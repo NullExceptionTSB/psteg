@@ -53,7 +53,7 @@
   <ItemGroup>
     <Compile Include="Algorithm\CryptoAlgorithm.cs" />
     <Compile Include="Algorithm\Crypto\CryptoRijndael.cs" />
-    <Compile Include="Algorithm\Extra\BitRingBuffer.cs" />
+    <Compile Include="Algorithm\Extra\BitQueue.cs" />
     <Compile Include="Algorithm\Stegano\SteganoLSB.cs" />
     <Compile Include="UI\Info\ContainerInfo.cs">
       <SubType>Form</SubType>
@@ -67,7 +67,6 @@
     <Compile Include="UI\CryptoOpts.Designer.cs">
       <DependentUpon>CryptoOpts.cs</DependentUpon>
     </Compile>
-    <Compile Include="File\Container.cs" />
     <Compile Include="File\FileID.cs" />
     <Compile Include="File\FileRaw.cs" />
     <Compile Include="File\Image\LosslessImg.cs" />
