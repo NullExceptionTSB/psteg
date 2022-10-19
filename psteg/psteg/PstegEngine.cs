@@ -180,7 +180,7 @@ namespace psteg {
                     try { 
                         cstream.CopyTo(RawFile.Stream);
                     } catch (Exception e) {
-                        throw new Exception("Cryptographic exception, likely incorrect key or steganographic parameters");
+                        throw new Exception("Cryptographic exception, likely incorrect key or steganographic parameters", e);
                     } finally {
                         SteganoAlgorithm.DecodedDataLength = prevdata;
 
@@ -195,18 +195,18 @@ namespace psteg {
                     throw new NotImplementedException("Cryptography password only");
             }
         }
-
-        private bool ran = false;
+        //lock to prevent winforms firing the event 4 times for no fucking reason
+        private bool @lock = false;
         private void bwgo(object sender, DoWorkEventArgs e) {
-            if (!ran) {
-                ran = true;
+            if (!@lock) {
+                @lock = true;
                 if (SteganoOperation == StegOperation.Encode) Encode();
                 else Decode();
             }
         }
 
         public void Go() {
-            ran = false;
+            @lock = false;
             Lint();
 
             SteganoAlgorithm.BackgroundWorker = AsyncWorker;

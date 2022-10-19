@@ -144,6 +144,11 @@ namespace psteg.Algorithm.Stegano {
 
             BitQueue ringBuffer = new BitQueue();
             int nbytes = 0;
+            bool    geta = ImageChannels.HasFlag(LSBImageChannels.Alpha),
+                    getr = ImageChannels.HasFlag(LSBImageChannels.Red),
+                    getg = ImageChannels.HasFlag(LSBImageChannels.Green),
+                    getb = ImageChannels.HasFlag(LSBImageChannels.Blue);
+
             while (RawData.Position < readLength) {
                 if (ringBuffer.Length >= 8) {
                     RawData.WriteByte(ringBuffer.Pop());
@@ -153,9 +158,12 @@ namespace psteg.Algorithm.Stegano {
                         WorkerReport(1, new Tuple<long, long>(RawData.Position, readLength));
                     }
                 }
+                int cn = (int)(ContainerData.Position % 4);
                 byte encdata = (byte)ContainerData.ReadByte();
-                for (int i = 0; i < BitWidth; i++)
-                    ringBuffer.Push((encdata & (1 << i)) > 0);
+
+                if ((cn == 3 && geta) || (cn == 2 && getr) || (cn == 1 && getg) || (cn == 0 && getb))
+                    for (int i = 0; i < BitWidth; i++)
+                        ringBuffer.Push((encdata & (1 << i)) > 0);
                 
             }
             WorkerReport(1, new Tuple<long, long>(RawData.Position, readLength));

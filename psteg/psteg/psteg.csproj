@@ -54,6 +54,7 @@
     <Compile Include="Algorithm\CryptoAlgorithm.cs" />
     <Compile Include="Algorithm\Crypto\CryptoRijndael.cs" />
     <Compile Include="Algorithm\Extra\BitQueue.cs" />
+    <Compile Include="Algorithm\Extra\Maths.cs" />
     <Compile Include="Algorithm\Stegano\SteganoLSB.cs" />
     <Compile Include="UI\Info\ContainerInfo.cs">
       <SubType>Form</SubType>
