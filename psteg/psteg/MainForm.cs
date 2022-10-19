@@ -3,6 +3,7 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Drawing;
 
+using psteg.UI;
 namespace psteg {
     public partial class MainForm : Form {
         readonly PstegEngine engine = null;
@@ -16,18 +17,13 @@ namespace psteg {
         private void rb_CheckedChanged(object sender, EventArgs e) {
             ClearDataPath();
             engine.SteganoOperation = rb_encode.Checked ? StegOperation.Encode : StegOperation.Decode;
+            cb_encrypt.Text = rb_encode.Checked ? "Encrypt" : "Decrypt";
         }
 
         private void b_dataBrowse_Click(object sender, EventArgs e) {
             FileDialog fd = rb_encode.Checked ? ofd_data : (FileDialog)sfd_data;
-            if (fd.ShowDialog() == DialogResult.OK) { 
+            if (fd.ShowDialog() == DialogResult.OK)
                 tb_datapath.Text = fd.FileName;
-                FileChanged();
-            }
-        }
-
-        private void tb_datapath_Leave(object sender, EventArgs e) {
-            FileChanged();
         }
 
         private void cb_encrypt_CheckedChanged(object sender, EventArgs e) {
@@ -89,13 +85,6 @@ namespace psteg {
             Point newLoc = new Point(Width - l_selectedMethod.Width - 28, oldLoc.Y);
         }
 
-        private void lv_methods_SelectedIndexChanged(object sender, EventArgs e) {
-            if (lv_methods.SelectedItems.Count < 1)
-                return;
-            l_selectedMethod.Text = lv_methods.SelectedItems[0].Name;
-            SetMethod();
-        }
-
         private void b_start_Click(object sender, EventArgs e) {
             if (engine.SteganoOperation == StegOperation.Encode) {
                 DialogResult dr = sfd_encoded.ShowDialog();
@@ -111,22 +100,55 @@ namespace psteg {
                     MessageBox.Show("File access error");
             }
             else {
-                throw new NotImplementedException();
+                engine.RawFile = OpenFileWrite(tb_datapath.Text);
+                if (engine.RawFile == null)
+                    MessageBox.Show("File access error");
             }
 
-            engine.Go();
+            l_status.Text = "Working";
+
+            SetEnabled(false);
+
+            try { 
+                engine.Go();
+            } catch (Exception ex) {
+                SetEnabled(true);
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void bw_process_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e) {
             Tuple<long, long> state = (Tuple<long,long>)e.UserState;
-            l_status.Text = state.Item1.ToString() + "/" + state.Item2.ToString();
+            l_status.Invoke((MethodInvoker)delegate { l_status.Text = state.Item1.ToString() + "/" + state.Item2.ToString(); });
             pb_status.Minimum = 0;
             pb_status.Maximum = (int)state.Item2;
             pb_status.Value = (int)state.Item1;
         }
 
         private void bw_process_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e) {
-            l_status.Text = "DONE";
+            SetEnabled(true);
+
+            if (e.Error != null) {
+                MessageBox.Show("STEGANOGRAPHIC ENCODING FAILED: " + e.Error.Message + ", Data may be invalid", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                l_status.Text = "ERROR";
+            }
+            else
+                l_status.Text = "DONE";
+
+            engine.RawFile?.Dispose();
+            engine.EncodedFile?.Dispose();
+
+            engine.EncodedFile = null;
+            engine.RawFile = null;
+
+
+        }
+
+        private void lv_methods_ItemActivate(object sender, EventArgs e) {
+            if (lv_methods.SelectedItems.Count < 1)
+                return;
+            l_selectedMethod.Text = lv_methods.SelectedItems[0].Name;
+            SetMethod();
         }
     }
 }

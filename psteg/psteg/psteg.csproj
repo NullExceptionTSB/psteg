@@ -34,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -52,16 +55,16 @@
     <Compile Include="Algorithm\Crypto\CryptoRijndael.cs" />
     <Compile Include="Algorithm\Extra\BitRingBuffer.cs" />
     <Compile Include="Algorithm\Stegano\SteganoLSB.cs" />
-    <Compile Include="ContainerInfo.cs">
+    <Compile Include="UI\Info\ContainerInfo.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ContainerInfo.Designer.cs">
+    <Compile Include="UI\Info\ContainerInfo.Designer.cs">
       <DependentUpon>ContainerInfo.cs</DependentUpon>
     </Compile>
-    <Compile Include="CryptoOpts.cs">
+    <Compile Include="UI\CryptoOpts.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CryptoOpts.Designer.cs">
+    <Compile Include="UI\CryptoOpts.Designer.cs">
       <DependentUpon>CryptoOpts.cs</DependentUpon>
     </Compile>
     <Compile Include="File\Container.cs" />
@@ -69,7 +72,6 @@
     <Compile Include="File\FileRaw.cs" />
     <Compile Include="File\Image\LosslessImg.cs" />
     <Compile Include="File\StegFile.cs" />
-    <Compile Include="IO\CryptoStream.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -79,27 +81,26 @@
     <Compile Include="MainLogic.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SettingsForms\Crypto\Rijndael256Settings.cs">
+    <Compile Include="UI\SettingsForms\Crypto\Rijndael256Settings.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SettingsForms\Crypto\Rijndael256Settings.Designer.cs">
+    <Compile Include="UI\SettingsForms\Crypto\Rijndael256Settings.Designer.cs">
       <DependentUpon>Rijndael256Settings.cs</DependentUpon>
     </Compile>
-    <Compile Include="SettingsForms\Stegano\LSBSettings.cs">
+    <Compile Include="UI\SettingsForms\Stegano\LSBSettings.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SettingsForms\Stegano\LSBSettings.Designer.cs">
+    <Compile Include="UI\SettingsForms\Stegano\LSBSettings.Designer.cs">
       <DependentUpon>LSBSettings.cs</DependentUpon>
     </Compile>
     <Compile Include="Algorithm\SteganoAlgorithm.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PstegEngine.cs" />
-    <Compile Include="IO\SteganoStream.cs" />
-    <EmbeddedResource Include="ContainerInfo.resx">
+    <EmbeddedResource Include="UI\Info\ContainerInfo.resx">
       <DependentUpon>ContainerInfo.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CryptoOpts.resx">
+    <EmbeddedResource Include="UI\CryptoOpts.resx">
       <DependentUpon>CryptoOpts.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
@@ -114,10 +115,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="SettingsForms\Crypto\Rijndael256Settings.resx">
+    <EmbeddedResource Include="UI\SettingsForms\Crypto\Rijndael256Settings.resx">
       <DependentUpon>Rijndael256Settings.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SettingsForms\Stegano\LSBSettings.resx">
+    <EmbeddedResource Include="UI\SettingsForms\Stegano\LSBSettings.resx">
       <DependentUpon>LSBSettings.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
@@ -133,6 +134,8 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="icon.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

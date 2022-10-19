@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using psteg.Algorithm.Extra;
 using psteg.File;
-using psteg.SettingsForms.Stegano;
+using psteg.UI.SettingsForms.Stegano;
 
 
 namespace psteg.Algorithm.Stegano {
@@ -55,13 +49,16 @@ namespace psteg.Algorithm.Stegano {
         public override StegMethod MethodEnum { get { return StegMethod.LSB; } }
         public override FileType[] SupportedFileTypes { get { return new FileType[] { FileType.LosslessImage, FileType.LosslessAudio }; } }
         public override Form SettingsForm { get { return settingsFormInstance; } }
-        public static string DisplayName { get { return "Least Significant Bit (LSB)"; } }
+
+        public static string AlgoDisplayName { get { return "Least Significant Bit (LSB)"; } }
+        public override string DisplayName { get { return AlgoDisplayName; } }
         #endregion
         public SteganoLSB() : base() {
             settingsFormInstance = new LSBSettings(this);
         }
 
-        public bool EncodeImage() {
+        public void EncodeImage() {
+            byte mask = BitWidth < 8 ? (byte)~((1 << BitWidth) - 1) : (byte)0;
             const int dataThreshold = BlockSize/2;
             StegFile container = Containers[0];
 
@@ -70,16 +67,19 @@ namespace psteg.Algorithm.Stegano {
             if (RawData.Length > capacity)
                 throw new Exception("Too much data to encode");
 
+            int n = 0;
+
             Stream contStream = container.GetRawData();
-            byte[] buffer = new byte[BlockSize * 8],
+            byte[] buffer = new byte[BlockSize * BitWidth],
                    contBuffer = new byte[BlockSize];
-            int cbread = 0;
-            BitRingBuffer bitRBuffer = new BitRingBuffer(buffer.Length * 2);
-            while ((contStream.Length - contStream.Position) > 0) {
+            int cbread = -1;
+            BitQueue bitRBuffer = new BitQueue();
+            while (cbread != 0) {
                 cbread = contStream.Read(contBuffer, 0, contBuffer.Length);
                 if ((RawData.Length - RawData.Position) > 0) {
                     if (bitRBuffer.Length < dataThreshold * 8) {
-                        RawData.Read(buffer, 0, BlockSize * 8);
+                        buffer.Initialize();
+                        RawData.Read(buffer, 0, BlockSize * BitWidth);
                         bitRBuffer.Push(buffer);
                     }
                     
@@ -107,7 +107,7 @@ namespace psteg.Algorithm.Stegano {
                             channels[idx++] = a;
 
                         for (int channel = 0; channel < ImageChannelCount; channel++) {
-                            channels[channel] &= (byte)~((1 << BitWidth) - 1);
+                            channels[channel] &= mask;
                             //byte bitdata = 0;
                             for (int bit = 0; bit < BitWidth; bit++)
                                 channels[channel] |= (byte)((bitRBuffer.PopSingle() ? 1 : 0) << bit);
@@ -118,35 +118,77 @@ namespace psteg.Algorithm.Stegano {
                         EncodedData.WriteByte(gf ? channels[idx++] : g);
                         EncodedData.WriteByte(rf ? channels[idx++] : r);
                         EncodedData.WriteByte(af ? channels[idx++] : a);
+                        n++;
+                        if (n > ReportEveryN) {
+                            WorkerReport(1, new Tuple<long, long>(contStream.Position, contStream.Length));
+                        }
                     }
                 }
                 else {
                     EncodedData.Write(contBuffer, 0, cbread);
                 }
-                WorkerReport(1, new Tuple<long, long>(EncodedData.Position, EncodedData.Length));
+                
             }
             EncodedData.Seek(0, SeekOrigin.Begin);
-            return true;
+            WorkerReport(1, new Tuple<long, long>(contStream.Position, contStream.Length));
+            contStream.Close();
+            contStream.Dispose();
         }
 
-        private void WorkerReport(int percent, object state) {
-            try { BackgroundWorker?.ReportProgress(percent, state); } catch { }
+        public void DecodeImage() {
+            Stream ContainerData = Containers[0].GetRawData();
+            ContainerData.Seek(0, SeekOrigin.Begin);
+            RawData.Seek(0, SeekOrigin.Begin);
+
+            long readLength = DecodedDataLength != null ? Math.Min((long)DecodedDataLength, ContainerData.Length) : ContainerData.Length;
+
+            BitQueue ringBuffer = new BitQueue();
+            int nbytes = 0;
+            while (RawData.Position < readLength) {
+                if (ringBuffer.Length >= 8) {
+                    RawData.WriteByte(ringBuffer.Pop());
+                    nbytes++;
+                    if (nbytes > ReportEveryN) {
+                        nbytes = 0;
+                        WorkerReport(1, new Tuple<long, long>(RawData.Position, readLength));
+                    }
+                }
+                byte encdata = (byte)ContainerData.ReadByte();
+                for (int i = 0; i < BitWidth; i++)
+                    ringBuffer.Push((encdata & (1 << i)) > 0);
+                
+            }
+            WorkerReport(1, new Tuple<long, long>(RawData.Position, readLength));
         }
 
-
-        public override bool Encode() {
+        public override void Encode() {
             if (Containers.Count == 1) {
                 StegFile container = Containers[0];
-                if (container.FileType != FileType.LosslessImage)
-                    throw new NotImplementedException();
-                return EncodeImage();
+                switch (container.FileType) {
+                    case FileType.LosslessImage:
+                        EncodeImage();
+                        return;
+                    default:
+                        throw new NotImplementedException("File type not supported: " + container.FileType.ToString());
+                }
             }
             else
-                throw new NotImplementedException();
+                throw new NotImplementedException("Multi-container mode not supported by method");
         }
 
-        public override bool Decode() {
-            throw new NotImplementedException();
+        public override void Decode() {
+            if (Containers.Count == 1) {
+                StegFile container = Containers[0];
+                switch (container.FileType) {
+                    case FileType.LosslessImage:
+                        DecodeImage();
+                        return;
+                    default: 
+                        throw new NotImplementedException("File type not supported: " + container.FileType.ToString());
+                }
+            }
+            else 
+                throw new NotImplementedException("Multi-container mode not supported by method");
         }
 
         public override long CalculateCapacity(long ContainerSize) {

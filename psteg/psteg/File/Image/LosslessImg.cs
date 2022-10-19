@@ -9,6 +9,7 @@ namespace psteg.File.Image {
         private Rectangle bmpRect;
         private Bitmap bmp;
 
+        public static bool RowFirst = true;
         public override FileType FileType { get { return FileType.LosslessImage; } }
         public bool Ready { get { return bmp != null; } }
         public Size Resolution { get; private set; }
@@ -20,23 +21,42 @@ namespace psteg.File.Image {
             //lockbits, while technically unsafe, is much faster than using GetPixel
             BitmapData bdata = bmp.LockBits(bmpRect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
-            for (int x = 0; x < bdata.Width; x++)
-                for (int y = 0; y < bdata.Height; y++) {
-                    byte a, r, g, b;
-                    long pxOffset = (4 * x) + (y * bdata.Stride);
-                    unsafe {
-                        byte* pxStart = (byte*)bdata.Scan0.ToPointer() + pxOffset;
-                        b = pxStart[0];
-                        g = pxStart[1];
-                        r = pxStart[2];
-                        a = pxStart[3];
+            if (!RowFirst) { 
+                for (int x = 0; x < bdata.Width; x++)
+                    for (int y = 0; y < bdata.Height; y++) {
+                        byte a, r, g, b;
+                        long pxOffset = (4 * x) + (y * bdata.Stride);
+                        unsafe {
+                            byte* pxStart = (byte*)bdata.Scan0.ToPointer() + pxOffset;
+                            b = pxStart[0];
+                            g = pxStart[1];
+                            r = pxStart[2];
+                            a = pxStart[3];
+                        }
+                        ms.WriteByte(b);
+                        ms.WriteByte(g);
+                        ms.WriteByte(r);
+                        ms.WriteByte(a);
                     }
-                    ms.WriteByte(b);
-                    ms.WriteByte(g);
-                    ms.WriteByte(r);
-                    ms.WriteByte(a);
-                }
-
+            }
+            else {
+                for (int y = 0; y < bdata.Height; y++)
+                    for (int x = 0; x < bdata.Width; x++) {
+                        byte a, r, g, b;
+                        long pxOffset = (4 * x) + (y * bdata.Stride);
+                        unsafe {
+                            byte* pxStart = (byte*)bdata.Scan0.ToPointer() + pxOffset;
+                            b = pxStart[0];
+                            g = pxStart[1];
+                            r = pxStart[2];
+                            a = pxStart[3];
+                        }
+                        ms.WriteByte(b);
+                        ms.WriteByte(g);
+                        ms.WriteByte(r);
+                        ms.WriteByte(a);
+                    }
+            }
             bmp.UnlockBits(bdata);
             ms.Seek(0, SeekOrigin.Begin);
             return ms;
@@ -60,14 +80,26 @@ namespace psteg.File.Image {
             BitmapData bdata = bmp.LockBits(bmpRect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
             int dataidx = 0;
-            for (int x = 0; x < bdata.Width; x++) for (int y = 0; y < bdata.Height; y++) {
-                    long pxOffset = (4 * x) + (y * bdata.Stride);
-                    unsafe {
-                        byte* pxStart = (byte*)bdata.Scan0.ToPointer() + pxOffset;
-                        for (int i = 0; i < 4; i++)
-                            pxStart[i] = data[dataidx++];
+            if (!RowFirst) {
+                for (int x = 0; x < bdata.Width; x++) for (int y = 0; y < bdata.Height; y++) {
+                        long pxOffset = (4 * x) + (y * bdata.Stride);
+                        unsafe {
+                            byte* pxStart = (byte*)bdata.Scan0.ToPointer() + pxOffset;
+                            for (int i = 0; i < 4; i++)
+                                pxStart[i] = data[dataidx++];
+                        }
                     }
-                }
+            }
+            else {
+                for (int y = 0; y < bdata.Height; y++) for (int x = 0; x < bdata.Width; x++) {
+                        long pxOffset = (4 * x) + (y * bdata.Stride);
+                        unsafe {
+                            byte* pxStart = (byte*)bdata.Scan0.ToPointer() + pxOffset;
+                            for (int i = 0; i < 4; i++)
+                                pxStart[i] = data[dataidx++];
+                        }
+                    }
+            }
             bmp.UnlockBits(bdata);
             bmp.Save(Stream, string.IsNullOrEmpty(Path) ? bmp.RawFormat : ImageFormat.Png);
         }
@@ -78,12 +110,12 @@ namespace psteg.File.Image {
             SetRawData(sdata);
         }
         #endregion
+
         public LosslessImg(FileStream fileStream) {
             Path = fileStream.Name;
             Stream = fileStream;
             try {
                 bmp = new Bitmap(fileStream);
-                //bmp = new Bitmap(Path);
                 bmpRect = new Rectangle(0, 0, bmp.Width, bmp.Height);
                 Resolution = bmp.Size;
                 Size = bmp.Width * bmp.Height * 4;

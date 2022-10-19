@@ -2,48 +2,36 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 using psteg.File;
 using psteg.Algorithm;
+using psteg.UI.Info;
+
 namespace psteg {
     public partial class MainForm : Form {
         Dictionary<string, StegFile> containerDict;
         FileType outputContainerType;
 
-        void FileChanged() {
-            //BLOCKED
-            return;
-            /*
-            try {
-                if (rb_encode.Checked)
-                    engine.RawFile = OpenFileRead(tb_datapath.Text);
-                else
-                    throw new NotImplementedException();
+        void SetEnabled(bool en) {
+            b_add_set.Enabled = en;
+            b_containerBrowse.Enabled = en;
+            b_cryptoOptions.Enabled = cb_encrypt.Checked && en;
+            b_dataBrowse.Enabled = en;
+            b_start.Enabled = en;
+            b_stegOptions.Enabled = en;
 
-                
-                    FileInfo fi = new FileInfo(tb_datapath.Text);
-                if (!fi.Exists && rb_encode.Checked) {
-                    MessageBox.Show("File not found", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    ClearDataPath();
-                    return;
-                }
-                if (rb_encode.Checked) {
-                    engine.RawData = StegFile.Open(tb_datapath.Text);
-                }
-                else {
-                    throw new NotImplementedException();
-                }
-                
+            tb_container.Enabled = en;
+            tb_datapath.Enabled = en;
 
-            } 
-            catch (Exception ex) {
-                MessageBox.Show($"File error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                ClearDataPath();
-                return;
-            }
-           */
+            rb_decode.Enabled = en;
+            rb_encode.Enabled = en;
+
+            cb_encrypt.Enabled = en;
+            cb_multicontainer.Enabled = false;
+
+            lv_containers.Enabled = en;
+            lv_methods.Enabled = en;
         }
 
         StegFile OpenFileRead(string path) {
@@ -118,7 +106,7 @@ namespace psteg {
             if (cont == null)
                 return;
 
-            new ContainerInfo(cont).Show();
+            new ContainerInfo(engine, cont).ShowDialog();
         }
 
         void ClearDataPath() {

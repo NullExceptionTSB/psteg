@@ -1,19 +1,35 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace psteg.File {
     public enum FileType {
         LosslessAudio, LosslessImage, Jpeg, Other
     }
     public static class FileID {
+        public static ImageFormat DefaultImageFormat = ImageFormat.Png;
+
         public static ImageFormat PathToFormat(string path) {
-            return ImageFormat.Png;
+            FileInfo fi = new FileInfo(path);
+            switch (fi.Extension) {
+                case ".png":
+                    return ImageFormat.Png;
+                case ".gif":
+                    return ImageFormat.Gif;
+                case ".tif":
+                case ".tiff":
+                    return ImageFormat.Tiff;
+                case ".jpeg":
+                case ".jpg":
+                case ".jfif":
+                case ".jpe":
+                    return ImageFormat.Jpeg;
+                case ".bmp":
+                case ".dib":
+                    return ImageFormat.Bmp;
+            }
+            return DefaultImageFormat;
         }
         public static FileType IdentifyFile(Stream fileStream) {
             byte[] magic = new byte[16];
@@ -75,7 +91,7 @@ namespace psteg.File {
                     long bcount = b.Width * b.Height * 4;
                     b.Dispose();
                     return bcount;
-                default:return 0;
+                default: return 0;
             }
         }
     }

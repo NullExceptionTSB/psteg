@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using psteg.Algorithm;
 using psteg.Algorithm.Stegano;
-using psteg.SettingsForms.Stegano;
 using psteg.File;
 
 
@@ -21,10 +16,14 @@ namespace psteg.Algorithm {
     }
 
     public abstract class SteganoAlgorithm {
+        public static int ReportEveryN { get; set; } = 1024;
+
         public abstract StegMethod MethodEnum { get; }
         public abstract FileType[] SupportedFileTypes { get; }
         public abstract Form SettingsForm { get; }
-        //public abstract string DisplayName { get; }
+        public virtual string DisplayName { get { return MethodEnum.ToString(); } }
+
+        public long? DecodedDataLength { get; set; } = null;
         public BackgroundWorker BackgroundWorker { get; set; } = null;
         public Stream RawData { get; set; }
         public List<StegFile> Containers { get; set; }
@@ -33,11 +32,14 @@ namespace psteg.Algorithm {
 
         public CryptoAlgorithm CryptoProvider { get; set; }
 
-        public abstract bool Encode();
-
-        public abstract bool Decode();
+        public abstract void Encode();
+        public abstract void Decode();
 
         public abstract long CalculateCapacity(long ContainerSize);
+
+        protected virtual void WorkerReport(int percent, object state) {
+            try { BackgroundWorker?.ReportProgress(percent, state); } catch { }
+        }
 
         public static SteganoAlgorithm NewByEnum(StegMethod MethodEnum) {
             switch (MethodEnum) {
@@ -50,7 +52,7 @@ namespace psteg.Algorithm {
         public static string GetDisplayName(StegMethod MethodEnum) {
             switch (MethodEnum) {
                 case StegMethod.LSB:
-                    return SteganoLSB.DisplayName;
+                    return SteganoLSB.AlgoDisplayName;
                 default: return MethodEnum.ToString();
             }
         }

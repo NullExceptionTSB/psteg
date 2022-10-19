@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using psteg.Algorithm;
 
 namespace psteg.File {
-    [Obsolete]
+    [Obsolete("Container deprecated, use StegFile", true)]
     public class Container {
         public StegFile File { get; private set; }
         public FileType FileType { get; private set; }

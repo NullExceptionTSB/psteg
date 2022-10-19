@@ -51,6 +51,7 @@ namespace psteg.File {
 
         public void Dispose() {
             Stream.Close();
+            Stream.Dispose();
         }
     }
 }

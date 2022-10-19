@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.lv_containers = new System.Windows.Forms.ListView();
             this.lv_methods = new System.Windows.Forms.ListView();
             this.label1 = new System.Windows.Forms.Label();
@@ -56,6 +57,7 @@
             this.l_selectedMethod = new System.Windows.Forms.Label();
             this.sfd_encoded = new System.Windows.Forms.SaveFileDialog();
             this.ofd_encoded = new System.Windows.Forms.OpenFileDialog();
+            this.l_underConstruction = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lv_containers
@@ -82,7 +84,7 @@
             this.lv_methods.TabIndex = 1;
             this.lv_methods.UseCompatibleStateImageBehavior = false;
             this.lv_methods.View = System.Windows.Forms.View.List;
-            this.lv_methods.SelectedIndexChanged += new System.EventHandler(this.lv_methods_SelectedIndexChanged);
+            this.lv_methods.ItemActivate += new System.EventHandler(this.lv_methods_ItemActivate);
             // 
             // label1
             // 
@@ -109,7 +111,6 @@
             this.tb_datapath.Size = new System.Drawing.Size(189, 20);
             this.tb_datapath.TabIndex = 4;
             this.tb_datapath.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tb_KeyDown);
-            this.tb_datapath.Leave += new System.EventHandler(this.tb_datapath_Leave);
             // 
             // b_dataBrowse
             // 
@@ -223,6 +224,7 @@
             // 
             // bw_process
             // 
+            this.bw_process.WorkerReportsProgress = true;
             this.bw_process.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.bw_process_ProgressChanged);
             this.bw_process.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.bw_process_RunWorkerCompleted);
             // 
@@ -279,6 +281,11 @@
             // 
             this.sfd_data.AddExtension = false;
             this.sfd_data.DefaultExt = "bin";
+            this.sfd_data.Filter = "Text File (*.txt)|*.txt|Binary File (*.bin)|*.bin|All Files|*.*";
+            // 
+            // ofd_container
+            // 
+            this.ofd_container.Filter = resources.GetString("ofd_container.Filter");
             // 
             // l_selectedMethod
             // 
@@ -296,17 +303,31 @@
             // sfd_encoded
             // 
             this.sfd_encoded.AddExtension = false;
+            this.sfd_encoded.Filter = resources.GetString("sfd_encoded.Filter");
             // 
             // ofd_encoded
             // 
             this.ofd_encoded.AddExtension = false;
             this.ofd_encoded.FileName = "openFileDialog1";
+            this.ofd_encoded.Filter = resources.GetString("ofd_encoded.Filter");
+            // 
+            // l_underConstruction
+            // 
+            this.l_underConstruction.AutoSize = true;
+            this.l_underConstruction.BackColor = System.Drawing.Color.Red;
+            this.l_underConstruction.ForeColor = System.Drawing.Color.Yellow;
+            this.l_underConstruction.Location = new System.Drawing.Point(253, 9);
+            this.l_underConstruction.Name = "l_underConstruction";
+            this.l_underConstruction.Size = new System.Drawing.Size(227, 13);
+            this.l_underConstruction.TabIndex = 29;
+            this.l_underConstruction.Text = "== ALPHA 2 == UNDER CONSTRUCTION ==";
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(727, 235);
+            this.Controls.Add(this.l_underConstruction);
             this.Controls.Add(this.l_selectedMethod);
             this.Controls.Add(this.cb_multicontainer);
             this.Controls.Add(this.b_add_set);
@@ -329,10 +350,11 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.lv_methods);
             this.Controls.Add(this.lv_containers);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "MainForm";
-            this.Text = "psteg - Steganographic encoder/decoder";
+            this.Text = "psteg - Steganographic encoder/decoder - Alpha 2";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -368,6 +390,7 @@
         private System.Windows.Forms.Label l_selectedMethod;
         private System.Windows.Forms.SaveFileDialog sfd_encoded;
         private System.Windows.Forms.OpenFileDialog ofd_encoded;
+        private System.Windows.Forms.Label l_underConstruction;
     }
 }
 

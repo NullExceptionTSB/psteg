@@ -47,6 +47,7 @@ namespace psteg {
         public List<StegFile> Containers { get; private set; }
 
         public bool Encrypt { get; set; } = false;
+        public bool AllBlockEncryption { get; set; } = false;
 
         public bool ShowSteganoSettings() {
             SteganoAlgorithm?.SettingsForm?.ShowDialog();
@@ -63,29 +64,31 @@ namespace psteg {
             Containers = new List<StegFile>();
         }
 
-        public void SetAlgorithms(StegMethod stegMethod, CryptoMethod cryptMethod = CryptoMethod.None) {
-            if (stegMethod != SteganoAlgorithm?.MethodEnum) { 
+        public void SetAlgorithms(StegMethod stegMethod, CryptoMethod cryptMethod) {
+            SetAlgorithms(stegMethod);
+            SetAlgorithms(cryptMethod);
+        }
+
+        public void SetAlgorithms(StegMethod stegMethod) {
+            if (SteganoAlgorithm?.MethodEnum != stegMethod) { 
                 if (stegMethod == StegMethod.Undecided)
                     SteganoAlgorithm = null;
                 else
                     SteganoAlgorithm = SteganoAlgorithm.NewByEnum(stegMethod);
             }
-
-            SetAlgorithms(cryptMethod);
-
-            if (SteganoAlgorithm != null)
-                SteganoAlgorithm.Containers = Containers;
         }
 
         public void SetAlgorithms(CryptoMethod cryptMethod) {
-            if (cryptMethod == CryptoMethod.None)
-                CryptoAlgorithm = null;
-            else
-                CryptoAlgorithm = CryptoAlgorithm.NewByEnum(cryptMethod);
+            if (CryptoAlgorithm?.MethodEnum != cryptMethod) { 
+                if (cryptMethod == CryptoMethod.None)
+                    CryptoAlgorithm = null;
+                else
+                    CryptoAlgorithm = CryptoAlgorithm.NewByEnum(cryptMethod);
+            }
         }
 
         private void Lint() {
-            if (EncodedFile == null)
+            if (EncodedFile == null && SteganoOperation == StegOperation.Encode)
                 throw new ArgumentException("No output specified");
             if (RawFile == null)
                 throw new ArgumentException("No input specified");
@@ -93,24 +96,36 @@ namespace psteg {
             if (SteganoAlgorithm == null)
                 throw new ArgumentException("Unspecified or unknown steganographic algorithm");
             if (CryptoAlgorithm == null && Encrypt)
-                throw new ArgumentException("Encryption enabled but not specified");
-
+                throw new ArgumentException("Encryption enabled but no method specified");
         }
 
         private void Encode() {
-            if (Encrypt)
-                throw new NotImplementedException("Cryptography is not implemented");
+            Stream inputData = RawFile.Stream;
 
-            //ENCRYPTION GOES HERE!!!!!
+            if (Encrypt) {
+                if (AllBlockEncryption)
+                    throw new NotImplementedException("Full-Block Encryption not supported");
+                else
+                    CryptoAlgorithm.InputData = RawFile.Stream;
+
+                if (KeyMode == KeyMode.Password) {
+                    inputData = new MemoryStream();
+                    Stream cstream = CryptoAlgorithm.Encrypt();
+                    cstream.CopyTo(inputData);
+                    cstream.Dispose();
+
+                    inputData.Seek(0, SeekOrigin.Begin);
+                }   
+                else
+                    throw new NotImplementedException("Cryptography password only");
+
+            }
 
             SteganoAlgorithm.Containers = Containers;
-            SteganoAlgorithm.RawData = RawFile.Stream;
+            SteganoAlgorithm.RawData = inputData;
             SteganoAlgorithm.EncodedData = new MemoryStream();
             
-            bool success = SteganoAlgorithm.Encode();
-            if (!success)
-                throw new Exception("Steganographic encoding error");
-            
+            SteganoAlgorithm.Encode();
 
             if (Containers.Count > 1)
                 throw new NotImplementedException();
@@ -125,21 +140,73 @@ namespace psteg {
             
             EncodedFile.SetRawData(SteganoAlgorithm.EncodedData);
             //cleanup
+            if (Encrypt) {
+                inputData?.Close();
+                inputData?.Dispose();
+            }
             SteganoAlgorithm.EncodedData.Dispose();
             SteganoAlgorithm.EncodedData = null;
             EncodedFile.Dispose();
         }
 
         private void Decode() {
+            Stream rawStream = RawFile.Stream;
+            long? prevdata = SteganoAlgorithm.DecodedDataLength;
+            
+            if (Encrypt) {
+                //block-align decoded data size for block cryptographic algorithms (they scream about padding otherwise)
+                if ((SteganoAlgorithm.DecodedDataLength % CryptoAlgorithm.BlockSize) != 0)
+                    SteganoAlgorithm.DecodedDataLength += (CryptoAlgorithm.BlockSize) - (SteganoAlgorithm.DecodedDataLength % CryptoAlgorithm.BlockSize);
+                if (AllBlockEncryption)
+                    throw new NotImplementedException("Full-Block Encryption not supported");
+                rawStream = new MemoryStream();
+            }
 
+            
+
+            SteganoAlgorithm.Containers = Containers;
+            SteganoAlgorithm.RawData = rawStream;
+
+            SteganoAlgorithm.EncodedData?.Dispose();
+            SteganoAlgorithm.EncodedData = null;
+
+            SteganoAlgorithm.Decode();
+
+            if (Encrypt) {
+                if (KeyMode == KeyMode.Password) {
+                    rawStream.Seek(0, SeekOrigin.Begin);
+                    CryptoAlgorithm.InputData = rawStream;
+                    Stream cstream = CryptoAlgorithm.Decrypt();
+                    try { 
+                        cstream.CopyTo(RawFile.Stream);
+                    } catch (Exception e) {
+                        throw new Exception("Cryptographic exception, likely incorrect key or steganographic parameters");
+                    } finally {
+                        SteganoAlgorithm.DecodedDataLength = prevdata;
+
+                        cstream.Close();
+                        cstream.Dispose();
+
+                        rawStream.Close();
+                        rawStream.Dispose();
+                    }
+                }
+                else 
+                    throw new NotImplementedException("Cryptography password only");
+            }
         }
 
+        private bool ran = false;
         private void bwgo(object sender, DoWorkEventArgs e) {
-            if (SteganoOperation == StegOperation.Encode) Encode();
-            else Decode();
+            if (!ran) {
+                ran = true;
+                if (SteganoOperation == StegOperation.Encode) Encode();
+                else Decode();
+            }
         }
 
         public void Go() {
+            ran = false;
             Lint();
 
             SteganoAlgorithm.BackgroundWorker = AsyncWorker;
