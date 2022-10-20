@@ -11,8 +11,6 @@ namespace psteg.File {
         public long Size { get; protected set; }
         public string Path { get; set; }
 
-        //public long IOBlockSize { get; set; } = 512;
-
         public abstract Stream GetRawData();
         public abstract byte[] GetRawData(long ammount);
         public abstract void SetRawData(Stream data);
@@ -24,8 +22,11 @@ namespace psteg.File {
                 FileType fileType = FileID.IdentifyFile(fileStream);
                 switch (fileType) {
                     case FileType.LosslessImage:
-                        return new LosslessImg(fileStream);
-                    default: return new FileRaw(fileStream);
+                        return new LosslessImgFile(fileStream);
+                    case FileType.LosslessAudio:
+                    case FileType.Jpeg:
+                        throw new NotImplementedException("File type not supported");
+                    default: return new RawFile(fileStream);
                 }
             } 
             catch (Exception ex) {
@@ -39,8 +40,8 @@ namespace psteg.File {
                 FileStream fileStream = new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
                 switch (type) {
                     case FileType.LosslessImage:
-                        return new LosslessImg(fileStream);
-                    default: return new FileRaw(fileStream);
+                        return new LosslessImgFile(fileStream);
+                    default: return new RawFile(fileStream);
                 }
             }
             catch (Exception ex) {

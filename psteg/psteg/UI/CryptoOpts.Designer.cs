@@ -38,6 +38,7 @@
             this.l_pw_key = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.cb_showpw = new System.Windows.Forms.CheckBox();
+            this.b_hashopts = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // lv_methods
@@ -125,7 +126,7 @@
             // 
             // tb_pw_key
             // 
-            this.tb_pw_key.Location = new System.Drawing.Point(218, 148);
+            this.tb_pw_key.Location = new System.Drawing.Point(218, 121);
             this.tb_pw_key.Name = "tb_pw_key";
             this.tb_pw_key.Size = new System.Drawing.Size(174, 20);
             this.tb_pw_key.TabIndex = 8;
@@ -133,7 +134,7 @@
             // 
             // b_browse
             // 
-            this.b_browse.Location = new System.Drawing.Point(398, 146);
+            this.b_browse.Location = new System.Drawing.Point(398, 119);
             this.b_browse.Name = "b_browse";
             this.b_browse.Size = new System.Drawing.Size(59, 23);
             this.b_browse.TabIndex = 9;
@@ -147,7 +148,7 @@
             // l_pw_key
             // 
             this.l_pw_key.AutoSize = true;
-            this.l_pw_key.Location = new System.Drawing.Point(218, 132);
+            this.l_pw_key.Location = new System.Drawing.Point(218, 105);
             this.l_pw_key.Name = "l_pw_key";
             this.l_pw_key.Size = new System.Drawing.Size(53, 13);
             this.l_pw_key.TabIndex = 10;
@@ -165,7 +166,7 @@
             // cb_showpw
             // 
             this.cb_showpw.AutoSize = true;
-            this.cb_showpw.Location = new System.Drawing.Point(398, 128);
+            this.cb_showpw.Location = new System.Drawing.Point(398, 101);
             this.cb_showpw.Name = "cb_showpw";
             this.cb_showpw.Size = new System.Drawing.Size(53, 17);
             this.cb_showpw.TabIndex = 12;
@@ -173,11 +174,22 @@
             this.cb_showpw.UseVisualStyleBackColor = true;
             this.cb_showpw.CheckedChanged += new System.EventHandler(this.cb_showpw_CheckedChanged);
             // 
+            // b_hashopts
+            // 
+            this.b_hashopts.Location = new System.Drawing.Point(218, 148);
+            this.b_hashopts.Name = "b_hashopts";
+            this.b_hashopts.Size = new System.Drawing.Size(239, 23);
+            this.b_hashopts.TabIndex = 13;
+            this.b_hashopts.Text = "Hashing Options";
+            this.b_hashopts.UseVisualStyleBackColor = true;
+            this.b_hashopts.Click += new System.EventHandler(this.b_hashopts_Click);
+            // 
             // CryptoOpts
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(469, 235);
+            this.Controls.Add(this.b_hashopts);
             this.Controls.Add(this.cb_showpw);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.l_pw_key);
@@ -218,5 +230,6 @@
         private System.Windows.Forms.Label l_pw_key;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox cb_showpw;
+        private System.Windows.Forms.Button b_hashopts;
     }
 }

@@ -23,7 +23,7 @@ namespace psteg.UI.SettingsForms.Stegano {
 
             tb_datasize.Text = _owner.DecodedDataLength.ToString();
 
-            cb_rowfirst.Checked = File.Image.LosslessImg.RowFirst;
+            cb_rowfirst.Checked = File.Image.LosslessImgFile.RowFirst;
 
             cb_imgcA.Checked = _owner.ImageChannels.HasFlag(LSBImageChannels.Alpha);
             cb_imgcR.Checked = _owner.ImageChannels.HasFlag(LSBImageChannels.Red);
@@ -48,7 +48,7 @@ namespace psteg.UI.SettingsForms.Stegano {
         }
 
         private void cb_rowfirst_CheckedChanged(object sender, EventArgs e) {
-            File.Image.LosslessImg.RowFirst = cb_rowfirst.Checked;
+            File.Image.LosslessImgFile.RowFirst = cb_rowfirst.Checked;
         }
 
         private void tb_datasize_TextChanged(object sender, EventArgs e) {

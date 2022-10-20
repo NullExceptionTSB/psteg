@@ -56,6 +56,12 @@
     <Compile Include="Algorithm\Extra\BitQueue.cs" />
     <Compile Include="Algorithm\Extra\Maths.cs" />
     <Compile Include="Algorithm\Stegano\SteganoLSB.cs" />
+    <Compile Include="UI\HashOpts.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\HashOpts.Designer.cs">
+      <DependentUpon>HashOpts.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\Info\ContainerInfo.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -69,8 +75,8 @@
       <DependentUpon>CryptoOpts.cs</DependentUpon>
     </Compile>
     <Compile Include="File\FileID.cs" />
-    <Compile Include="File\FileRaw.cs" />
-    <Compile Include="File\Image\LosslessImg.cs" />
+    <Compile Include="File\RawFile.cs" />
+    <Compile Include="File\Image\LosslessImgFile.cs" />
     <Compile Include="File\StegFile.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -81,11 +87,11 @@
     <Compile Include="MainLogic.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\SettingsForms\Crypto\Rijndael256Settings.cs">
+    <Compile Include="UI\SettingsForms\Crypto\RijndaelSettings.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\SettingsForms\Crypto\Rijndael256Settings.Designer.cs">
-      <DependentUpon>Rijndael256Settings.cs</DependentUpon>
+    <Compile Include="UI\SettingsForms\Crypto\RijndaelSettings.Designer.cs">
+      <DependentUpon>RijndaelSettings.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\SettingsForms\Stegano\LSBSettings.cs">
       <SubType>Form</SubType>
@@ -97,6 +103,9 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PstegEngine.cs" />
+    <EmbeddedResource Include="UI\HashOpts.resx">
+      <DependentUpon>HashOpts.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\Info\ContainerInfo.resx">
       <DependentUpon>ContainerInfo.cs</DependentUpon>
     </EmbeddedResource>
@@ -115,8 +124,8 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="UI\SettingsForms\Crypto\Rijndael256Settings.resx">
-      <DependentUpon>Rijndael256Settings.cs</DependentUpon>
+    <EmbeddedResource Include="UI\SettingsForms\Crypto\RijndaelSettings.resx">
+      <DependentUpon>RijndaelSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\SettingsForms\Stegano\LSBSettings.resx">
       <DependentUpon>LSBSettings.cs</DependentUpon>

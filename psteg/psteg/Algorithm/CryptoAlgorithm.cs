@@ -21,8 +21,9 @@ namespace psteg.Algorithm {
 
         public virtual int BlockSize { get { return 1; } }
 
+        public readonly static HashAlgo[] HashingAlgorithms = new HashAlgo[]{ HashAlgo.SHA2_512, HashAlgo.SHA2_256 };
 
-        public HashAlgo HashingAlgorithm { get; set; }
+        public HashAlgo HashingAlgorithm { get; set; } = HashAlgo.SHA2_512;
         public string CryptoPasswd { get; set; }
         public Stream InputData { get; set; }
         protected RNGCryptoServiceProvider CryptoRng { get; private set; }
@@ -46,7 +47,7 @@ namespace psteg.Algorithm {
 
                 byte[] cryptoBytes = new byte[4];
                 CryptoRng.GetBytes(cryptoBytes);
-                int ivOffset = (halgo.HashSize < (keySize + ivSize) * 8) ? (int)(BitConverter.ToUInt32(cryptoBytes, 0) % (halgo.HashSize / 8 - ivSize)) : keySize;
+                int ivOffset = (halgo.HashSize < (keySize + ivSize) * 8) ? ((halgo.HashSize/8 - ivSize)-1) : keySize;
 
                 byte[] data = HashString(halgo, password);
 

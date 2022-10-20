@@ -2,10 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 
 using psteg.Algorithm;
 using psteg.Algorithm.Crypto;
@@ -132,7 +128,7 @@ namespace psteg {
 
             switch (Containers[0].FileType) {
                 case FileType.LosslessImage:
-                    ((LosslessImg)EncodedFile).NewBitmap(((LosslessImg)Containers[0]).Resolution);
+                    ((LosslessImgFile)EncodedFile).NewBitmap(((LosslessImgFile)Containers[0]).Resolution);
                     break;
                 default:
                     throw new NotImplementedException();
@@ -212,6 +208,7 @@ namespace psteg {
             SteganoAlgorithm.BackgroundWorker = AsyncWorker;
             AsyncWorker.DoWork += bwgo;
             AsyncWorker.RunWorkerAsync();
+            AsyncWorker.DoWork -= bwgo;
         }
     }
 }

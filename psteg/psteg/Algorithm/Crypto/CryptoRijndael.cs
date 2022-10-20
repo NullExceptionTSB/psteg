@@ -19,6 +19,17 @@ namespace psteg.Algorithm.Crypto {
 
         public int KeySize { get { return aes.KeySize; } set { aes.KeySize = value; } }
         public override int BlockSize { get { return aes.BlockSize / 8; } }
+        public PaddingMode PaddingMode { get { return aes.Padding; } set { aes.Padding = value; } }
+        public CipherMode CipherMode { get { return aes.Mode; } set { aes.Mode = value; } }
+
+        public KeySizes[] ValidKeySizes { get { return aes.LegalKeySizes; } }
+        public KeySizes[] ValidBlockSizes { get { return aes.LegalBlockSizes; } }
+        public CipherMode[] ValidCipherModes { get { return (CipherMode[])Enum.GetValues(typeof(CipherMode)); } }
+        public PaddingMode[] ValidPaddingModes { get { return (PaddingMode[])Enum.GetValues(typeof(PaddingMode)); } }
+
+        public void SetBlockSize(int bs) {
+            aes.BlockSize = bs;
+        }
 
         public override Stream Decrypt() {
             if (string.IsNullOrEmpty(CryptoPasswd) && !byKey)

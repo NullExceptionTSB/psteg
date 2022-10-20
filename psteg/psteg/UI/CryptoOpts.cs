@@ -73,8 +73,10 @@ namespace psteg.UI {
             rb_password.Enabled = validMethod;
 
             tb_pw_key.Enabled = validMethod;
+
             b_browse.Enabled = validMethod;
             b_ok.Enabled = validMethod;
+            b_hashopts.Enabled = validMethod;
 
             cb_showpw.Enabled = validMethod;
 
@@ -142,6 +144,10 @@ namespace psteg.UI {
                 pass = tb_pw_key.Text;
             else
                 key = tb_pw_key.Text;
+        }
+
+        private void b_hashopts_Click(object sender, EventArgs e) {
+            new HashOpts(engine.CryptoAlgorithm).ShowDialog();
         }
     }
 }
