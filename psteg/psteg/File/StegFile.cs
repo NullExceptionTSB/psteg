@@ -26,7 +26,7 @@ namespace psteg.File {
                     case FileType.LosslessAudio:
                     case FileType.Jpeg:
                         throw new NotImplementedException("File type not supported");
-                    default: return new RawFile(fileStream);
+                    default: return new FileRaw(fileStream);
                 }
             } 
             catch (Exception ex) {
@@ -41,7 +41,7 @@ namespace psteg.File {
                 switch (type) {
                     case FileType.LosslessImage:
                         return new LosslessImgFile(fileStream);
-                    default: return new RawFile(fileStream);
+                    default: return new FileRaw(fileStream);
                 }
             }
             catch (Exception ex) {

@@ -65,7 +65,7 @@ namespace psteg {
                 containerDict.Clear();
                 containerDict.Add(tb_container.Text, cont);
 
-                SetAvailableMethods(SteganoAlgorithm.AvailableMethods(new FileType[] { cont.FileType }));
+                SetAvailableMethods(SteganoAlgorithm.AvailableMethods(new FileType[] { cont.FileType }).Intersect(PstegEngine.KnownSteg.Keys).ToArray());
                 outputContainerType = cont.FileType;
             } 
             catch (Exception ex) {

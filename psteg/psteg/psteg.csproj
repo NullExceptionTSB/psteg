@@ -75,7 +75,7 @@
       <DependentUpon>CryptoOpts.cs</DependentUpon>
     </Compile>
     <Compile Include="File\FileID.cs" />
-    <Compile Include="File\RawFile.cs" />
+    <Compile Include="File\FileRaw.cs" />
     <Compile Include="File\Image\LosslessImgFile.cs" />
     <Compile Include="File\StegFile.cs" />
     <Compile Include="MainForm.cs">

@@ -37,7 +37,7 @@ namespace psteg {
         public StegOperation SteganoOperation { get; set; } = StegOperation.Encode;
         public KeyMode KeyMode { get; set; } = KeyMode.Password;
 
-        public StegFile RawFile { get; set; }
+        public StegFile FileRaw { get; set; }
         public StegFile EncodedFile { get; set; }
 
         public List<StegFile> Containers { get; private set; }
@@ -86,7 +86,7 @@ namespace psteg {
         private void Lint() {
             if (EncodedFile == null && SteganoOperation == StegOperation.Encode)
                 throw new ArgumentException("No output specified");
-            if (RawFile == null)
+            if (FileRaw == null)
                 throw new ArgumentException("No input specified");
 
             if (SteganoAlgorithm == null)
@@ -96,13 +96,13 @@ namespace psteg {
         }
 
         private void Encode() {
-            Stream inputData = RawFile.Stream;
+            Stream inputData = FileRaw.Stream;
 
             if (Encrypt) {
                 if (AllBlockEncryption)
                     throw new NotImplementedException("Full-Block Encryption not supported");
                 else
-                    CryptoAlgorithm.InputData = RawFile.Stream;
+                    CryptoAlgorithm.InputData = FileRaw.Stream;
 
                 if (KeyMode == KeyMode.Password) {
                     inputData = new MemoryStream();
@@ -146,7 +146,7 @@ namespace psteg {
         }
 
         private void Decode() {
-            Stream rawStream = RawFile.Stream;
+            Stream rawStream = FileRaw.Stream;
             long? prevdata = SteganoAlgorithm.DecodedDataLength;
             
             if (Encrypt) {
@@ -174,7 +174,7 @@ namespace psteg {
                     CryptoAlgorithm.InputData = rawStream;
                     Stream cstream = CryptoAlgorithm.Decrypt();
                     try { 
-                        cstream.CopyTo(RawFile.Stream);
+                        cstream.CopyTo(FileRaw.Stream);
                     } catch (Exception e) {
                         throw new Exception("Cryptographic exception, likely incorrect key or steganographic parameters", e);
                     } finally {

@@ -95,13 +95,13 @@ namespace psteg {
                 if (engine.EncodedFile == null)
                     MessageBox.Show("File access error");
 
-                engine.RawFile = OpenFileRead(tb_datapath.Text);
-                if (engine.RawFile == null)
+                engine.FileRaw = OpenFileRead(tb_datapath.Text);
+                if (engine.FileRaw == null)
                     MessageBox.Show("File access error");
             }
             else {
-                engine.RawFile = OpenFileWrite(tb_datapath.Text);
-                if (engine.RawFile == null)
+                engine.FileRaw = OpenFileWrite(tb_datapath.Text);
+                if (engine.FileRaw == null)
                     MessageBox.Show("File access error");
             }
 
@@ -135,11 +135,11 @@ namespace psteg {
             else
                 l_status.Text = "DONE";
 
-            engine.RawFile?.Dispose();
+            engine.FileRaw?.Dispose();
             engine.EncodedFile?.Dispose();
 
             engine.EncodedFile = null;
-            engine.RawFile = null;
+            engine.FileRaw = null;
 
 
         }
