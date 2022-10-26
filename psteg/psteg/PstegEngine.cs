@@ -17,17 +17,10 @@ namespace psteg {
         Password,Key
     }
 
-    public class PstegEngine {
-        public static Dictionary<StegMethod, Type> KnownSteg = new Dictionary<StegMethod, Type>
-        {
-            { StegMethod.LSB, typeof(SteganoLSB) }
-        };
+    public sealed class PstegEngine {
+        public static Dictionary<StegMethod, Type> KnownSteg;
 
-        public static Dictionary<CryptoMethod, Type> KnownCrypto = new Dictionary<CryptoMethod, Type>
-        {
-            { CryptoMethod.Rijndael, typeof(CryptoRijndael) }
-
-        };
+        public static Dictionary<CryptoMethod, Type> KnownCrypto;
 
         public BackgroundWorker AsyncWorker { get; set; }
 
@@ -117,6 +110,7 @@ namespace psteg {
 
             }
 
+            SteganoAlgorithm.EncodedPath = EncodedFile.Path;
             SteganoAlgorithm.Containers = Containers;
             SteganoAlgorithm.RawData = inputData;
             SteganoAlgorithm.EncodedData = new MemoryStream();
@@ -158,8 +152,8 @@ namespace psteg {
                 rawStream = new MemoryStream();
             }
 
-            
 
+            SteganoAlgorithm.EncodedPath = EncodedFile.Path;
             SteganoAlgorithm.Containers = Containers;
             SteganoAlgorithm.RawData = rawStream;
 

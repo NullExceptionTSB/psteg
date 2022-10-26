@@ -130,7 +130,7 @@
     <value>366, 17</value>
   </metadata>
   <data name="ofd_container.Filter" xml:space="preserve">
-    <value>BMP Files: (*.BMP;*.DIB)|*.BMP;*.DIB;|JPEG Files: (*.JPG;*.JPEG;*.JPE;*.JFIF)|*.JPG;*.JPEG;*.JPE;*.JFIF|GIF Files: (*.GIF)|*.GIF|TIFF Files: (*.TIF;*.TIFF)|*.TIF;*.TIFF|PNG Files: (*.PNG)|*.PNG|WAV Audio Files (*.WAV;*.WAVE)|*.wav;*.wave</value>
+    <value>BMP Files: (*.BMP;*.DIB)|*.BMP;*.DIB;|JPEG Files: (*.JPG;*.JPEG;*.JPE;*.JFIF)|*.JPG;*.JPEG;*.JPE;*.JFIF|GIF Files: (*.GIF)|*.GIF|TIFF Files: (*.TIF;*.TIFF)|*.TIF;*.TIFF|PNG Files: (*.PNG)|*.PNG|WAV Audio Files (*.WAV;*.WAVE)|*.wav;*.wave|All files (*.*)|*.*</value>
   </data>
   <metadata name="sfd_encoded.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>642, 16</value>

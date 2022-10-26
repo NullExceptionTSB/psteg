@@ -55,7 +55,9 @@
     <Compile Include="Algorithm\Crypto\CryptoRijndael.cs" />
     <Compile Include="Algorithm\Extra\BitQueue.cs" />
     <Compile Include="Algorithm\Extra\Maths.cs" />
+    <Compile Include="Algorithm\Stegano\SteganoADS.cs" />
     <Compile Include="Algorithm\Stegano\SteganoLSB.cs" />
+    <Compile Include="EngineInitializer.cs" />
     <Compile Include="UI\HashOpts.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -93,6 +95,12 @@
     <Compile Include="UI\SettingsForms\Crypto\RijndaelSettings.Designer.cs">
       <DependentUpon>RijndaelSettings.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\SettingsForms\Stegano\ADSSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\SettingsForms\Stegano\ADSSettings.Designer.cs">
+      <DependentUpon>ADSSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\SettingsForms\Stegano\LSBSettings.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -126,6 +134,9 @@
     </Compile>
     <EmbeddedResource Include="UI\SettingsForms\Crypto\RijndaelSettings.resx">
       <DependentUpon>RijndaelSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\SettingsForms\Stegano\ADSSettings.resx">
+      <DependentUpon>ADSSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\SettingsForms\Stegano\LSBSettings.resx">
       <DependentUpon>LSBSettings.cs</DependentUpon>

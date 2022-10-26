@@ -28,7 +28,7 @@ namespace psteg.Algorithm {
         public Stream RawData { get; set; }
         public List<StegFile> Containers { get; set; }
         public Stream EncodedData { get; set; }
-
+        public virtual string EncodedPath { get; set; }
 
         public CryptoAlgorithm CryptoProvider { get; set; }
 
@@ -45,6 +45,8 @@ namespace psteg.Algorithm {
             switch (MethodEnum) {
                 case StegMethod.LSB:
                     return new SteganoLSB();
+                case StegMethod.ADS:
+                    return new SteganoADS();
                 default: return null;
             }
         }
@@ -53,6 +55,8 @@ namespace psteg.Algorithm {
             switch (MethodEnum) {
                 case StegMethod.LSB:
                     return SteganoLSB.AlgoDisplayName;
+                case StegMethod.ADS:
+                    return SteganoADS.AlgoDisplayName;
                 default: return MethodEnum.ToString();
             }
         }
