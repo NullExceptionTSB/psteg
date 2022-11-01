@@ -76,7 +76,7 @@ namespace psteg.UI {
 
             b_browse.Enabled = validMethod;
             b_ok.Enabled = validMethod;
-            b_hashopts.Enabled = validMethod;
+            b_advopts.Enabled = validMethod;
 
             cb_showpw.Enabled = validMethod;
 

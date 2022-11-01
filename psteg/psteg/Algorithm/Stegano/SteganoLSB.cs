@@ -21,7 +21,7 @@ namespace psteg.Algorithm.Stegano {
         Blue = 8
     }
 
-    public class SteganoLSB : SteganoAlgorithm {
+    public sealed class SteganoLSB : SteganoAlgorithm {
         private readonly LSBSettings settingsFormInstance = null;
         private const int BlockSize = 512;
 

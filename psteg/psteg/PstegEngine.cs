@@ -121,13 +121,14 @@ namespace psteg {
                 throw new NotImplementedException();
 
             switch (Containers[0].FileType) {
+                case FileType.Other:
+                    break;
                 case FileType.LosslessImage:
                     ((LosslessImgFile)EncodedFile).NewBitmap(((LosslessImgFile)Containers[0]).Resolution);
                     break;
                 default:
                     throw new NotImplementedException();
             }
-            
             EncodedFile.SetRawData(SteganoAlgorithm.EncodedData);
             //cleanup
             if (Encrypt) {

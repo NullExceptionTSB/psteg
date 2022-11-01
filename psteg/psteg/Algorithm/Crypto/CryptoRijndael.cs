@@ -7,7 +7,7 @@ using psteg.UI.SettingsForms.Crypto;
 
 
 namespace psteg.Algorithm.Crypto {
-    public class CryptoRijndael : CryptoAlgorithm {
+    public sealed class CryptoRijndael : CryptoAlgorithm {
         private const int IVSize = 16;
 
         private readonly Aes aes;

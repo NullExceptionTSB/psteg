@@ -5,16 +5,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
 
 using psteg.File;
 using psteg.UI.SettingsForms.Stegano;
-using System.Runtime.InteropServices;
+
 
 namespace psteg.Algorithm.Stegano {
     internal static class AdsInternal {
         //function signature from pinvoke.net @ https://www.pinvoke.net/default.aspx/kernel32.CreateFile
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        internal static extern IntPtr CreateFileW(
+        internal static extern SafeFileHandle CreateFileW(
             [MarshalAs(UnmanagedType.LPWStr)] string filename,
             [MarshalAs(UnmanagedType.U4)] FileAccess access,
             [MarshalAs(UnmanagedType.U4)] FileShare share,
@@ -24,7 +26,7 @@ namespace psteg.Algorithm.Stegano {
             IntPtr templateFile);
     }
 
-    public class SteganoADS : SteganoAlgorithm {
+    public sealed class SteganoADS : SteganoAlgorithm {
         public override StegMethod MethodEnum { get { return StegMethod.ADS; } }
         public static string AlgoDisplayName { get { return "Alternate Data Stream (ADS)"; } }
         public override string DisplayName { get { return AlgoDisplayName; } }
@@ -38,13 +40,19 @@ namespace psteg.Algorithm.Stegano {
         }
 
         private void EncodeSingle(StegFile container) {
-            IntPtr Handle = AdsInternal.CreateFileW(EncodedPath + ":" + StreamName, FileAccess.ReadWrite, FileShare.ReadWrite, IntPtr.Zero, FileMode.Create, FileAttributes.Normal, IntPtr.Zero);
+            container.Stream.CopyTo(EncodedData);
+            EncodedData.Seek(0, SeekOrigin.Begin);
 
+            SafeFileHandle Handle = AdsInternal.CreateFileW(EncodedPath + ":" + StreamName, FileAccess.ReadWrite, FileShare.ReadWrite, IntPtr.Zero, FileMode.Create, FileAttributes.Normal, IntPtr.Zero);
+            FileStream fs = new FileStream(Handle, FileAccess.ReadWrite);
 
-            try { 
-                using (FileRaw data = new FileRaw(new FileStream(EncodedPath + ":" + StreamName, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))) {
-                    EncodedData.CopyTo(data.Stream);
-                }
+            try {
+                RawData.CopyTo(fs);
+
+                fs.Close();
+                fs.Dispose();
+                Handle.Close();
+                Handle.Dispose();
             } catch (Exception e) { throw new Exception("File access error: " + e.Message, e); }
         }
 
