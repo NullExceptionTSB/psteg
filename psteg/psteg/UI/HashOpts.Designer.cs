@@ -94,7 +94,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "HashOpts";
-            this.Text = "HashOpts";
+            this.Text = "Hashing Options";
             this.ResumeLayout(false);
             this.PerformLayout();
 

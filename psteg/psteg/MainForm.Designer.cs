@@ -116,7 +116,7 @@
             // 
             this.b_dataBrowse.Location = new System.Drawing.Point(412, 38);
             this.b_dataBrowse.Name = "b_dataBrowse";
-            this.b_dataBrowse.Size = new System.Drawing.Size(98, 21);
+            this.b_dataBrowse.Size = new System.Drawing.Size(98, 22);
             this.b_dataBrowse.TabIndex = 5;
             this.b_dataBrowse.Text = "Browse";
             this.b_dataBrowse.UseVisualStyleBackColor = true;
@@ -158,7 +158,7 @@
             // cb_encrypt
             // 
             this.cb_encrypt.AutoSize = true;
-            this.cb_encrypt.Location = new System.Drawing.Point(218, 117);
+            this.cb_encrypt.Location = new System.Drawing.Point(218, 118);
             this.cb_encrypt.Name = "cb_encrypt";
             this.cb_encrypt.Size = new System.Drawing.Size(62, 17);
             this.cb_encrypt.TabIndex = 12;
@@ -170,7 +170,7 @@
             // 
             this.b_start.Location = new System.Drawing.Point(310, 71);
             this.b_start.Name = "b_start";
-            this.b_start.Size = new System.Drawing.Size(199, 23);
+            this.b_start.Size = new System.Drawing.Size(200, 23);
             this.b_start.TabIndex = 13;
             this.b_start.Text = "Start";
             this.b_start.UseVisualStyleBackColor = true;
@@ -180,7 +180,7 @@
             // 
             this.b_stegOptions.Location = new System.Drawing.Point(310, 94);
             this.b_stegOptions.Name = "b_stegOptions";
-            this.b_stegOptions.Size = new System.Drawing.Size(199, 23);
+            this.b_stegOptions.Size = new System.Drawing.Size(200, 23);
             this.b_stegOptions.TabIndex = 14;
             this.b_stegOptions.Text = "Steganographic Options";
             this.b_stegOptions.UseVisualStyleBackColor = true;
@@ -191,7 +191,7 @@
             this.b_cryptoOptions.Enabled = false;
             this.b_cryptoOptions.Location = new System.Drawing.Point(310, 117);
             this.b_cryptoOptions.Name = "b_cryptoOptions";
-            this.b_cryptoOptions.Size = new System.Drawing.Size(199, 23);
+            this.b_cryptoOptions.Size = new System.Drawing.Size(200, 23);
             this.b_cryptoOptions.TabIndex = 16;
             this.b_cryptoOptions.Text = "Cryptographic Options";
             this.b_cryptoOptions.UseVisualStyleBackColor = true;
@@ -200,7 +200,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(216, 210);
+            this.label5.Location = new System.Drawing.Point(216, 208);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(40, 13);
             this.label5.TabIndex = 20;
@@ -209,7 +209,7 @@
             // l_status
             // 
             this.l_status.AutoSize = true;
-            this.l_status.Location = new System.Drawing.Point(257, 210);
+            this.l_status.Location = new System.Drawing.Point(257, 208);
             this.l_status.Name = "l_status";
             this.l_status.Size = new System.Drawing.Size(24, 13);
             this.l_status.TabIndex = 21;
@@ -217,9 +217,9 @@
             // 
             // pb_status
             // 
-            this.pb_status.Location = new System.Drawing.Point(310, 207);
+            this.pb_status.Location = new System.Drawing.Point(310, 206);
             this.pb_status.Name = "pb_status";
-            this.pb_status.Size = new System.Drawing.Size(200, 16);
+            this.pb_status.Size = new System.Drawing.Size(199, 17);
             this.pb_status.TabIndex = 22;
             // 
             // bw_process
@@ -230,9 +230,9 @@
             // 
             // tb_container
             // 
-            this.tb_container.Location = new System.Drawing.Point(219, 181);
+            this.tb_container.Location = new System.Drawing.Point(218, 181);
             this.tb_container.Name = "tb_container";
-            this.tb_container.Size = new System.Drawing.Size(188, 20);
+            this.tb_container.Size = new System.Drawing.Size(189, 20);
             this.tb_container.TabIndex = 23;
             this.tb_container.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tb_KeyDown);
             // 
@@ -240,7 +240,7 @@
             // 
             this.b_containerBrowse.Location = new System.Drawing.Point(412, 180);
             this.b_containerBrowse.Name = "b_containerBrowse";
-            this.b_containerBrowse.Size = new System.Drawing.Size(98, 21);
+            this.b_containerBrowse.Size = new System.Drawing.Size(98, 22);
             this.b_containerBrowse.TabIndex = 24;
             this.b_containerBrowse.Text = "Browse";
             this.b_containerBrowse.UseVisualStyleBackColor = true;
@@ -269,7 +269,7 @@
             // 
             this.cb_multicontainer.AutoSize = true;
             this.cb_multicontainer.Enabled = false;
-            this.cb_multicontainer.Location = new System.Drawing.Point(218, 138);
+            this.cb_multicontainer.Location = new System.Drawing.Point(218, 139);
             this.cb_multicontainer.Name = "cb_multicontainer";
             this.cb_multicontainer.Size = new System.Drawing.Size(96, 17);
             this.cb_multicontainer.TabIndex = 27;

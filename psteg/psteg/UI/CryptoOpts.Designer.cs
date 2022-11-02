@@ -39,6 +39,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.cb_showpw = new System.Windows.Forms.CheckBox();
             this.b_hashopts = new System.Windows.Forms.Button();
+            this.b_generate = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // lv_methods
@@ -73,7 +74,7 @@
             // 
             // b_advopts
             // 
-            this.b_advopts.Location = new System.Drawing.Point(218, 174);
+            this.b_advopts.Location = new System.Drawing.Point(218, 177);
             this.b_advopts.Name = "b_advopts";
             this.b_advopts.Size = new System.Drawing.Size(239, 23);
             this.b_advopts.TabIndex = 3;
@@ -84,7 +85,7 @@
             // rb_password
             // 
             this.rb_password.AutoSize = true;
-            this.rb_password.Location = new System.Drawing.Point(218, 41);
+            this.rb_password.Location = new System.Drawing.Point(218, 39);
             this.rb_password.Name = "rb_password";
             this.rb_password.Size = new System.Drawing.Size(71, 17);
             this.rb_password.TabIndex = 4;
@@ -96,7 +97,7 @@
             // 
             this.rb_key.AutoSize = true;
             this.rb_key.Enabled = false;
-            this.rb_key.Location = new System.Drawing.Point(218, 64);
+            this.rb_key.Location = new System.Drawing.Point(218, 62);
             this.rb_key.Name = "rb_key";
             this.rb_key.Size = new System.Drawing.Size(43, 17);
             this.rb_key.TabIndex = 5;
@@ -106,7 +107,7 @@
             // 
             // b_ok
             // 
-            this.b_ok.Location = new System.Drawing.Point(218, 200);
+            this.b_ok.Location = new System.Drawing.Point(218, 203);
             this.b_ok.Name = "b_ok";
             this.b_ok.Size = new System.Drawing.Size(118, 23);
             this.b_ok.TabIndex = 6;
@@ -116,7 +117,7 @@
             // 
             // b_cancel
             // 
-            this.b_cancel.Location = new System.Drawing.Point(339, 200);
+            this.b_cancel.Location = new System.Drawing.Point(339, 203);
             this.b_cancel.Name = "b_cancel";
             this.b_cancel.Size = new System.Drawing.Size(118, 23);
             this.b_cancel.TabIndex = 7;
@@ -126,7 +127,7 @@
             // 
             // tb_pw_key
             // 
-            this.tb_pw_key.Location = new System.Drawing.Point(218, 121);
+            this.tb_pw_key.Location = new System.Drawing.Point(219, 100);
             this.tb_pw_key.Name = "tb_pw_key";
             this.tb_pw_key.Size = new System.Drawing.Size(174, 20);
             this.tb_pw_key.TabIndex = 8;
@@ -134,9 +135,9 @@
             // 
             // b_browse
             // 
-            this.b_browse.Location = new System.Drawing.Point(398, 119);
+            this.b_browse.Location = new System.Drawing.Point(399, 98);
             this.b_browse.Name = "b_browse";
-            this.b_browse.Size = new System.Drawing.Size(59, 23);
+            this.b_browse.Size = new System.Drawing.Size(58, 23);
             this.b_browse.TabIndex = 9;
             this.b_browse.Text = "Browse";
             this.b_browse.UseVisualStyleBackColor = true;
@@ -148,7 +149,7 @@
             // l_pw_key
             // 
             this.l_pw_key.AutoSize = true;
-            this.l_pw_key.Location = new System.Drawing.Point(218, 105);
+            this.l_pw_key.Location = new System.Drawing.Point(215, 84);
             this.l_pw_key.Name = "l_pw_key";
             this.l_pw_key.Size = new System.Drawing.Size(53, 13);
             this.l_pw_key.TabIndex = 10;
@@ -157,7 +158,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(215, 25);
+            this.label2.Location = new System.Drawing.Point(215, 23);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(89, 13);
             this.label2.TabIndex = 11;
@@ -166,7 +167,7 @@
             // cb_showpw
             // 
             this.cb_showpw.AutoSize = true;
-            this.cb_showpw.Location = new System.Drawing.Point(398, 101);
+            this.cb_showpw.Location = new System.Drawing.Point(400, 80);
             this.cb_showpw.Name = "cb_showpw";
             this.cb_showpw.Size = new System.Drawing.Size(53, 17);
             this.cb_showpw.TabIndex = 12;
@@ -176,7 +177,7 @@
             // 
             // b_hashopts
             // 
-            this.b_hashopts.Location = new System.Drawing.Point(218, 148);
+            this.b_hashopts.Location = new System.Drawing.Point(218, 151);
             this.b_hashopts.Name = "b_hashopts";
             this.b_hashopts.Size = new System.Drawing.Size(239, 23);
             this.b_hashopts.TabIndex = 13;
@@ -184,11 +185,21 @@
             this.b_hashopts.UseVisualStyleBackColor = true;
             this.b_hashopts.Click += new System.EventHandler(this.b_hashopts_Click);
             // 
+            // b_generate
+            // 
+            this.b_generate.Location = new System.Drawing.Point(218, 125);
+            this.b_generate.Name = "b_generate";
+            this.b_generate.Size = new System.Drawing.Size(239, 23);
+            this.b_generate.TabIndex = 15;
+            this.b_generate.Text = "Generate Cryptographic Key...";
+            this.b_generate.UseVisualStyleBackColor = true;
+            // 
             // CryptoOpts
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(469, 235);
+            this.Controls.Add(this.b_generate);
             this.Controls.Add(this.b_hashopts);
             this.Controls.Add(this.cb_showpw);
             this.Controls.Add(this.label2);
@@ -207,7 +218,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "CryptoOpts";
-            this.Text = "CryptoOpts";
+            this.Text = "Cryptographic Options";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -231,5 +242,6 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox cb_showpw;
         private System.Windows.Forms.Button b_hashopts;
+        private System.Windows.Forms.Button b_generate;
     }
 }

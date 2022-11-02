@@ -96,6 +96,7 @@ namespace psteg.UI {
                 l_pw_key.Text = "Key path:";
                 tb_pw_key.PasswordChar = '\0';
                 cb_showpw.Visible = false;
+                b_generate.Enabled = true;
 
                 if (!init) tb_pw_key.Text = key;
             }
@@ -105,6 +106,7 @@ namespace psteg.UI {
                 l_pw_key.Text = "Password:";
                 cb_showpw.Visible = true;
                 tb_pw_key.PasswordChar = cb_showpw.Checked ? '\0' : '*';
+                b_generate.Enabled = false;
 
                 //key = tb_pw_key.Text;
                 if (!init) tb_pw_key.Text = pass;
