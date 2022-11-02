@@ -22,7 +22,17 @@ namespace psteg {
 
         public static Dictionary<CryptoMethod, Type> KnownCrypto;
 
-        public BackgroundWorker AsyncWorker { get; set; }
+        public BackgroundWorker AsyncWorker { 
+            get { 
+                return asyncWorker; 
+            }
+            set {
+                if (asyncWorker != null)
+                    asyncWorker.DoWork -= bwgo;
+                asyncWorker = value;
+                asyncWorker.DoWork += bwgo;
+            } 
+        }
 
         public SteganoAlgorithm SteganoAlgorithm { get; private set; }
         public CryptoAlgorithm CryptoAlgorithm { get; private set; }
@@ -59,7 +69,7 @@ namespace psteg {
         }
 
         public void SetAlgorithms(StegMethod stegMethod) {
-            if (SteganoAlgorithm?.MethodEnum != stegMethod) { 
+            if (SteganoAlgorithm?.MethodEnum != stegMethod) {
                 if (stegMethod == StegMethod.Undecided)
                     SteganoAlgorithm = null;
                 else
@@ -68,7 +78,7 @@ namespace psteg {
         }
 
         public void SetAlgorithms(CryptoMethod cryptMethod) {
-            if (CryptoAlgorithm?.MethodEnum != cryptMethod) { 
+            if (CryptoAlgorithm?.MethodEnum != cryptMethod) {
                 if (cryptMethod == CryptoMethod.None)
                     CryptoAlgorithm = null;
                 else
@@ -90,7 +100,7 @@ namespace psteg {
 
         private void Encode() {
             Stream inputData = FileRaw.Stream;
-
+            
             if (Encrypt) {
                 if (AllBlockEncryption)
                     throw new NotImplementedException("Full-Block Encryption not supported");
@@ -104,17 +114,18 @@ namespace psteg {
                     cstream.Dispose();
 
                     inputData.Seek(0, SeekOrigin.Begin);
-                }   
+                }
                 else
                     throw new NotImplementedException("Cryptography password only");
 
             }
 
+            inputData.Seek(0, SeekOrigin.Begin);
             SteganoAlgorithm.EncodedPath = EncodedFile.Path;
             SteganoAlgorithm.Containers = Containers;
             SteganoAlgorithm.RawData = inputData;
             SteganoAlgorithm.EncodedData = new MemoryStream();
-            
+
             SteganoAlgorithm.Encode();
 
             if (Containers.Count > 1)
@@ -143,7 +154,7 @@ namespace psteg {
         private void Decode() {
             Stream rawStream = FileRaw.Stream;
             long? prevdata = SteganoAlgorithm.DecodedDataLength;
-            
+
             if (Encrypt) {
                 //block-align decoded data size for block cryptographic algorithms (they scream about padding otherwise)
                 if ((SteganoAlgorithm.DecodedDataLength % CryptoAlgorithm.BlockSize) != 0)
@@ -154,7 +165,7 @@ namespace psteg {
             }
 
 
-            SteganoAlgorithm.EncodedPath = EncodedFile.Path;
+            //SteganoAlgorithm.EncodedPath = EncodedFile.Path;
             SteganoAlgorithm.Containers = Containers;
             SteganoAlgorithm.RawData = rawStream;
 
@@ -168,11 +179,13 @@ namespace psteg {
                     rawStream.Seek(0, SeekOrigin.Begin);
                     CryptoAlgorithm.InputData = rawStream;
                     Stream cstream = CryptoAlgorithm.Decrypt();
-                    try { 
+                    try {
                         cstream.CopyTo(FileRaw.Stream);
-                    } catch (Exception e) {
+                    }
+                    catch (Exception e) {
                         throw new Exception("Cryptographic exception, likely incorrect key or steganographic parameters", e);
-                    } finally {
+                    }
+                    finally {
                         SteganoAlgorithm.DecodedDataLength = prevdata;
 
                         cstream.Close();
@@ -182,15 +195,17 @@ namespace psteg {
                         rawStream.Dispose();
                     }
                 }
-                else 
+                else
                     throw new NotImplementedException("Cryptography password only");
             }
         }
         //lock to prevent winforms firing the event 4 times for no fucking reason
         private bool @lock = false;
+        private BackgroundWorker asyncWorker;
+
         private void bwgo(object sender, DoWorkEventArgs e) {
             if (!@lock) {
-                @lock = true;
+                //@lock = true;
                 if (SteganoOperation == StegOperation.Encode) Encode();
                 else Decode();
             }
@@ -201,9 +216,7 @@ namespace psteg {
             Lint();
 
             SteganoAlgorithm.BackgroundWorker = AsyncWorker;
-            AsyncWorker.DoWork += bwgo;
             AsyncWorker.RunWorkerAsync();
-            AsyncWorker.DoWork -= bwgo;
         }
     }
 }

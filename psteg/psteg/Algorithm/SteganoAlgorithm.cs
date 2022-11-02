@@ -35,7 +35,9 @@ namespace psteg.Algorithm {
         public abstract void Encode();
         public abstract void Decode();
 
-        public abstract long CalculateCapacity(long ContainerSize);
+        public virtual long CalculateCapacity(long ContainerSize) {
+            return -1;
+        }
 
         protected virtual void WorkerReport(int percent, object state) {
             try { BackgroundWorker?.ReportProgress(percent, state); } catch { }

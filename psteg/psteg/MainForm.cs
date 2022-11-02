@@ -3,7 +3,9 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Drawing;
 
+using psteg.Algorithm.Extra;
 using psteg.UI;
+
 namespace psteg {
     public partial class MainForm : Form {
         readonly PstegEngine engine = null;
@@ -119,7 +121,8 @@ namespace psteg {
 
         private void bw_process_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e) {
             Tuple<long, long> state = (Tuple<long,long>)e.UserState;
-            l_status.Invoke((MethodInvoker)delegate { l_status.Text = state.Item1.ToString() + "/" + state.Item2.ToString(); });
+
+            l_status.Invoke((MethodInvoker)delegate { l_status.Text = Suffixify.SuffixToString(state.Item1) + "/" + Suffixify.SuffixToString(state.Item2); });
             pb_status.Minimum = 0;
             pb_status.Maximum = (int)state.Item2;
             pb_status.Value = (int)state.Item1;
