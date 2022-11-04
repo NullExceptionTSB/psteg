@@ -37,6 +37,24 @@ namespace psteg.Algorithm {
             return hashAlgo.ComputeHash(Encoding.Unicode.GetBytes(str));
         }
 
+        public static int GetDefaultKeySize(CryptoMethod method) {
+            switch (method) {
+                case CryptoMethod.Rijndael:
+                    return 256;
+                default:
+                    return 0;
+            }
+        }
+
+        public static int GetDefaultIVSize(CryptoMethod method) {
+            switch (method) {
+                case CryptoMethod.Rijndael:
+                    return 128;
+                default:
+                    return 0;
+            }
+        }
+
         public virtual Tuple<byte[], byte[]> GetKey(string password, int keySize, int ivSize) {
             if (string.IsNullOrEmpty(password) || keySize <= 0 || ivSize < 0)
                 return null;

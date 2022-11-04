@@ -34,8 +34,12 @@ namespace psteg {
             } 
         }
 
+        internal string CryptoKeyPath { get; set; } = "";
+
         public SteganoAlgorithm SteganoAlgorithm { get; private set; }
         public CryptoAlgorithm CryptoAlgorithm { get; private set; }
+
+        public CryptoKey CryptographicKey { get; set; }
 
         public StegOperation SteganoOperation { get; set; } = StegOperation.Encode;
         public KeyMode KeyMode { get; set; } = KeyMode.Password;
@@ -107,16 +111,14 @@ namespace psteg {
                 else
                     CryptoAlgorithm.InputData = FileRaw.Stream;
 
-                if (KeyMode == KeyMode.Password) {
-                    inputData = new MemoryStream();
-                    Stream cstream = CryptoAlgorithm.Encrypt();
-                    cstream.CopyTo(inputData);
-                    cstream.Dispose();
+                
+                inputData = new MemoryStream();
+                Stream cstream = KeyMode == KeyMode.Password ? CryptoAlgorithm.Encrypt() : CryptoAlgorithm.Encrypt(CryptographicKey.Key, CryptographicKey.IV); 
+                cstream.CopyTo(inputData);
+                cstream.Dispose();
 
-                    inputData.Seek(0, SeekOrigin.Begin);
-                }
-                else
-                    throw new NotImplementedException("Cryptography password only");
+                inputData.Seek(0, SeekOrigin.Begin);
+                
 
             }
 
@@ -175,28 +177,25 @@ namespace psteg {
             SteganoAlgorithm.Decode();
 
             if (Encrypt) {
-                if (KeyMode == KeyMode.Password) {
-                    rawStream.Seek(0, SeekOrigin.Begin);
-                    CryptoAlgorithm.InputData = rawStream;
-                    Stream cstream = CryptoAlgorithm.Decrypt();
-                    try {
-                        cstream.CopyTo(FileRaw.Stream);
-                    }
-                    catch (Exception e) {
-                        throw new Exception("Cryptographic exception, likely incorrect key or steganographic parameters", e);
-                    }
-                    finally {
-                        SteganoAlgorithm.DecodedDataLength = prevdata;
-
-                        cstream.Close();
-                        cstream.Dispose();
-
-                        rawStream.Close();
-                        rawStream.Dispose();
-                    }
+                rawStream.Seek(0, SeekOrigin.Begin);
+                CryptoAlgorithm.InputData = rawStream;
+                Stream cstream = KeyMode == KeyMode.Password ? CryptoAlgorithm.Decrypt() : CryptoAlgorithm.Decrypt(CryptographicKey.Key, CryptographicKey.IV);
+                try {
+                    cstream.CopyTo(FileRaw.Stream);
                 }
-                else
-                    throw new NotImplementedException("Cryptography password only");
+                catch (Exception e) {
+                    throw new Exception("Cryptographic exception, likely incorrect key or steganographic parameters (incorrect data length?)", e);
+                }
+                finally {
+                    SteganoAlgorithm.DecodedDataLength = prevdata;
+
+                    cstream.Close();
+                    cstream.Dispose();
+
+                    rawStream.Close();
+                    rawStream.Dispose();
+                }
+                
             }
         }
         //lock to prevent winforms firing the event 4 times for no fucking reason

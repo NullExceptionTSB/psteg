@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using psteg.Algorithm;
+using psteg.UI.Dialog;
 
 namespace psteg.UI {
     public partial class CryptoOpts : Form {
@@ -41,9 +43,14 @@ namespace psteg.UI {
             rb_password.Checked = !rb_key.Checked;
 
             pass = engine.CryptoAlgorithm?.CryptoPasswd;
+            key = engine.CryptoKeyPath;
 
             if (engine.KeyMode == KeyMode.Password)
                 tb_pw_key.Text = pass;
+            else
+                tb_pw_key.Text = key;
+
+            rb_CheckedChanged(null, null);
 
             init = false;
         }
@@ -77,6 +84,7 @@ namespace psteg.UI {
             b_browse.Enabled = validMethod;
             b_ok.Enabled = validMethod;
             b_advopts.Enabled = validMethod;
+            b_generate.Enabled = validMethod;
 
             cb_showpw.Enabled = validMethod;
 
@@ -99,6 +107,7 @@ namespace psteg.UI {
                 b_generate.Enabled = true;
 
                 if (!init) tb_pw_key.Text = key;
+                engine.KeyMode = KeyMode.Key;
             }
             else {
                 b_browse.Visible = false;
@@ -110,15 +119,18 @@ namespace psteg.UI {
 
                 //key = tb_pw_key.Text;
                 if (!init) tb_pw_key.Text = pass;
+                engine.KeyMode = KeyMode.Password;
             }
             inhibitsave = false;
         }
-        
+
         private void b_ok_Click(object sender, EventArgs e) {
             engine.KeyMode = rb_key.Checked ? KeyMode.Key : KeyMode.Password;
-            if (engine.CryptoAlgorithm != null) { 
-                engine.CryptoAlgorithm.CryptoPasswd = rb_password.Checked ? tb_pw_key.Text : null;
+            if (engine.CryptoAlgorithm != null) {
+                engine.CryptoAlgorithm.CryptoPasswd = pass;
+                SaveKey(key);
             }
+            
             Close();
         }
 
@@ -150,6 +162,37 @@ namespace psteg.UI {
 
         private void b_hashopts_Click(object sender, EventArgs e) {
             new HashOpts(engine.CryptoAlgorithm).ShowDialog();
+        }
+
+        private void SaveKey(string path) {
+            engine.CryptoKeyPath = path;
+            engine.CryptographicKey = new File.CryptoKey(path);
+        }
+
+        private void SetKey(string path) {
+            tb_pw_key.Text = key = path;
+        }
+
+        private void b_generate_Click(object sender, EventArgs e) {
+            if (sfd_key.ShowDialog() == DialogResult.OK) {
+                using (KeygenDialog kd = new KeygenDialog(CryptoAlgorithm.GetDefaultKeySize(engine.CryptoAlgorithm.MethodEnum), CryptoAlgorithm.GetDefaultIVSize(engine.CryptoAlgorithm.MethodEnum))) {
+
+                    if (kd.ShowDialog() != DialogResult.OK) return;
+
+                    string data = File.CryptoKey.RandomKey(kd.KeySize, kd.IVSize).Encode();
+                    using (FileStream fs = new FileStream(sfd_key.FileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                        fs.Write(Encoding.ASCII.GetBytes(data), 0, data.Length);
+                    
+                    if (MessageBox.Show("Key generation finished. Would you like to set the generated key as your current key?", "OK", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes) 
+                        SetKey(sfd_key.FileName);
+                    
+                }
+            }
+        }
+
+        private void b_browse_Click(object sender, EventArgs e) {
+            if (ofd_key.ShowDialog() == DialogResult.OK) 
+                SetKey(ofd_key.FileName);
         }
     }
 }

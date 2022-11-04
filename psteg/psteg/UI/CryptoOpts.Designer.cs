@@ -141,10 +141,16 @@
             this.b_browse.TabIndex = 9;
             this.b_browse.Text = "Browse";
             this.b_browse.UseVisualStyleBackColor = true;
+            this.b_browse.Click += new System.EventHandler(this.b_browse_Click);
+            // 
+            // sfd_key
+            // 
+            this.sfd_key.Filter = "Cryptographic Key (*.key)|*.key";
             // 
             // ofd_key
             // 
             this.ofd_key.FileName = "openFileDialog1";
+            this.ofd_key.Filter = "Cryptographic Key (*.key)|*.key";
             // 
             // l_pw_key
             // 
@@ -193,6 +199,7 @@
             this.b_generate.TabIndex = 15;
             this.b_generate.Text = "Generate Cryptographic Key...";
             this.b_generate.UseVisualStyleBackColor = true;
+            this.b_generate.Click += new System.EventHandler(this.b_generate_Click);
             // 
             // CryptoOpts
             // 
