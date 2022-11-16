@@ -42,6 +42,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -56,8 +57,10 @@
     <Compile Include="Algorithm\CryptoAlgorithm.cs" />
     <Compile Include="Algorithm\Crypto\CryptoRijndael.cs" />
     <Compile Include="Algorithm\Extra\BitQueue.cs" />
+    <Compile Include="Algorithm\Extra\ColourConversion.cs" />
     <Compile Include="Algorithm\Extra\Maths.cs" />
     <Compile Include="Algorithm\Extra\Suffixify.cs" />
+    <Compile Include="Algorithm\Extra\Transforms.cs" />
     <Compile Include="Algorithm\Stegano\SteganoADS.cs" />
     <Compile Include="Algorithm\Stegano\SteganoLSB.cs" />
     <Compile Include="Algorithm\WinternalAlgorithm.cs" />

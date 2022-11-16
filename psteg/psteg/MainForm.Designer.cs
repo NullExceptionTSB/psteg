@@ -320,7 +320,7 @@
             this.l_underConstruction.Name = "l_underConstruction";
             this.l_underConstruction.Size = new System.Drawing.Size(227, 13);
             this.l_underConstruction.TabIndex = 29;
-            this.l_underConstruction.Text = "== ALPHA 2 == UNDER CONSTRUCTION ==";
+            this.l_underConstruction.Text = "== ALPHA 3 == UNDER CONSTRUCTION ==";
             // 
             // MainForm
             // 
@@ -354,7 +354,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "MainForm";
-            this.Text = "psteg - Steganographic encoder/decoder - Alpha 2";
+            this.Text = "psteg - Steganographic encoder/decoder - Alpha 3";
             this.ResumeLayout(false);
             this.PerformLayout();
 
