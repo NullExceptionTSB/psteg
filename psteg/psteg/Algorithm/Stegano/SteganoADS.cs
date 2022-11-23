@@ -18,6 +18,7 @@ namespace psteg.Algorithm.Stegano {
         public override string DisplayName { get { return AlgoDisplayName; } }
         public override FileType[] SupportedFileTypes { get { return (FileType[])Enum.GetValues(typeof(StegMethod)); } }
         public override Form SettingsForm { get { return new ADSSettings(this); } }
+        public override bool ForceRaw { get { return true; } }
 
         public string StreamName { get; set; } = "SteganoStream";
 

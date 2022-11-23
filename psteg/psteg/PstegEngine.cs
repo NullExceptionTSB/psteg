@@ -118,8 +118,12 @@ namespace psteg {
                 cstream.Dispose();
 
                 inputData.Seek(0, SeekOrigin.Begin);
-                
+            }
 
+            if (SteganoAlgorithm.ForceRaw) {
+                string p = EncodedFile.Path;
+                EncodedFile.Dispose();
+                EncodedFile = StegFile.Open(p, true);
             }
 
             inputData.Seek(0, SeekOrigin.Begin);

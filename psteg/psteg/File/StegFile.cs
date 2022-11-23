@@ -16,10 +16,10 @@ namespace psteg.File {
         public abstract void SetRawData(Stream data);
         public abstract void SetRawData(byte[] data);
 
-        public static StegFile Open(string path) {
+        public static StegFile Open(string path, bool forceraw = false) {
             try { 
                 FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
-                FileType fileType = FileID.IdentifyFile(fileStream);
+                FileType fileType = forceraw ? FileType.Other : FileID.IdentifyFile(fileStream);
                 switch (fileType) {
                     case FileType.LosslessImage:
                         return new LosslessImgFile(fileStream);

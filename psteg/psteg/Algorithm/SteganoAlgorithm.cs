@@ -21,6 +21,7 @@ namespace psteg.Algorithm {
         public abstract StegMethod MethodEnum { get; }
         public abstract FileType[] SupportedFileTypes { get; }
         public abstract Form SettingsForm { get; }
+        public virtual bool ForceRaw { get; } = false;
         public virtual string DisplayName { get { return MethodEnum.ToString(); } }
 
         public long? DecodedDataLength { get; set; } = null;
