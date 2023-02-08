@@ -77,9 +77,10 @@ namespace psteg.Stegano.UI {
 
             if (CoverID.GetType().IsSubclassOf(typeof(ImageFileID))) {
                 if (ExtraOptions?.GetType() != typeof(ExtraImage)) {
+                    Controls.Remove(ExtraOptions);
                     ExtraOptions?.Dispose();
                     ExtraOptions = new ExtraImage() {
-                        Location = new Point(ClientRectangle.Right, gb_cover.Top)
+                        Location = new Point(FormerClientSize.Width, gb_cover.Top)
                     };
                 }
                 ClientSize = new Size(FormerClientSize.Width + ExtraOptions.Size.Width, FormerClientSize.Height);
@@ -89,9 +90,10 @@ namespace psteg.Stegano.UI {
             }
             else if (CoverID.GetType().IsSubclassOf(typeof(AudioFileID))) {
                 //if (ExtraOptions?.GetType() != typeof(ExtraSound)) {
+                Controls.Remove(ExtraOptions);
                 ExtraOptions?.Dispose();
                 ExtraOptions = new ExtraSound((AudioFileID)CoverID) {
-                    Location = new Point(ClientRectangle.Right, gb_cover.Top)
+                    Location = new Point(FormerClientSize.Width, gb_cover.Top)
                 };
                 //}
 
