@@ -108,6 +108,8 @@
             this.tb_coverPath.Name = "tb_coverPath";
             this.tb_coverPath.Size = new System.Drawing.Size(387, 20);
             this.tb_coverPath.TabIndex = 0;
+            this.tb_coverPath.DragDrop += new System.Windows.Forms.DragEventHandler(this.tb_coverPath_DragDrop);
+            this.tb_coverPath.DragEnter += new System.Windows.Forms.DragEventHandler(this.tb_DragEnter);
             // 
             // label2
             // 

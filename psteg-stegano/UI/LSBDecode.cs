@@ -89,13 +89,11 @@ namespace psteg.Stegano.UI {
                 //b_start.Enabled = true;
             }
             else if (CoverID.GetType().IsSubclassOf(typeof(AudioFileID))) {
-                //if (ExtraOptions?.GetType() != typeof(ExtraSound)) {
                 Controls.Remove(ExtraOptions);
                 ExtraOptions?.Dispose();
                 ExtraOptions = new ExtraSound((AudioFileID)CoverID) {
                     Location = new Point(FormerClientSize.Width, gb_cover.Top)
                 };
-                //}
 
                 ClientSize = new Size(FormerClientSize.Width + ExtraOptions.Size.Width, FormerClientSize.Height);
                 Controls.Add(ExtraOptions);
@@ -222,8 +220,13 @@ namespace psteg.Stegano.UI {
             l_status.Text = ps.State?.ToString() + (ps.IndefProgress ? "..." : (": " + ps.Current + "/" + ps.Maximum));
         }
 
-        private void tb_dataLength_KeyPress(object sender, KeyPressEventArgs e) 
-            => e.Handled = !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
+        private void tb_dataLength_KeyPress(object sender, KeyPressEventArgs e) => 
+            e.Handled = !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
+        private void tb_DragEnter(object sender, DragEventArgs e) =>
+            e.Effect = DragDropEffects.Copy;
 
+        private void tb_coverPath_DragDrop(object sender, DragEventArgs e) =>
+            tb_coverPath.Text = ((string[])e.Data.GetData(DataFormats.FileDrop, false))[0];
+        
     }
 }

@@ -72,13 +72,11 @@ namespace psteg.Stegano.UI {
                 sfd_destination.Filter = "Images|*.bmp;*.dib;*.gif;*.png";
             }
             else if (CoverID.GetType().IsSubclassOf(typeof(AudioFileID))) {
-                //if (ExtraOptions?.GetType() != typeof(ExtraSound)) {
                 Controls.Remove(ExtraOptions);
                 ExtraOptions?.Dispose();
                 ExtraOptions = new ExtraSound((AudioFileID)CoverID) {
                     Location = new Point(FormerClientSize.Width, gb_cover.Top)
                 };
-                //}
 
                 ClientSize = new Size(FormerClientSize.Width + ExtraOptions.Size.Width, FormerClientSize.Height);
                 Controls.Add(ExtraOptions);
