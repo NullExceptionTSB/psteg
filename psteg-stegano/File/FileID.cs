@@ -61,6 +61,8 @@ namespace psteg.Stegano.File {
             return FileFormat.Unknown;
         }
 
+        public virtual bool IsSupported() => true;
+
         public static FileID New(Stream file) {
             FileFormat format = IdentifyFile(file);
             switch (format) {
@@ -70,6 +72,8 @@ namespace psteg.Stegano.File {
                     return new BmpFileID(file);
                 case FileFormat.GIF:
                     return new GifFileID(file);
+                case FileFormat.WAV:
+                    return new WavFileID(file);
             }
             return new FileID();
         }
@@ -86,6 +90,17 @@ namespace psteg.Stegano.File {
         protected ImageFileID(Stream file) { }
         public override string ToString() =>
             base.ToString() + $"\nWidth: {Width}\nHeight: {Height}\nSupportsAlpha: {SupportsAlpha.ToString()}";
+    }
+
+    public class AudioFileID : FileID {
+        public virtual int SampleSize { get; protected set; }
+        public virtual int SampleRate { get; protected set; }
+        public virtual int Channels { get; protected set; }
+
+        protected AudioFileID(Stream file) { }
+        public override string ToString() =>
+            base.ToString() + $"\nSample Rate: {SampleRate}\nSample Size: {SampleSize}\nChannel Count: {Channels}";
+        
     }
 
     public sealed class PngFileID : ImageFileID{
@@ -178,6 +193,35 @@ namespace psteg.Stegano.File {
             HasAlpha = SupportsAlpha = true;
 
             file.Seek(pos, SeekOrigin.Begin);
+        }
+    }
+    public sealed class WavFileID : AudioFileID {
+        private Format.RIFFWAV.WaveFormat wavefmt;
+        public override FileFormat FileFormat => FileFormat.WAV;
+        public Format.RIFFWAV.FormatTag SampleType { get => wavefmt.wFormatTag; }
+        public override int SampleSize { get => wavefmt.wBitsPerSample; }
+        public override int SampleRate { get => (int)wavefmt.dwSampleRate; }
+        public override int Channels { get => wavefmt.nChannels; }
+
+        public override bool IsSupported() => 
+            (SampleType == Format.RIFFWAV.FormatTag.PCM && Channels < 3);
+
+        public override string ToString() =>
+            base.ToString() + $"\nSample Type: {SampleType.ToString()}";
+
+        public WavFileID(Stream file) : base(file) {
+            long fmtoffset;
+
+            Valid = Format.RIFFWAV.IsValid((FileStream)file, out fmtoffset, out _);
+            if (!Valid)
+                return;
+            if (fmtoffset == 0)
+                throw new Exception("bababooey");
+
+            file.Seek(fmtoffset+4, SeekOrigin.Begin);
+            byte[] fmtb = new byte[20];
+            file.Read(fmtb, 0, 20);
+            wavefmt = new Format.RIFFWAV.WaveFormat(fmtb);
         }
     }
 }

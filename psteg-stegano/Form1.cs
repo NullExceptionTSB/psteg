@@ -27,5 +27,11 @@ namespace psteg.Stegano {
             JpegDecode jd = new JpegDecode(fs);
 
         }
+
+        private void panel2_DragDrop(object sender, DragEventArgs e) {
+            FileStream fs = new FileStream(((string[])e.Data.GetData(DataFormats.FileDrop, false))[0], FileMode.Open, FileAccess.Read, FileShare.Read);
+
+            WavDecode wd = new WavDecode(fs);
+        }
     }
 }

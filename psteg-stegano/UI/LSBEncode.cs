@@ -69,7 +69,25 @@ namespace psteg.Stegano.UI {
                 b_browseOutput.Enabled = true;
 
                 sfd_destination.Filter = "Images|*.bmp;*.dib;*.gif;*.png";
-            } else ClientSize = FormerClientSize;
+            }
+            else if (CoverID.GetType().IsSubclassOf(typeof(AudioFileID))) {
+                //if (ExtraOptions?.GetType() != typeof(ExtraSound)) {
+                ExtraOptions?.Dispose();
+                ExtraOptions = new ExtraSound((AudioFileID)CoverID) {
+                    Location = new Point(ClientRectangle.Right, gb_cover.Top)
+                };
+                //}
+
+                ClientSize = new Size(FormerClientSize.Width + ExtraOptions.Size.Width, FormerClientSize.Height);
+                Controls.Add(ExtraOptions);
+                ExtraOptions.Parent = this;
+                b_setOutput.Enabled = true;
+                b_browseOutput.Enabled = true;
+
+                sfd_destination.Filter = "Sound Files|*.wav";
+            }
+            else
+                ClientSize = FormerClientSize;
             MayRun();
         }
         private void b_browseCover_Click(object sender, EventArgs e) {
@@ -106,6 +124,9 @@ namespace psteg.Stegano.UI {
                 case FileFormat.BMP:
                 case FileFormat.PNG:
                 case FileFormat.GIF:
+                case FileFormat.WAV:
+                    if (!CoverID.IsSupported())
+                        return;
                     break;
                 default:
                     return;
@@ -126,7 +147,17 @@ namespace psteg.Stegano.UI {
 
             if (CoverID.GetType().IsSubclassOf(typeof(ImageFileID))) {
                 ExtraImage ei = (ExtraImage)ExtraOptions;
+                int c = 0;
+                foreach (bool b in ei.ChannelAssignments.Values)
+                    if (b)
+                        c++;
+                if (c == 0) {
+                    MessageBox.Show("No channels assigned", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    engine.Dispose();
+                }
 
+
+                engine.EngineMode = LSBEncoderEngine.Mode.Image;
                 engine.IV = ei.IV;
                 engine.AdaptiveDistribution = ei.AdaptiveMode;
                 engine.ReverseBitOrder = ei.ReverseBitOrder;
@@ -136,7 +167,40 @@ namespace psteg.Stegano.UI {
                     OutputFormat = GetImageFormat(),
                     RowReadMode = ei.RowReadMode
                 };
-            } else throw new NotImplementedException("Sound files not supported");
+            } else if (CoverID.GetType().IsSubclassOf(typeof(AudioFileID))) {
+                ExtraSound es = (ExtraSound)ExtraOptions;
+                AudioFileID id = (AudioFileID)CoverID;
+                AudioEncode encoder = null;
+                AudioDecode decoder = null;
+
+                int c = 0;
+                foreach (bool b in es.ChannelAssignments.Values)
+                    if (b)
+                        c++;
+                if (c == 0) {
+                    MessageBox.Show("No channels assigned", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    engine.Dispose();
+                }
+
+                try { 
+                    decoder = new File.Format.WavDecode((FileStream)engine.CoverStream);
+                    encoder = new File.Format.WavEncode((FileStream)engine.OutputStream, ((File.Format.WavDecode)decoder).WaveFormat);
+                } catch (Exception ex) {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    engine.Dispose();
+                }
+
+                engine.IV = es.IV;
+                engine.AdaptiveDistribution = es.AdaptiveMode;
+                engine.ReverseBitOrder = es.ReverseBitOrder;
+                engine.AudioSpecificOptions = new LSBEncoderEngine._AudioSpecificOptions() {
+                    BitWidth = es.BitDepth,
+                    Channels = es.ChannelAssignments,
+                    ID = id,
+                    Encoder = encoder,
+                    Decoder = decoder
+                };
+            }
 
             bw_process.RunWorkerAsync(engine);
         }

@@ -54,9 +54,11 @@
     <Compile Include="Engine\Encode\EncoderEngine.cs" />
     <Compile Include="Engine\Encode\LSBEncoderEngine.cs" />
     <Compile Include="Engine\Factory.cs" />
+    <Compile Include="File\AudioDecode.cs" />
+    <Compile Include="File\AudioEncode.cs" />
     <Compile Include="File\FileID.cs" />
-    <Compile Include="File\Format\JpegDecode.cs" />
-    <Compile Include="File\Format\WavEncode.cs" />
+    <Compile Include="File\Format\Jpeg.cs" />
+    <Compile Include="File\Format\RIFFWAV.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -89,6 +91,12 @@
     <Compile Include="UI\LSBExtra\ExtraImage.Designer.cs">
       <DependentUpon>ExtraImage.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\LSBExtra\ExtraSound.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\LSBExtra\ExtraSound.Designer.cs">
+      <DependentUpon>ExtraSound.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -110,6 +118,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\LSBExtra\ExtraImage.resx">
       <DependentUpon>ExtraImage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\LSBExtra\ExtraSound.resx">
+      <DependentUpon>ExtraSound.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

@@ -46,6 +46,9 @@ namespace psteg.Stegano.UI {
                 case FileFormat.BMP:
                 case FileFormat.PNG:
                 case FileFormat.GIF:
+                case FileFormat.WAV:
+                    if (!CoverID.IsSupported())
+                        return;
                     break;
                 default:
                     return;
@@ -83,6 +86,18 @@ namespace psteg.Stegano.UI {
                 Controls.Add(ExtraOptions);
                 ExtraOptions.Parent = this;
                 //b_start.Enabled = true;
+            }
+            else if (CoverID.GetType().IsSubclassOf(typeof(AudioFileID))) {
+                //if (ExtraOptions?.GetType() != typeof(ExtraSound)) {
+                ExtraOptions?.Dispose();
+                ExtraOptions = new ExtraSound((AudioFileID)CoverID) {
+                    Location = new Point(ClientRectangle.Right, gb_cover.Top)
+                };
+                //}
+
+                ClientSize = new Size(FormerClientSize.Width + ExtraOptions.Size.Width, FormerClientSize.Height);
+                Controls.Add(ExtraOptions);
+                ExtraOptions.Parent = this;
             }
             else
                 ClientSize = FormerClientSize;
@@ -136,8 +151,40 @@ namespace psteg.Stegano.UI {
                     RowReadMode = ei.RowReadMode
                 };
             }
-            else
-                throw new NotImplementedException("Sound files not supported");
+            else if (CoverID.GetType().IsSubclassOf(typeof(AudioFileID))) {
+                ExtraSound es = (ExtraSound)ExtraOptions;
+                AudioFileID id = (AudioFileID)CoverID;
+                AudioEncode encoder = null;
+                AudioDecode decoder = null;
+
+                int c = 0;
+                foreach (bool b in es.ChannelAssignments.Values)
+                    if (b)
+                        c++;
+                if (c == 0) {
+                    MessageBox.Show("No channels assigned", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    engine.Dispose();
+                }
+
+                try {
+                    decoder = new File.Format.WavDecode((FileStream)engine.CoverStream);
+                }
+                catch (Exception ex) {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    engine.Dispose();
+                }
+
+                engine.IV = es.IV;
+                engine.AdaptiveDistribution = es.AdaptiveMode;
+                engine.ReverseBitOrder = es.ReverseBitOrder;
+                engine.AudioSpecificOptions = new LSBEncoderEngine._AudioSpecificOptions() {
+                    BitWidth = es.BitDepth,
+                    Channels = es.ChannelAssignments,
+                    ID = id,
+                    Encoder = encoder,
+                    Decoder = decoder
+                };
+            }
 
             bw_process.RunWorkerAsync(engine);
         }

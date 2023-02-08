@@ -6,10 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using psteg.Stegano.Engine.Encode;
+using static psteg.Stegano.Engine.Encode.LSBEncoderEngine;
+using psteg.Stegano.File;
 
 namespace psteg.Stegano.Engine.Decode {
     public sealed class LSBDecoderEngine : DecoderEngine {
+
         private const int BQ_BLOCKSIZE = 1024;
         private BitQueue bq = new BitQueue();
 
@@ -17,7 +19,10 @@ namespace psteg.Stegano.Engine.Decode {
         public bool AdaptiveDistribution { get; set; }
         public int? IV { get; set; }
 
-        public LSBEncoderEngine._ImageSpecificOptions ImageSpecificOptions { get; set; }
+        public Mode EngineMode { get; set; }
+
+        public _ImageSpecificOptions ImageSpecificOptions { get; set; }
+        public _AudioSpecificOptions AudioSpecificOptions { get; set; }
 
         public static byte ReverseBits(byte b) =>
             (byte)(((b * 0x80200802ul) & 0x0884422110ul) * 0x0101010101ul >> 32);
@@ -30,6 +35,11 @@ namespace psteg.Stegano.Engine.Decode {
         }
 
         private void LSBUnmixPush(byte data, int width) {
+            for (int i = 0; i < width; i++)
+                bq.Push((data&(1<<i))>0);
+        }
+
+        private void LSBUnmixPush(ushort data, int width) {
             for (int i = 0; i < width; i++)
                 bq.Push((data&(1<<i))>0);
         }
@@ -73,7 +83,7 @@ namespace psteg.Stegano.Engine.Decode {
                             LSBUnmixPush(a, ImageSpecificOptions.BitWidth);
 
                         if (bq.Length / 8 > 0) {
-                            OutputStream.WriteByte(bq.Pop());
+                            OutputStream.WriteByte(!ReverseBitOrder ? ReverseBits(bq.Pop()) : bq.Pop());
                             if (OutputStream.Position == DataSize) { 
                                 data_eof = true;
                                 break;
@@ -84,14 +94,82 @@ namespace psteg.Stegano.Engine.Decode {
             }
         }
 
+        public void DecodeAudio8() {
+            AudioDecode decoder = AudioSpecificOptions.Decoder;
+            byte[] buffer = new byte[BQ_BLOCKSIZE];
+            int smp_count = 0;
+
+            bool mono = AudioSpecificOptions.ID.Channels == 1;
+            do {
+                smp_count = decoder.GetSamples8(buffer);
+
+                if (mono)
+                    for (int i = 0; i < buffer.Length; i++)
+                        LSBUnmixPush(buffer[i], AudioSpecificOptions.BitWidth);
+                else 
+                    for (int i = 0; i < buffer.Length; i+=2) {
+                        if (AudioSpecificOptions.Channels['L'])
+                            LSBUnmixPush(buffer[i], AudioSpecificOptions.BitWidth);
+                        if (AudioSpecificOptions.Channels['R'])
+                            LSBUnmixPush(buffer[i+1], AudioSpecificOptions.BitWidth);
+                    }
+                while (bq.Length / 8 > 0) {
+                    OutputStream.WriteByte(!ReverseBitOrder ? ReverseBits(bq.Pop()) : bq.Pop());
+                    if (OutputStream.Position == DataSize)
+                        goto eol;
+                }
+            } while (smp_count != 0);
+        eol:
+            if (true) { }
+        }
+
+        public void DecodeAudio16() {
+            AudioDecode decoder = AudioSpecificOptions.Decoder;
+            ushort[] buffer = new ushort[BQ_BLOCKSIZE];
+            int smp_count = 0;
+
+            bool mono = AudioSpecificOptions.ID.Channels == 1;
+            do {
+                smp_count = decoder.GetSamples16(buffer);
+
+                if (mono)
+                    for (int i = 0; i < buffer.Length; i++)
+                        LSBUnmixPush(buffer[i], AudioSpecificOptions.BitWidth);
+                else
+                    for (int i = 0; i < buffer.Length; i+=2) {
+                        if (AudioSpecificOptions.Channels['L'])
+                            LSBUnmixPush(buffer[i], AudioSpecificOptions.BitWidth);
+                        if (AudioSpecificOptions.Channels['R'])
+                            LSBUnmixPush(buffer[i+1], AudioSpecificOptions.BitWidth);
+                    }
+                while (bq.Length / 8 > 0) {
+                    OutputStream.WriteByte(!ReverseBitOrder?ReverseBits(bq.Pop()):bq.Pop());
+                    if (OutputStream.Position == DataSize) 
+                        goto eol;
+                }
+            } while (smp_count != 0);
+        eol:
+            if (true) { }
+        }
+
+        public void DecodeAudio() {
+            if (AudioSpecificOptions.ID.SampleSize == 8)
+                DecodeAudio8();
+            else if (AudioSpecificOptions.ID.SampleSize == 16)
+                DecodeAudio16();
+            else
+                throw new NotImplementedException();
+        }
+
         public override void Go() {
             Prepare();
 
             Owner.ReportProgress(1, new ProgressState(1, 2, "Initializing", true));
             Lint();
             bq = new BitQueue();
-
-            if (ImageSpecificOptions.RowReadMode)
+            if (EngineMode == Mode.Audio)
+                DecodeAudio();
+            else if (ImageSpecificOptions.RowReadMode)
                 RowFirstDecodeImage();
 
             Finish();

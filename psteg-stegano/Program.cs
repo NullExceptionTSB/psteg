@@ -14,8 +14,10 @@ namespace psteg.Stegano {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            if (args.Length == 0)
+            if (args.Length == 0) { 
                 Application.Run(new Form1());
+                return;
+            }
 
             switch (args[0]) {
                 case "--lsbencode":

@@ -59,7 +59,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(203, 13);
             this.label1.TabIndex = 3;
-            this.label1.Text = "psteg Beta 1 - not intended for production";
+            this.label1.Text = "psteg Beta 2 - not intended for production";
             // 
             // b_lsbencode
             // 
