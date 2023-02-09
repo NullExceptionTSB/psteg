@@ -25,5 +25,7 @@ namespace psteg_launcher {
 
         private void b_lsbencode_Click(object sender, EventArgs e) => Run(".\\stegano.exe", "--lsbencode");
         private void b_lsbdecode_Click(object sender, EventArgs e) => Run(".\\stegano.exe", "--lsbdecode");
+
+        private void b_ads_Click(object sender, EventArgs e) => Run(".\\fstools.exe", "--ads");
     }
 }

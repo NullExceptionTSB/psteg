@@ -23,7 +23,7 @@ Icon ..\icon-install.ico
 
 !insertmacro MUI_LANGUAGE "English"
 
-Name "psteg"
+Name "psteg Beta 2"
 
 InstallDir "C:\Program Files\psteg"
 	

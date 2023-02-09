@@ -87,5 +87,11 @@
   <ItemGroup>
     <Content Include="icon-fstools.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\psteg-common\psteg-common.csproj">
+      <Project>{4909C379-8C70-4CF8-A932-EB7C74C1C57F}</Project>
+      <Name>psteg-common</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

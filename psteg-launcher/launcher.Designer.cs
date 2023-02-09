@@ -23,11 +23,13 @@
         /// obsah této metody v editoru kódu.
         /// </summary>
         private void InitializeComponent() {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(f_Launcher));
             this.b_chaffing = new System.Windows.Forms.Button();
             this.b_winnowing = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.b_lsbencode = new System.Windows.Forms.Button();
             this.b_lsbdecode = new System.Windows.Forms.Button();
+            this.b_ads = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // b_chaffing
@@ -55,7 +57,7 @@
             this.label1.AutoSize = true;
             this.label1.BackColor = System.Drawing.Color.Red;
             this.label1.ForeColor = System.Drawing.Color.Yellow;
-            this.label1.Location = new System.Drawing.Point(53, 67);
+            this.label1.Location = new System.Drawing.Point(53, 98);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(203, 13);
             this.label1.TabIndex = 3;
@@ -81,17 +83,29 @@
             this.b_lsbdecode.UseVisualStyleBackColor = true;
             this.b_lsbdecode.Click += new System.EventHandler(this.b_lsbdecode_Click);
             // 
+            // b_ads
+            // 
+            this.b_ads.Location = new System.Drawing.Point(12, 70);
+            this.b_ads.Name = "b_ads";
+            this.b_ads.Size = new System.Drawing.Size(282, 23);
+            this.b_ads.TabIndex = 6;
+            this.b_ads.Text = "NTFS Alternate Data Streams (Windows only)\r\n";
+            this.b_ads.UseVisualStyleBackColor = true;
+            this.b_ads.Click += new System.EventHandler(this.b_ads_Click);
+            // 
             // f_Launcher
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(309, 87);
+            this.ClientSize = new System.Drawing.Size(309, 120);
+            this.Controls.Add(this.b_ads);
             this.Controls.Add(this.b_lsbdecode);
             this.Controls.Add(this.b_lsbencode);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.b_winnowing);
             this.Controls.Add(this.b_chaffing);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "f_Launcher";
             this.Text = "psteg - Steganographic Suite";
@@ -106,6 +120,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button b_lsbencode;
         private System.Windows.Forms.Button b_lsbdecode;
+        private System.Windows.Forms.Button b_ads;
     }
 }
 

@@ -12,6 +12,8 @@ namespace psteg.Crypto {
 
         public virtual int BlockSize { get => 1; }
 
+        public virtual System.Security.Cryptography.PaddingMode PaddingMode { get; set; }
+
         public byte[] Key { get => _key; set { _key=value; KeysChanged(); } }
         public byte[] IV { get => _iV; set { _iV=value; KeysChanged(); } }
 

@@ -11,14 +11,18 @@ namespace psteg_fstools {
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main() {
+        static void Main(string[] Args) {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            if (Args.Length == 0)
+                return;
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                Application.Run(new ADS());
-            else
-                MessageBox.Show("psteg-fstools relies on Windows API calls and is only available on Microsoft Windows.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (Args[0] == "--ads") { 
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Application.Run(new ADS());
+                else
+                    MessageBox.Show("psteg-fstools relies on Windows API calls and is only available on Microsoft Windows.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }
