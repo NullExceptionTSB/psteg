@@ -25,10 +25,12 @@ namespace psteg_chaffblob.Container.Reader {
             Tuple<byte[], byte[]> key_iv_pair = CryptoAlgorithm.GetKeyIVPair(CryptoKey);
             CryptoAlgorithm.Key = key_iv_pair.Item1;
             CryptoAlgorithm.IV = key_iv_pair.Item2;
+            CryptoAlgorithm.PaddingMode = System.Security.Cryptography.PaddingMode.None;
 
             byte[] mac = new byte[MACAlgorithm.MACSize];
             int bc = 0;
             while (block != null) {
+                CryptoAlgorithm.PaddingMode = System.Security.Cryptography.PaddingMode.None; // to ensure the encryptor state is reset every iteration
                 bc++;
                 ReportsTo.ReportProgress(1, new ProgressState(bc, (int)BlockCount, "Parsing blocks"));
                 for (int i = 0; i < mac.Length; i++)
@@ -58,8 +60,16 @@ namespace psteg_chaffblob.Container.Reader {
 
                 Stream cs = CryptoAlgorithm.Decrypt(ms);
                 int real_bs = cs.Read(raw_block, 0, raw_block.Length);
+                cs.Close();
+                cs.Dispose();
+                ms.Close();
+                ms.Dispose();
+
+
 
                 uint padding_ammt = BitConverter.ToUInt32(raw_block, 0);
+                if (padding_ammt > real_bs)
+                    throw new Exception("Invalid block metadata");
 
                 byte[] block_data = new byte[real_bs - 4 - padding_ammt];
 
@@ -70,6 +80,7 @@ namespace psteg_chaffblob.Container.Reader {
 
                 block = FetchNextBlock();
             }
+            FinalizeRead();
         }
 
         public static ChaffContainerReader FromFile(FileStream file, FileStream output) {
@@ -78,6 +89,12 @@ namespace psteg_chaffblob.Container.Reader {
 
             byte[] magic_buff = new byte[4];
             file.Read(magic_buff, 0, 4);
+
+            byte[] tarid = new byte[8];
+            file.Seek(0x101, SeekOrigin.Begin);
+            file.Read(tarid, 0, 8);
+
+            string tarids = Encoding.ASCII.GetString(tarid, 0, 8);
 
             uint magic = BitConverter.ToUInt32(magic_buff, 0);
 
@@ -88,7 +105,11 @@ namespace psteg_chaffblob.Container.Reader {
                     cr = ChaffBlobReader.FromFile(file, output);
                     break;
                 default:
-                    throw new Exception("File format not recognized");
+                    if (tarids == "ustar  \0" || tarids == "ustar\000")
+                        cr = TarReader.FromFile(file, output);
+                    else
+                        throw new Exception("File format not recognized");
+                    break;
             }
 
             file.Seek(pos, SeekOrigin.Begin);

@@ -46,7 +46,7 @@ namespace psteg_chaffblob.Engine {
             
             cw.PRNG = rng;
 
-            MemoryStream ChaffStream = new MemoryStream(rng.GetRandomBytes((cw.BlockSize-1)*ChaffCount));
+            MemoryStream ChaffStream = new MemoryStream(rng.GetRandomBytes((cw.BlockSize)*ChaffCount));
 
             foreach (InputFile @if in InputFiles) 
                 cw.AddFile(@if.Stream, @if.CryptKey, @if.IDKey);

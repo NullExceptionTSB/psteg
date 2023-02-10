@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace psteg_chaffblob.Container.Reader {
     public sealed class ChaffBlobReader : ChaffContainerReader {
-        ChaffBlobHeader cbh;
+        private ChaffBlobHeader cbh;
 
         public override void InitializeRead() {
             InputFile.Seek(0, SeekOrigin.Begin);

@@ -13,7 +13,7 @@ namespace psteg.Crypto {
 
         public override int BlockSize => 16;
 
-        public override PaddingMode PaddingMode { get => aes.Padding; set => aes.Padding=value; }
+        public override PaddingMode PaddingMode { get => aes.Padding; set { aes.Padding=value; KeysChanged(); } }
 
         public override void KeysChanged() {
             try {

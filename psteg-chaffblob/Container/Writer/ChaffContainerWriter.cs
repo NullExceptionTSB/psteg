@@ -29,8 +29,9 @@ namespace psteg_chaffblob.Container.Writer {
 
         public virtual void WriteDataBlocks() {
             long total_blks = 0;
+
             foreach (BlobFile bf in FileList)
-                total_blks += (bf.Stream.Length / (BlockSize-1)) + 1; // i have no clue why this is wrong
+                total_blks += (bf.Stream.Length / (BlockSize)) + 1; // i have no clue why this is wrong
             long c = 0;
             while (FileList.Count > 0) {
                 BlobFile currentFile = FileList[(int)(PRNG.GetRandomU32() % FileList.Count)];
@@ -39,17 +40,18 @@ namespace psteg_chaffblob.Container.Writer {
                     continue;
                 }
 
-                byte[] data = currentFile.ExtractBlock(BlockSize-1);
+                byte[] data = currentFile.ExtractBlock(BlockSize);
 
                 MemoryStream ms = new MemoryStream(data);
 
                 Tuple<byte[], byte[]> pair = CryptoAlgorithm.GetKeyIVPair(currentFile.CryptoKey);
                 CryptoAlgorithm.Key = pair.Item1;
                 CryptoAlgorithm.IV = pair.Item2;
+                CryptoAlgorithm.PaddingMode = System.Security.Cryptography.PaddingMode.None;
 
                 Stream cs = CryptoAlgorithm.Encrypt(ms);
 
-                byte[] cdata = new byte[data.Length+1];
+                byte[] cdata = new byte[data.Length];
                 cs.Read(cdata, 0, cdata.Length);
 
 

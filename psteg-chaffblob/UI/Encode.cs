@@ -34,6 +34,11 @@ namespace psteg_chaffblob {
         };
         private List<Tuple<string, string, string>> FileList = new List<Tuple<string, string, string>>();
 
+        public Dictionary<WriteEngine.ContainerType, string> Filters = new Dictionary<WriteEngine.ContainerType, string> {
+            { WriteEngine.ContainerType.ChaffBlob, "Chaffblock File|*.chablk" },
+            { WriteEngine.ContainerType.Tar, "Encapsulated TAR File|*.tar" }
+        };
+
         public Encode() {
             InitializeComponent();
             cb_container.Items.Clear();
@@ -156,6 +161,7 @@ namespace psteg_chaffblob {
         }
 
         public void BrowseOutput() {
+            sfd_output.Filter = Filters[(WriteEngine.ContainerType)Enum.Parse(typeof(WriteEngine.ContainerType), cb_container.Items[cb_container.SelectedIndex].ToString())];
             if (sfd_output.ShowDialog() == DialogResult.OK)
                 tb_outputFile.Text = sfd_output.FileName;
         }

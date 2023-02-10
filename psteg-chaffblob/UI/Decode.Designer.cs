@@ -197,7 +197,7 @@
             // 
             // ofd_input
             // 
-            this.ofd_input.Filter = "Chaffblock File|*.chablk";
+            this.ofd_input.Filter = "Chaffblock File|*.chablk|Encapsulated TAR File|*.tar";
             // 
             // sfd_output
             // 

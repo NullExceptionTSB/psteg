@@ -56,6 +56,7 @@
     <Compile Include="Container\ChaffContainer.cs" />
     <Compile Include="Container\Reader\ChaffBlobReader.cs" />
     <Compile Include="Container\Reader\ChaffContainerReader.cs" />
+    <Compile Include="Container\Reader\TarReader.cs" />
     <Compile Include="Container\Writer\ChaffBlobWriter.cs" />
     <Compile Include="Container\Writer\ChaffContainerWriter.cs" />
     <Compile Include="Container\Writer\TarWriter.cs" />
