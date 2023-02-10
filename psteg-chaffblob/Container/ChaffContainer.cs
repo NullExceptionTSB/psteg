@@ -26,7 +26,7 @@ namespace psteg_chaffblob.Container {
         };
         protected static Dictionary<Type, byte> CryptMap = new Dictionary<Type, byte> {
             { typeof(NullEncrypt), 0x00 },
-            { typeof(AES256), 0x10 }
+            { typeof(AES), 0x10 }
         };
         protected static MACAlgorithm GetMacById(byte id) {
             Type t = Type.Missing.GetType();

@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using System.IO;
 
 namespace psteg.Crypto {
-    public class AES256 : Encryption {
+    public class AES : Encryption {
         private Aes aes;
         private ICryptoTransform d, e;
 
@@ -14,6 +14,12 @@ namespace psteg.Crypto {
         public override int BlockSize => 16;
 
         public override PaddingMode PaddingMode { get => aes.Padding; set { aes.Padding=value; KeysChanged(); } }
+        public override CipherMode BlockMode { get => aes.Mode; set { aes.Mode = value; KeysChanged(); } }
+        public override int KeySize { get => aes.KeySize; set { aes.KeySize = value; KeysChanged(); } }
+
+        public override int[] ValidKeySizes { get { return new int[] { 128, 192, 256 }; } }
+
+        public override Type ExtraOptions => typeof(UI.AESExtra);
 
         public override void KeysChanged() {
             try {
@@ -30,7 +36,7 @@ namespace psteg.Crypto {
             catch { }
         }
 
-        public AES256() {
+        public AES() {
             aes = Aes.Create();
         }
 

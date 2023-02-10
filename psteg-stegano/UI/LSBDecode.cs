@@ -19,6 +19,7 @@ namespace psteg.Stegano.UI {
     public partial class LSBDecode : Form {
         FileID CoverID = null;
         UserControl ExtraOptions = null;
+        UserControl ExtraCrypto = null;
         Size FormerClientSize;
 
         public LSBDecode() {
@@ -71,6 +72,7 @@ namespace psteg.Stegano.UI {
             catch { return; }
 
             tb_appCoverPath.Text = tb_coverPath.Text;
+            int starty = ExtraCrypto != null ? ExtraCrypto.Bottom : 0;
 
             CoverID = FileID.New(fs);
             tb_coverID.Text = CoverID.ToString().Replace("\n", "\r\n");
@@ -80,27 +82,35 @@ namespace psteg.Stegano.UI {
                     Controls.Remove(ExtraOptions);
                     ExtraOptions?.Dispose();
                     ExtraOptions = new ExtraImage() {
-                        Location = new Point(FormerClientSize.Width, gb_cover.Top)
+                        Location = new Point(FormerClientSize.Width, Math.Max(gb_cover.Top, starty))
                     };
                 }
-                ClientSize = new Size(FormerClientSize.Width + ExtraOptions.Size.Width, FormerClientSize.Height);
+                ClientSize = new Size(FormerClientSize.Width + ExtraOptions.Size.Width + 12, FormerClientSize.Height);
                 Controls.Add(ExtraOptions);
                 ExtraOptions.Parent = this;
-                //b_start.Enabled = true;
+                
             }
             else if (CoverID.GetType().IsSubclassOf(typeof(AudioFileID))) {
                 Controls.Remove(ExtraOptions);
                 ExtraOptions?.Dispose();
                 ExtraOptions = new ExtraSound((AudioFileID)CoverID) {
-                    Location = new Point(FormerClientSize.Width, gb_cover.Top)
+                    Location = new Point(FormerClientSize.Width, Math.Max(gb_cover.Top, starty))
                 };
 
-                ClientSize = new Size(FormerClientSize.Width + ExtraOptions.Size.Width, FormerClientSize.Height);
+                ClientSize = new Size(FormerClientSize.Width + ExtraOptions.Size.Width + 12, FormerClientSize.Height);
                 Controls.Add(ExtraOptions);
                 ExtraOptions.Parent = this;
             }
-            else
-                ClientSize = FormerClientSize;
+            else {
+                if (ExtraCrypto == null)
+                    ClientSize = FormerClientSize;
+                else if (ExtraCrypto.Location.Y != gb_cover.Top)
+                    ExtraCrypto.Location = new Point(ExtraCrypto.Location.X, gb_cover.Top);
+
+                Controls.Remove(ExtraOptions);
+                ExtraOptions?.Dispose();
+                ExtraOptions = null;
+            }
             MayRun();
         }
 
@@ -138,6 +148,12 @@ namespace psteg.Stegano.UI {
                 SetCryptography((Encryption)Activator.CreateInstance(Encryption.AlgoList[cb_crypto.Items[cb_crypto.SelectedIndex].ToString()])).
                 SetCryptoKey(tb_cryptoKey.Text).
                 Finish();
+
+            switch (ExtraCrypto.GetType().ToString()) {
+                case "psteg.UI.AESExtra":
+                    ((psteg.UI.AESExtra)ExtraCrypto).Apply((AES)engine.Encryption);
+                    break;
+            }
 
             if (CoverID.GetType().IsSubclassOf(typeof(ImageFileID))) {
                 ExtraImage ei = (ExtraImage)ExtraOptions;
@@ -227,6 +243,27 @@ namespace psteg.Stegano.UI {
 
         private void tb_coverPath_DragDrop(object sender, DragEventArgs e) =>
             tb_coverPath.Text = ((string[])e.Data.GetData(DataFormats.FileDrop, false))[0];
-        
+
+        private void cb_crypto_SelectedIndexChanged(object sender, EventArgs e) {
+            Encryption tmp = (Encryption)Activator.CreateInstance(Encryption.AlgoList[cb_crypto.Items[cb_crypto.SelectedIndex].ToString()]);
+            Controls.Remove(ExtraCrypto);
+            ExtraCrypto?.Dispose();
+            if (tmp.ExtraOptions == null) {
+                if (ExtraOptions == null)
+                    ClientSize = FormerClientSize;
+                else
+                    ExtraOptions.Location = new Point(ExtraOptions.Location.X, gb_cover.Top);
+                tmp.Dispose();
+                ExtraCrypto = null;
+                return;
+            }
+
+            ExtraCrypto = (UserControl)Activator.CreateInstance(tmp.ExtraOptions, new object[] { tmp, true });
+
+            ExtraCrypto.Location = new Point(FormerClientSize.Width, ExtraOptions != null ? ExtraOptions.Bottom : gb_cover.Top);
+            ClientSize = new Size(FormerClientSize.Width + ExtraCrypto.Width + 12, FormerClientSize.Height);
+            Controls.Add(ExtraCrypto);
+            tmp.Dispose();
+        }
     }
 }

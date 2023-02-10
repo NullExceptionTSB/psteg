@@ -24,16 +24,16 @@
         /// </summary>
         private void InitializeComponent() {
             this.gb_main = new System.Windows.Forms.GroupBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.cb_r = new System.Windows.Forms.CheckBox();
-            this.cb_l = new System.Windows.Forms.CheckBox();
+            this.cb_rbo = new System.Windows.Forms.CheckBox();
+            this.tb_iv = new System.Windows.Forms.TextBox();
+            this.cb_iv = new System.Windows.Forms.CheckBox();
+            this.cb_adaptive = new System.Windows.Forms.CheckBox();
             this.l_bitdepth = new System.Windows.Forms.Label();
             this.tb_bitdepth = new System.Windows.Forms.TrackBar();
             this.label1 = new System.Windows.Forms.Label();
-            this.cb_adaptive = new System.Windows.Forms.CheckBox();
-            this.tb_iv = new System.Windows.Forms.TextBox();
-            this.cb_iv = new System.Windows.Forms.CheckBox();
-            this.cb_rbo = new System.Windows.Forms.CheckBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.cb_r = new System.Windows.Forms.CheckBox();
+            this.cb_l = new System.Windows.Forms.CheckBox();
             this.gb_main.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tb_bitdepth)).BeginInit();
             this.SuspendLayout();
@@ -58,36 +58,45 @@
             this.gb_main.TabStop = false;
             this.gb_main.Text = "Audio";
             // 
-            // label2
+            // cb_rbo
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(4, 77);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(54, 13);
-            this.label2.TabIndex = 21;
-            this.label2.Text = "Channels:";
+            this.cb_rbo.AutoSize = true;
+            this.cb_rbo.Location = new System.Drawing.Point(9, 162);
+            this.cb_rbo.Name = "cb_rbo";
+            this.cb_rbo.Size = new System.Drawing.Size(110, 17);
+            this.cb_rbo.TabIndex = 28;
+            this.cb_rbo.Text = "Reverse Bit Order";
+            this.cb_rbo.UseVisualStyleBackColor = true;
             // 
-            // cb_r
+            // tb_iv
             // 
-            this.cb_r.AutoSize = true;
-            this.cb_r.Location = new System.Drawing.Point(178, 93);
-            this.cb_r.Name = "cb_r";
-            this.cb_r.Size = new System.Drawing.Size(34, 17);
-            this.cb_r.TabIndex = 20;
-            this.cb_r.Text = "R";
-            this.cb_r.UseVisualStyleBackColor = true;
+            this.tb_iv.Enabled = false;
+            this.tb_iv.Location = new System.Drawing.Point(129, 185);
+            this.tb_iv.Name = "tb_iv";
+            this.tb_iv.Size = new System.Drawing.Size(183, 20);
+            this.tb_iv.TabIndex = 27;
             // 
-            // cb_l
+            // cb_iv
             // 
-            this.cb_l.AutoSize = true;
-            this.cb_l.Checked = true;
-            this.cb_l.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cb_l.Location = new System.Drawing.Point(9, 93);
-            this.cb_l.Name = "cb_l";
-            this.cb_l.Size = new System.Drawing.Size(32, 17);
-            this.cb_l.TabIndex = 19;
-            this.cb_l.Text = "L";
-            this.cb_l.UseVisualStyleBackColor = true;
+            this.cb_iv.AutoSize = true;
+            this.cb_iv.Enabled = false;
+            this.cb_iv.Location = new System.Drawing.Point(9, 188);
+            this.cb_iv.Name = "cb_iv";
+            this.cb_iv.Size = new System.Drawing.Size(114, 17);
+            this.cb_iv.TabIndex = 26;
+            this.cb_iv.Text = "Initialization Vector";
+            this.cb_iv.UseVisualStyleBackColor = true;
+            // 
+            // cb_adaptive
+            // 
+            this.cb_adaptive.AutoSize = true;
+            this.cb_adaptive.Enabled = false;
+            this.cb_adaptive.Location = new System.Drawing.Point(9, 141);
+            this.cb_adaptive.Name = "cb_adaptive";
+            this.cb_adaptive.Size = new System.Drawing.Size(192, 17);
+            this.cb_adaptive.TabIndex = 25;
+            this.cb_adaptive.Text = "Adaptive Distribution [Experimental]";
+            this.cb_adaptive.UseVisualStyleBackColor = true;
             // 
             // l_bitdepth
             // 
@@ -119,45 +128,36 @@
             this.label1.TabIndex = 22;
             this.label1.Text = "Bit Depth:";
             // 
-            // cb_adaptive
+            // label2
             // 
-            this.cb_adaptive.AutoSize = true;
-            this.cb_adaptive.Enabled = false;
-            this.cb_adaptive.Location = new System.Drawing.Point(9, 141);
-            this.cb_adaptive.Name = "cb_adaptive";
-            this.cb_adaptive.Size = new System.Drawing.Size(192, 17);
-            this.cb_adaptive.TabIndex = 25;
-            this.cb_adaptive.Text = "Adaptive Distribution [Experimental]";
-            this.cb_adaptive.UseVisualStyleBackColor = true;
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(4, 77);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(54, 13);
+            this.label2.TabIndex = 21;
+            this.label2.Text = "Channels:";
             // 
-            // tb_iv
+            // cb_r
             // 
-            this.tb_iv.Enabled = false;
-            this.tb_iv.Location = new System.Drawing.Point(129, 185);
-            this.tb_iv.Name = "tb_iv";
-            this.tb_iv.Size = new System.Drawing.Size(183, 20);
-            this.tb_iv.TabIndex = 27;
+            this.cb_r.AutoSize = true;
+            this.cb_r.Location = new System.Drawing.Point(178, 93);
+            this.cb_r.Name = "cb_r";
+            this.cb_r.Size = new System.Drawing.Size(34, 17);
+            this.cb_r.TabIndex = 20;
+            this.cb_r.Text = "R";
+            this.cb_r.UseVisualStyleBackColor = true;
             // 
-            // cb_iv
+            // cb_l
             // 
-            this.cb_iv.AutoSize = true;
-            this.cb_iv.Enabled = false;
-            this.cb_iv.Location = new System.Drawing.Point(9, 185);
-            this.cb_iv.Name = "cb_iv";
-            this.cb_iv.Size = new System.Drawing.Size(114, 17);
-            this.cb_iv.TabIndex = 26;
-            this.cb_iv.Text = "Initialization Vector";
-            this.cb_iv.UseVisualStyleBackColor = true;
-            // 
-            // cb_rbo
-            // 
-            this.cb_rbo.AutoSize = true;
-            this.cb_rbo.Location = new System.Drawing.Point(9, 162);
-            this.cb_rbo.Name = "cb_rbo";
-            this.cb_rbo.Size = new System.Drawing.Size(110, 17);
-            this.cb_rbo.TabIndex = 28;
-            this.cb_rbo.Text = "Reverse Bit Order";
-            this.cb_rbo.UseVisualStyleBackColor = true;
+            this.cb_l.AutoSize = true;
+            this.cb_l.Checked = true;
+            this.cb_l.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cb_l.Location = new System.Drawing.Point(9, 93);
+            this.cb_l.Name = "cb_l";
+            this.cb_l.Size = new System.Drawing.Size(32, 17);
+            this.cb_l.TabIndex = 19;
+            this.cb_l.Text = "L";
+            this.cb_l.UseVisualStyleBackColor = true;
             // 
             // ExtraSound
             // 

@@ -337,6 +337,7 @@
             this.cb_crypto.Name = "cb_crypto";
             this.cb_crypto.Size = new System.Drawing.Size(279, 21);
             this.cb_crypto.TabIndex = 19;
+            this.cb_crypto.SelectedIndexChanged += new System.EventHandler(this.cb_crypto_SelectedIndexChanged);
             // 
             // tb_appDataPath
             // 

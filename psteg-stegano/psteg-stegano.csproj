@@ -67,12 +67,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\CryptoExtra\AESExtra.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UI\CryptoExtra\AESExtra.Designer.cs">
-      <DependentUpon>AESExtra.cs</DependentUpon>
-    </Compile>
     <Compile Include="UI\LSBDecode.cs">
       <SubType>Form</SubType>
     </Compile>

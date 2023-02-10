@@ -81,7 +81,7 @@ namespace psteg.Stegano.UI.LSBExtra
             // cb_iv
             // 
             this.cb_iv.AutoSize = true;
-            this.cb_iv.Location = new System.Drawing.Point(9, 210);
+            this.cb_iv.Location = new System.Drawing.Point(9, 213);
             this.cb_iv.Name = "cb_iv";
             this.cb_iv.Size = new System.Drawing.Size(114, 17);
             this.cb_iv.TabIndex = 24;

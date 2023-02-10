@@ -22,7 +22,7 @@ namespace psteg_chaffblob {
 
         private Dictionary<string, Type> CryptMap = new Dictionary<string, Type> {
             { "None", typeof(NullEncrypt) },
-            { "AES256", typeof(AES256) }
+            { "AES256", typeof(AES) }
         };
 
 

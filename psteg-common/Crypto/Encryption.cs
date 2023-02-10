@@ -13,12 +13,18 @@ namespace psteg.Crypto {
         public virtual int BlockSize { get => 1; }
 
         public virtual System.Security.Cryptography.PaddingMode PaddingMode { get; set; }
+        public virtual int KeySize { get; set; }
+        public virtual System.Security.Cryptography.CipherMode BlockMode { get; set; }
+
+        public virtual int[] ValidKeySizes { get => null; }
 
         public byte[] Key { get => _key; set { _key=value; KeysChanged(); } }
         public byte[] IV { get => _iV; set { _iV=value; KeysChanged(); } }
 
         public abstract Stream Encrypt(Stream data);
         public abstract Stream Decrypt(Stream data);
+
+        public virtual Type ExtraOptions { get => null; }
 
         public static KeyDerivationAlgo KeyDerivationAlgorithm {
             get => s_keyDerivationAlgorithm;
@@ -38,7 +44,7 @@ namespace psteg.Crypto {
 
         public static Dictionary<string, Type> AlgoList = new Dictionary<string, Type>() {
             { "None", typeof(NullEncrypt) },
-            { "AES256", typeof(AES256) }
+            { "AES", typeof(AES) }
         };
 
         public static Dictionary<string, Type> KDFList = new Dictionary<string, Type>() {
