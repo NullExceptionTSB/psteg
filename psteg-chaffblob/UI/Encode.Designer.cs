@@ -446,6 +446,7 @@
             this.bw_go.WorkerReportsProgress = true;
             this.bw_go.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bw_go_DoWork);
             this.bw_go.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.bw_go_ProgressChanged);
+            this.bw_go.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.bw_go_RunWorkerCompleted);
             // 
             // sfd_output
             // 

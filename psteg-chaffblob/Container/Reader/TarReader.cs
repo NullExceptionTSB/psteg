@@ -32,9 +32,9 @@ namespace psteg_chaffblob.Container.Reader {
                 if (filename == "HEADER\0") { 
                     return true;
                 }
-                InputFile.Seek(bs / 512 + (bs % 512 > 0 ? 512 : 0), SeekOrigin.Current);
+                InputFile.Seek((bs / 512 + ((bs % 512) > 0 ? 512 : 0))*512, SeekOrigin.Current);
 
-            } while (InputFile.Position != InputFile.Length);
+            } while (InputFile.Position < InputFile.Length);
 
             return false;
         }

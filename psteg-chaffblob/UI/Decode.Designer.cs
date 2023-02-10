@@ -194,6 +194,7 @@
             this.bw_process.WorkerSupportsCancellation = true;
             this.bw_process.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bw_process_DoWork);
             this.bw_process.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.bw_process_ProgressChanged);
+            this.bw_process.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.bw_process_RunWorkerCompleted);
             // 
             // ofd_input
             // 

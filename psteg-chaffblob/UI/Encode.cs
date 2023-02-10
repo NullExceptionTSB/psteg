@@ -110,8 +110,11 @@ namespace psteg_chaffblob {
             cb_showKeys.Checked = false;
         }
 
+
+        private WriteEngine _e = null;
         public void Start() {
             WriteEngine e = new WriteEngine(RNGMap[cb_prng.Text], CryptMap[cb_cryptoalgo.Text], MACMap[cb_hmac.Text]);
+            _e = e;
             e.Owner = bw_go;
             e.ChaffCount = int.Parse(tb_chaffCount.Text);
             e.Container = (WriteEngine.ContainerType)Enum.Parse(typeof(WriteEngine.ContainerType) ,cb_container.Items[cb_container.SelectedIndex].ToString());
@@ -126,8 +129,7 @@ namespace psteg_chaffblob {
                         );
                 e.Output = new FileStream(tb_outputFile.Text, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
             } catch (Exception ex) {
-                MessageBox.Show("Encoder initialization failed. Reason: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Finish(e, true);
+                Finish(e, new Exception("Encoder initialization failed. Reason: " + ex.Message, ex));
                 return;
             }
 
@@ -135,10 +137,12 @@ namespace psteg_chaffblob {
         }
         public void Process(WriteEngine e) {
             e.Go();
-            Finish(e);
         }
-        public void Finish(WriteEngine e, bool err = false) {
-            bw_go.ReportProgress(99, "Finalizing");
+        public void Finish(WriteEngine e, Exception err = null) {
+            if (_e == null)
+                return;
+
+            Invoke( new Action(() => bw_go_ProgressChanged(null, new ProgressChangedEventArgs(99, "Finalizing"))));
 
             foreach (InputFile i in e.InputFiles) { 
                 i.Stream?.Close();
@@ -146,13 +150,17 @@ namespace psteg_chaffblob {
             }
             e.Output?.Close();
             e.Output?.Dispose();
+            e.Output = null;
             e.Dispose();
-            bw_go.ReportProgress(100, err ? "Error" : "Done");
+            Invoke( new Action(() => bw_go_ProgressChanged(null, new ProgressChangedEventArgs(100, err!=null ? "Error" : "Done"))));
             pb_progress.Invoke(new Action(delegate {
                 pb_progress.Style = ProgressBarStyle.Continuous;
                 pb_progress.Maximum = 1;
                 pb_progress.Value = 1;
-            }));   
+            }));
+            if (err!=null)
+                MessageBox.Show("Encoder error: " + err.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _e = null;
         }
 
         public void BrowseInput() {
@@ -209,6 +217,10 @@ namespace psteg_chaffblob {
 
         private void b_randomizeChaffCount_Click(object sender, EventArgs e) =>
             tb_chaffCount.Text = random.Next(16, 4096).ToString();
+
+        private void bw_go_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) =>
+            Finish(_e, e.Error);
+
         
     }
 }
