@@ -26,6 +26,7 @@ namespace psteg.Stegano.UI {
                 case FileFormat.BMP: return ImageFormat.Bmp;
                 case FileFormat.PNG: return ImageFormat.Png;
                 case FileFormat.GIF: return ImageFormat.Gif;
+                case FileFormat.TIFF: return ImageFormat.Tiff;
                 default: return ImageFormat.Png;
             }
         }
@@ -136,6 +137,7 @@ namespace psteg.Stegano.UI {
                 case FileFormat.BMP:
                 case FileFormat.PNG:
                 case FileFormat.GIF:
+                case FileFormat.TIFF:
                 case FileFormat.WAV:
                     if (!CoverID.IsSupported())
                         return;
@@ -156,8 +158,8 @@ namespace psteg.Stegano.UI {
                 SetCryptography((Encryption)Activator.CreateInstance(Encryption.AlgoList[cb_crypto.Items[cb_crypto.SelectedIndex].ToString()])).
                 SetCryptoKey(tb_cryptoKey.Text).
                 Finish();
-
-            switch (ExtraCrypto.GetType().ToString()) {
+            
+            switch (ExtraCrypto?.GetType().ToString()) {
                 case "psteg.UI.AESExtra":
                     ((psteg.UI.AESExtra)ExtraCrypto).Apply((AES)engine.Encryption);
                     break;
@@ -207,7 +209,7 @@ namespace psteg.Stegano.UI {
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     engine.Dispose();
                 }
-
+                engine.EngineMode = LSBEncoderEngine.Mode.Audio;
                 engine.IV = es.IV;
                 engine.AdaptiveDistribution = es.AdaptiveMode;
                 engine.ReverseBitOrder = es.ReverseBitOrder;

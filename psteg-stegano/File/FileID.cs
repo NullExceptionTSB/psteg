@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace psteg.Stegano.File {
     public enum FileFormat {
-        JPEG, BMP, PNG, GIF, WAV, FLAC, Unknown
+        JPEG, BMP, PNG, TIFF, GIF, WAV, FLAC, Unknown
     }
     public class FileID {
         public bool Valid { get; protected set; } = true;
@@ -53,6 +53,9 @@ namespace psteg.Stegano.File {
                     if (fourbyteMagic == 0x45564157)
                         return FileFormat.WAV; //RIFF - WAVE
                     break;
+                case 0x2A004D4DU:
+                case 0x002A4949U:
+                    return FileFormat.TIFF;
                 case 0xE0FFD8FFU: //JPEG - JPEG
                     return FileFormat.JPEG;
                 case 0x38464947U: //GIF8 - GIF (TECHNICALLY INCORRECT)
@@ -72,6 +75,8 @@ namespace psteg.Stegano.File {
                     return new BmpFileID(file);
                 case FileFormat.GIF:
                     return new GifFileID(file);
+                case FileFormat.TIFF:
+                    return new TiffFileID(file);
                 case FileFormat.WAV:
                     return new WavFileID(file);
             }
@@ -113,6 +118,21 @@ namespace psteg.Stegano.File {
                 SupportsAlpha = HasAlpha = true;
                 b.Dispose();
             } catch {
+                Valid = false;
+            }
+        }
+    }
+    public sealed class TiffFileID : ImageFileID {
+        public override FileFormat FileFormat => FileFormat.TIFF;
+        public TiffFileID(Stream file) : base(file) {
+            try {
+                Bitmap b = new Bitmap(file);
+                Width = (uint)b.Width;
+                Height = (uint)b.Height;
+                SupportsAlpha = HasAlpha = true;
+                b.Dispose();
+            }
+            catch {
                 Valid = false;
             }
         }

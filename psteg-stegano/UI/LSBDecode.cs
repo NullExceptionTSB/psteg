@@ -47,6 +47,7 @@ namespace psteg.Stegano.UI {
                 case FileFormat.BMP:
                 case FileFormat.PNG:
                 case FileFormat.GIF:
+                case FileFormat.TIFF:
                 case FileFormat.WAV:
                     if (!CoverID.IsSupported())
                         return;
@@ -149,7 +150,7 @@ namespace psteg.Stegano.UI {
                 SetCryptoKey(tb_cryptoKey.Text).
                 Finish();
 
-            switch (ExtraCrypto.GetType().ToString()) {
+            switch (ExtraCrypto?.GetType().ToString()) {
                 case "psteg.UI.AESExtra":
                     ((psteg.UI.AESExtra)ExtraCrypto).Apply((AES)engine.Encryption);
                     break;
@@ -158,6 +159,8 @@ namespace psteg.Stegano.UI {
             if (CoverID.GetType().IsSubclassOf(typeof(ImageFileID))) {
                 ExtraImage ei = (ExtraImage)ExtraOptions;
 
+
+                engine.EngineMode = LSBEncoderEngine.Mode.Image;
                 engine.IV = ei.IV;
                 engine.AdaptiveDistribution = ei.AdaptiveMode;
                 engine.ReverseBitOrder = ei.ReverseBitOrder;
@@ -190,6 +193,7 @@ namespace psteg.Stegano.UI {
                     engine.Dispose();
                 }
 
+                engine.EngineMode = LSBEncoderEngine.Mode.Audio;
                 engine.IV = es.IV;
                 engine.AdaptiveDistribution = es.AdaptiveMode;
                 engine.ReverseBitOrder = es.ReverseBitOrder;
