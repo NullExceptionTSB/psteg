@@ -21,10 +21,10 @@ namespace psteg.Stegano {
 
             switch (args[0]) {
                 case "--lsbencode":
-                    Application.Run(new UI.LSBEncode());
+                    Application.Run(new UI.GenericEncode());
                     break;
                 case "--lsbdecode":
-                    Application.Run(new UI.LSBDecode());
+                    Application.Run(new UI.GenericDecode());
                     break;
             }
         }

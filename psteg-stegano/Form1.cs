@@ -11,11 +11,11 @@ namespace psteg.Stegano {
         }
 
         private void button1_Click(object sender, EventArgs e) {
-            new UI.LSBEncode().Show();
+            new UI.GenericEncode().Show();
         }
 
         private void button2_Click(object sender, EventArgs e) {
-            new UI.LSBDecode().Show();
+            new UI.GenericDecode().Show();
         }
 
         private void panel1_DragEnter(object sender, DragEventArgs e) =>

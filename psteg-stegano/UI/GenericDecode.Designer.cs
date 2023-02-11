@@ -1,5 +1,5 @@
 ﻿namespace psteg.Stegano.UI {
-    partial class LSBDecode {
+    partial class GenericDecode {
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -23,7 +23,7 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LSBDecode));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GenericDecode));
             this.gb_cover = new System.Windows.Forms.GroupBox();
             this.tb_coverID = new System.Windows.Forms.TextBox();
             this.tb_appCoverPath = new System.Windows.Forms.TextBox();
@@ -54,6 +54,8 @@
             this.sfd_destination = new System.Windows.Forms.SaveFileDialog();
             this.ofd_cover = new System.Windows.Forms.OpenFileDialog();
             this.bw_process = new System.ComponentModel.BackgroundWorker();
+            this.label5 = new System.Windows.Forms.Label();
+            this.cb_sm = new System.Windows.Forms.ComboBox();
             this.gb_cover.SuspendLayout();
             this.gb_output.SuspendLayout();
             this.SuspendLayout();
@@ -68,7 +70,7 @@
             this.gb_cover.Controls.Add(this.label2);
             this.gb_cover.Controls.Add(this.b_setCover);
             this.gb_cover.Controls.Add(this.b_browseCover);
-            this.gb_cover.Location = new System.Drawing.Point(12, 12);
+            this.gb_cover.Location = new System.Drawing.Point(12, 39);
             this.gb_cover.Name = "gb_cover";
             this.gb_cover.Size = new System.Drawing.Size(402, 283);
             this.gb_cover.TabIndex = 6;
@@ -128,7 +130,7 @@
             this.b_setCover.TabIndex = 3;
             this.b_setCover.Text = "Set";
             this.b_setCover.UseVisualStyleBackColor = true;
-            this.b_setCover.Click += new System.EventHandler(this.b_setCover_Click);
+            this.b_setCover.Click += new System.EventHandler(this.b_setCover_Click_LSB);
             // 
             // b_browseCover
             // 
@@ -156,7 +158,7 @@
             this.gb_output.Controls.Add(this.b_setOutput);
             this.gb_output.Controls.Add(this.label6);
             this.gb_output.Controls.Add(this.cb_crypto);
-            this.gb_output.Location = new System.Drawing.Point(12, 296);
+            this.gb_output.Location = new System.Drawing.Point(12, 323);
             this.gb_output.Name = "gb_output";
             this.gb_output.Size = new System.Drawing.Size(402, 220);
             this.gb_output.TabIndex = 7;
@@ -293,17 +295,17 @@
             // b_start
             // 
             this.b_start.Enabled = false;
-            this.b_start.Location = new System.Drawing.Point(12, 522);
+            this.b_start.Location = new System.Drawing.Point(12, 549);
             this.b_start.Name = "b_start";
             this.b_start.Size = new System.Drawing.Size(402, 23);
             this.b_start.TabIndex = 18;
             this.b_start.Text = "Start";
             this.b_start.UseVisualStyleBackColor = true;
-            this.b_start.Click += new System.EventHandler(this.b_start_Click);
+            this.b_start.Click += new System.EventHandler(this.b_start_Click_LSB);
             // 
             // pb_progress
             // 
-            this.pb_progress.Location = new System.Drawing.Point(12, 568);
+            this.pb_progress.Location = new System.Drawing.Point(12, 595);
             this.pb_progress.Name = "pb_progress";
             this.pb_progress.Size = new System.Drawing.Size(402, 23);
             this.pb_progress.TabIndex = 15;
@@ -311,7 +313,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 552);
+            this.label3.Location = new System.Drawing.Point(12, 579);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(40, 13);
             this.label3.TabIndex = 16;
@@ -320,7 +322,7 @@
             // l_status
             // 
             this.l_status.AutoSize = true;
-            this.l_status.Location = new System.Drawing.Point(52, 552);
+            this.l_status.Location = new System.Drawing.Point(52, 579);
             this.l_status.Name = "l_status";
             this.l_status.Size = new System.Drawing.Size(27, 13);
             this.l_status.TabIndex = 17;
@@ -338,11 +340,35 @@
             this.bw_process.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bw_process_DoWork);
             this.bw_process.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.bw_process_ProgressChanged);
             // 
-            // LSBDecode
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(12, 15);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(124, 13);
+            this.label5.TabIndex = 20;
+            this.label5.Text = "Steganographic Method:";
+            // 
+            // cb_sm
+            // 
+            this.cb_sm.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cb_sm.FormattingEnabled = true;
+            this.cb_sm.Items.AddRange(new object[] {
+            "LSB",
+            "Metadata"});
+            this.cb_sm.Location = new System.Drawing.Point(147, 12);
+            this.cb_sm.Name = "cb_sm";
+            this.cb_sm.Size = new System.Drawing.Size(267, 21);
+            this.cb_sm.TabIndex = 19;
+            this.cb_sm.SelectedIndexChanged += new System.EventHandler(this.cb_sm_SelectedIndexChanged);
+            // 
+            // GenericDecode
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(426, 603);
+            this.ClientSize = new System.Drawing.Size(426, 627);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.cb_sm);
             this.Controls.Add(this.b_start);
             this.Controls.Add(this.l_status);
             this.Controls.Add(this.gb_output);
@@ -352,8 +378,8 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
-            this.Name = "LSBDecode";
-            this.Text = "psteg-stegano: LSB Steganography Decoder";
+            this.Name = "GenericDecode";
+            this.Text = "psteg-stegano: Steganography Decoder";
             this.gb_cover.ResumeLayout(false);
             this.gb_cover.PerformLayout();
             this.gb_output.ResumeLayout(false);
@@ -395,5 +421,7 @@
         private System.ComponentModel.BackgroundWorker bw_process;
         private System.Windows.Forms.TextBox tb_dataLength;
         private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.ComboBox cb_sm;
     }
 }

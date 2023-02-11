@@ -8,7 +8,7 @@ using psteg.Crypto;
 
 namespace psteg.Stegano.Engine {
     public enum Methods {
-        LSB, DCT
+        LSB, DCT, Metadata
     }
 
     public sealed class EncoderFactory {    
@@ -19,6 +19,9 @@ namespace psteg.Stegano.Engine {
             switch (method) {
                 case Methods.DCT:
                     throw new NotImplementedException();
+                case Methods.Metadata:
+                    ef.Engine = new MetadataEncoderEngine();
+                    break;
                 case Methods.LSB:
                     ef.Engine = new LSBEncoderEngine();
                     break;
@@ -72,6 +75,9 @@ namespace psteg.Stegano.Engine {
         public static DecoderFactory Create(Methods method) {
             DecoderFactory ef = new DecoderFactory();
             switch (method) {
+                case Methods.Metadata:
+                    ef.Engine = new MetadataDecoderEngine();
+                    break;
                 case Methods.DCT:
                     throw new NotImplementedException();
                 case Methods.LSB:

@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace psteg.Stegano.File {
     public enum FileFormat {
-        JPEG, BMP, PNG, TIFF, GIF, WAV, FLAC, Unknown
+        JPEG, BMP, PNG, TIFF, GIF, WAV, FLAC, MP4, Unknown
     }
     public class FileID {
         public bool Valid { get; protected set; } = true;
@@ -58,9 +54,18 @@ namespace psteg.Stegano.File {
                     return FileFormat.TIFF;
                 case 0xE0FFD8FFU: //JPEG - JPEG
                     return FileFormat.JPEG;
+                    /*
+                case 0x20000000U:
+                    break;
+                    */
                 case 0x38464947U: //GIF8 - GIF (TECHNICALLY INCORRECT)
                     return FileFormat.GIF;
             }
+
+            fourbyteMagic = BitConverter.ToUInt32(magic, 4);
+            if (fourbyteMagic == 0x70797466U)
+                return FileFormat.MP4;
+
             return FileFormat.Unknown;
         }
 
@@ -69,6 +74,10 @@ namespace psteg.Stegano.File {
         public static FileID New(Stream file) {
             FileFormat format = IdentifyFile(file);
             switch (format) {
+                case FileFormat.MP4:
+                    return new MP4FileID();
+                case FileFormat.JPEG:
+                    return new JpegFileID(file);
                 case FileFormat.PNG:
                     return new PngFileID(file);
                 case FileFormat.BMP:
@@ -108,6 +117,25 @@ namespace psteg.Stegano.File {
         
     }
 
+    public sealed class MP4FileID : FileID {
+        public override FileFormat FileFormat => FileFormat.MP4;
+    }
+
+    public sealed class JpegFileID : ImageFileID {
+        public override FileFormat FileFormat => FileFormat.JPEG;
+        public JpegFileID(Stream file) : base(file) {
+            try {
+                Bitmap b = new Bitmap(file);
+                Width = (uint)b.Width;
+                Height = (uint)b.Height;
+                SupportsAlpha = HasAlpha = true;
+                b.Dispose();
+            }
+            catch {
+                Valid = false;
+            }
+        }
+    }
     public sealed class PngFileID : ImageFileID{
         public override FileFormat FileFormat => FileFormat.PNG;
         public PngFileID(Stream file) : base(file) {
@@ -215,6 +243,7 @@ namespace psteg.Stegano.File {
             file.Seek(pos, SeekOrigin.Begin);
         }
     }
+
     public sealed class WavFileID : AudioFileID {
         private Format.RIFFWAV.WaveFormat wavefmt;
         public override FileFormat FileFormat => FileFormat.WAV;

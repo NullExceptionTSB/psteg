@@ -1,5 +1,5 @@
 ﻿namespace psteg.Stegano.UI {
-    partial class LSBEncode {
+    partial class GenericEncode {
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -23,7 +23,7 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LSBEncode));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GenericEncode));
             this.tb_coverPath = new System.Windows.Forms.TextBox();
             this.b_browseCover = new System.Windows.Forms.Button();
             this.b_setCover = new System.Windows.Forms.Button();
@@ -59,6 +59,8 @@
             this.label3 = new System.Windows.Forms.Label();
             this.b_setData = new System.Windows.Forms.Button();
             this.ofd_data = new System.Windows.Forms.OpenFileDialog();
+            this.cb_sm = new System.Windows.Forms.ComboBox();
+            this.label9 = new System.Windows.Forms.Label();
             this.gb_cover.SuspendLayout();
             this.gb_output.SuspendLayout();
             this.gb_data.SuspendLayout();
@@ -92,7 +94,7 @@
             this.b_setCover.TabIndex = 3;
             this.b_setCover.Text = "Set";
             this.b_setCover.UseVisualStyleBackColor = true;
-            this.b_setCover.Click += new System.EventHandler(this.b_setCover_Click);
+            this.b_setCover.Click += new System.EventHandler(this.b_setCover_Click_LSB);
             // 
             // label2
             // 
@@ -113,7 +115,7 @@
             this.gb_cover.Controls.Add(this.label2);
             this.gb_cover.Controls.Add(this.b_setCover);
             this.gb_cover.Controls.Add(this.b_browseCover);
-            this.gb_cover.Location = new System.Drawing.Point(12, 12);
+            this.gb_cover.Location = new System.Drawing.Point(12, 39);
             this.gb_cover.Name = "gb_cover";
             this.gb_cover.Size = new System.Drawing.Size(402, 283);
             this.gb_cover.TabIndex = 5;
@@ -153,7 +155,7 @@
             this.gb_output.Controls.Add(this.b_browseOutput);
             this.gb_output.Controls.Add(this.label1);
             this.gb_output.Controls.Add(this.b_setOutput);
-            this.gb_output.Location = new System.Drawing.Point(12, 509);
+            this.gb_output.Location = new System.Drawing.Point(12, 536);
             this.gb_output.Name = "gb_output";
             this.gb_output.Size = new System.Drawing.Size(402, 123);
             this.gb_output.TabIndex = 6;
@@ -208,7 +210,7 @@
             // 
             // pb_progress
             // 
-            this.pb_progress.Location = new System.Drawing.Point(12, 684);
+            this.pb_progress.Location = new System.Drawing.Point(12, 711);
             this.pb_progress.Name = "pb_progress";
             this.pb_progress.Size = new System.Drawing.Size(402, 23);
             this.pb_progress.TabIndex = 7;
@@ -216,7 +218,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 668);
+            this.label5.Location = new System.Drawing.Point(12, 695);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(40, 13);
             this.label5.TabIndex = 8;
@@ -230,7 +232,7 @@
             // l_status
             // 
             this.l_status.AutoSize = true;
-            this.l_status.Location = new System.Drawing.Point(52, 668);
+            this.l_status.Location = new System.Drawing.Point(52, 695);
             this.l_status.Name = "l_status";
             this.l_status.Size = new System.Drawing.Size(27, 13);
             this.l_status.TabIndex = 9;
@@ -239,13 +241,13 @@
             // b_start
             // 
             this.b_start.Enabled = false;
-            this.b_start.Location = new System.Drawing.Point(12, 638);
+            this.b_start.Location = new System.Drawing.Point(12, 665);
             this.b_start.Name = "b_start";
             this.b_start.Size = new System.Drawing.Size(402, 23);
             this.b_start.TabIndex = 12;
             this.b_start.Text = "Start";
             this.b_start.UseVisualStyleBackColor = true;
-            this.b_start.Click += new System.EventHandler(this.b_start_Click);
+            this.b_start.Click += new System.EventHandler(this.b_start_Click_LSB);
             // 
             // bw_process
             // 
@@ -268,7 +270,7 @@
             this.gb_data.Controls.Add(this.b_browseData);
             this.gb_data.Controls.Add(this.label3);
             this.gb_data.Controls.Add(this.b_setData);
-            this.gb_data.Location = new System.Drawing.Point(12, 301);
+            this.gb_data.Location = new System.Drawing.Point(12, 328);
             this.gb_data.Name = "gb_data";
             this.gb_data.Size = new System.Drawing.Size(402, 202);
             this.gb_data.TabIndex = 14;
@@ -386,12 +388,36 @@
             this.b_setData.UseVisualStyleBackColor = true;
             this.b_setData.Click += new System.EventHandler(this.b_setData_Click);
             // 
-            // LSBEncode
+            // cb_sm
+            // 
+            this.cb_sm.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cb_sm.FormattingEnabled = true;
+            this.cb_sm.Items.AddRange(new object[] {
+            "LSB",
+            "Metadata"});
+            this.cb_sm.Location = new System.Drawing.Point(147, 12);
+            this.cb_sm.Name = "cb_sm";
+            this.cb_sm.Size = new System.Drawing.Size(267, 21);
+            this.cb_sm.TabIndex = 15;
+            this.cb_sm.SelectedIndexChanged += new System.EventHandler(this.cb_sm_SelectedIndexChanged);
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(12, 15);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(124, 13);
+            this.label9.TabIndex = 16;
+            this.label9.Text = "Steganographic Method:";
+            // 
+            // GenericEncode
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(426, 715);
+            this.ClientSize = new System.Drawing.Size(426, 746);
+            this.Controls.Add(this.label9);
+            this.Controls.Add(this.cb_sm);
             this.Controls.Add(this.gb_data);
             this.Controls.Add(this.b_start);
             this.Controls.Add(this.l_status);
@@ -402,8 +428,8 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
-            this.Name = "LSBEncode";
-            this.Text = "psteg-stegano: LSB Steganography Encoder";
+            this.Name = "GenericEncode";
+            this.Text = "psteg-stegano: Steganography Encoder";
             this.gb_cover.ResumeLayout(false);
             this.gb_cover.PerformLayout();
             this.gb_output.ResumeLayout(false);
@@ -452,5 +478,7 @@
         private System.Windows.Forms.TextBox tb_cryptoKey;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.CheckBox cb_shpwd;
+        private System.Windows.Forms.ComboBox cb_sm;
+        private System.Windows.Forms.Label label9;
     }
 }
