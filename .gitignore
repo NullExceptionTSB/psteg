@@ -1,9 +1,10 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
+﻿#######################################################
+# This .gitignore file was automatically created by Me
+#######################################################
 
-/psteg/psteg/.vs/psteg/v15
-/psteg/.vs/psteg/v15/Server/sqlite3
-/psteg/psteg/obj/Debug
-/psteg/psteg/bin/Debug
-/psteg/.vs/psteg/v15
+**/.vs
+*.exe
+*.dll
+*.pdb
+**/obj
+
