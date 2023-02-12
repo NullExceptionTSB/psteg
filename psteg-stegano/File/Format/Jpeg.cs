@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -78,191 +80,137 @@ namespace psteg.Stegano.File.Format {
                             //COMMENT
             COM = 0xFEFF    //comment
         }
-        public static class HuffConst {
-            public const int RegsiterSize = 64;
-            public const int FetchBits = 48;
 
-            public const int LookupBits = 8;
-            public const int LookupSize = 1<<LookupBits;
+        private static readonly byte[] swabuff = new byte[2];
+        public static ushort GetBigEndianU16(byte[] arr, int idx) {
+            swabuff[0] = arr[idx+1];
+            swabuff[1] = arr[idx];
+            return BitConverter.ToUInt16(swabuff, 0);
         }
-        //most of this code is heavily based on F5 JPEG Steganography
-        //todo: refactor this warcrime
-        protected internal sealed class HuffmanTableNew {
+
+        private readonly byte[] NaturalOrder = new byte[] {
+             0,  1,  8, 16,  9,  2,  3, 10,
+            17, 24, 32, 25, 18, 11,  4,  5,
+            12, 19, 26, 33, 40, 48, 41, 34,
+            27, 20, 13,  6,  7, 14, 21, 28,
+            35, 42, 49, 56, 57, 50, 43, 36,
+            29, 22, 15, 23, 30, 37, 44, 51,
+            58, 59, 52, 45, 38, 31, 39, 46,
+            53, 60, 61, 54, 47, 55, 62, 63,
+        };
+
+        //todo: refactor this warcrime (again)
+        protected internal sealed class HuffmanTable {
             public ushort Length { get; set; }
             public byte Type { get; set; }
             public byte Index { get; set; }
 
-            public uint[] HuffmanWorkspace { get; set; }
-            public byte[] HuffmanCodes { get; set; }
-            public byte[] HuffmanLengths { get; set; }
+            public byte[] ValueOrder;
 
-            public byte[] Values { get; set; } = new byte[256];
-            public byte[] MaxCode { get; set; } = new byte[18];
-            public byte[] ValOffset { get; set; } = new byte[19];
+            public int[] ValPtr = new int[17];
+            public int[] MinCode = new int[17];
+            public int[] MaxCode = new int[17];
 
-            public byte[] LookaheadSize { get; set; } = new byte[HuffConst.LookupSize];
-            public byte[] LookaheadVals { get; set; } = new byte[HuffConst.LookupSize];
+            public byte[] Bits = new byte[17];
 
-            public HuffmanTableNew(byte[] section) {
-                byte[] flipbuffer = new byte[2];
-                flipbuffer[0] = section[1];
-                flipbuffer[1] = section[0];
+            public int[] Sizes = new int[257];
+            public int[] Codes = new int[257];
+            public int[] OrderedSizes = new int[257];
+            public int[] OrderedCodes = new int[257];
+            //sorry, my children. for i have failed to bring you salvation from this cold, dark world.
+            public HuffmanTable(byte[] section) {
+                Length = GetBigEndianU16(section, 0);
 
-                byte type_index = section[3];
-
-                Length = BitConverter.ToUInt16(flipbuffer, 0);
-
-                Type = (byte)(type_index >> 4);
-                Index = (byte)(type_index & 0x0F);
+                Type = (byte)(section[3] >> 4);
+                Index = (byte)(section[3] & 0x0F);
 
                 if (Type > 1)
                     Console.WriteLine("W: invalid huffman table type");
-                if (Type > 3)
+                if (Index > 3)
                     Console.WriteLine("W: invalid huffman table index");
 
-                HuffmanLengths = new byte[17];
-                HuffmanCodes = new byte[256];
-
-                for (int i = 1; i < 16; i++)
-                    HuffmanLengths[i] = section[2+i];
-
-                int sum_codelength = 0;
-                for (int i = 0; i < 16; i++)
-                    sum_codelength += HuffmanLengths[i];
-
-                if (sum_codelength > 256 || sum_codelength > section.Length-17)
-                    throw new Exception("Huffman table invalid (too big)");
-
-
-            }
-        }
-
-        protected internal sealed class HuffmanTable {
-            public ushort Length { get; set; }
-            public byte ValIsAC { get; set; }
-            public byte Index { get; set; }
-
-            public int[] Bits { get; set; }
-            public int[] HuffmanValues { get; set; }
-            public int[] HuffmanCode { get; set; }
-            public int[] HuffmanSize { get; set; }
-            public int[] ValuePointers { get; set; }
-            public int[] CodeMaximum { get; set; }
-            public int[] CodeMinimum { get; set; }
-            public int[] OrderedHuffmanCode { get; set; }
-            public int[] OrderedHuffmanSize { get; set; }
-
-            private int K, I, J, LASTK, C, SI;
-
-            private ushort GetBits(byte[] table, int start) {
-                ushort bitCount = 0;
-
-                for (int i = 1; i < 17; i++) {
-                    Bits[i] = table[start+i];
-                    bitCount += (ushort)Bits[i];
+                int ValueCount = 0;
+                for (int i = 1; i <= 16; i++) { 
+                    Bits[i] = section[2+i];
+                    ValueCount+= Bits[i];
                 }
-                for (int i = 0; i < bitCount; i++)
-                    HuffmanValues[i] = table[start+bitCount+i];
+                if (ValueCount > 19+section.Length)
+                    throw new Exception("Invalid DHT section");
 
-                return bitCount;
-            }
+                ValueOrder = new byte[ValueCount];
+                for (int i = 0; i < ValueCount; i++)
+                    ValueOrder[i] = section[19 + i];
 
-            private void GetSizes() {
-                I=1;
-                J=1;
-                K=0;
+                int lastk;
+                //my mango is to blow up
+                //Figure C.1 translated from flowchart to code like a troglodyte
+                { 
+                    int k = 0, i = 1, j = 1;
 
-                for (; ; ) {
-                    if (J>Bits[I]) {
-                        J=1;
-                        I++;
-                        if (I > 16)
+                    do {
+                        while (!(j>Bits[i])) {
+                            Sizes[k] = i;
+                            k++;
+                            j++;
+                        }
+                        i++;
+                        j=1;
+                    } while (!(i > 16));
+                    Sizes[k] = 0;
+                    lastk = k;
+                }
+
+                //Figure C.2
+                {
+                    int k = 0, code = 0, si = Sizes[0];
+                    do {
+                        do {
+                            Codes[k] = code;
+                            code++;
+                            k++;
+                        } while (Sizes[k] == si);
+
+                        if (Sizes[k] == 0)
                             break;
-                    } else {
-                        HuffmanSize[K++]=I;
-                        J++;
-                    }
+
+                        do {
+                            code <<= 1; // described as SLL CODE 1 in the official JPEG docs : - ]
+                            si++;
+                        } while (Sizes[k] == si);
+
+                    } while (true);
                 }
-                HuffmanSize[K] = 0;
-                LASTK = K;
-            }
 
-            private void GetCodeTable() {
-                K=0;
-                C=0;
-                SI=HuffmanSize[0];
+                //Figure C.3
+                //at this point i feel like i'm getting a colonoscopy
+                {
+                    int k = 0;
+                    do {
+                        int i = ValueOrder[k];
+                        OrderedSizes[i] = Sizes[k];
+                        OrderedCodes[i] = Codes[k];
+                        k++;
+                    } while (k < lastk);
 
-                for (; ; ) {
-                    HuffmanCode[K++] = C++;
-
-                    if (HuffmanSize[K] == SI)
-                        continue;
-                    if (HuffmanSize[K] == 0)
-                        break;
-
-                    while (HuffmanSize[K] != SI) {
-                        C <<= 1;
-                        SI++;
-                    }
                 }
-            }
 
-            private void SortCodeTable() {
-                K=0;
-
-                while (K<LASTK) {
-                    I = HuffmanValues[K];
-
-                    OrderedHuffmanCode[I] = HuffmanCode[K];
-                    OrderedHuffmanSize[I] = HuffmanSize[K++];
+                //Figure F.15
+                {
+                    int i = 0, j = 0;
+                    do {
+                        i++;
+                        if (i > 16)
+                            break;
+                        if (Bits[i]==0)
+                            continue;
+                        ValPtr[i] = j;
+                        MinCode[i] = Codes[j];
+                        j += Bits[i]-1;
+                        MaxCode[i]= Codes[j];
+                        j++;
+                    } while (true);
                 }
-            }
 
-            private void GenerateDecoderTables() {
-                I=J=0;
-
-                for(; ; ) {
-                    if (++I > 16)
-                        return;
-
-                    if (Bits[I] == 0)
-                        CodeMaximum[I] = -1;
-                    else {
-                        ValuePointers[I] = J;
-                        CodeMinimum[I] = HuffmanCode[J];
-                        J+= Bits[I] - 1;
-                        CodeMaximum[I] = HuffmanCode[J++];
-                    }
-                }
-            }
-
-            public void Parse(byte[] table, int i, byte idx, byte isac) {
-                ValIsAC = isac;
-                Index = idx;
-
-
-                Length = (ushort)(19 + GetBits(table, i));
-
-                GetSizes();
-                GetCodeTable();
-                SortCodeTable();
-                GenerateDecoderTables();
-
-                
-            }
-
-            public HuffmanTable() {
-                HuffmanValues = new int[256];
-                HuffmanCode = new int[257];
-                HuffmanSize = new int[257];
-
-                ValuePointers = new int[17];
-                CodeMaximum = new int[18];
-                CodeMinimum = new int[17];
-
-                OrderedHuffmanCode = new int[HuffmanCode.Length];
-                OrderedHuffmanSize = new int[HuffmanSize.Length];
-                Bits = new int[17];
             }
         }
 
@@ -272,11 +220,7 @@ namespace psteg.Stegano.File.Format {
             public ushort Length { get; private set; }
 
             public QuantizationTable(byte[] section) {
-                byte[] flipbuf = new byte[2];
-                flipbuf[0] = section[1];
-                flipbuf[1] = section[0];
-
-                Length = BitConverter.ToUInt16(flipbuf, 0);
+                Length = GetBigEndianU16(section, 0);
 
                 if (Length != 67)
                     throw new Exception("DQT length != 67 !!");
@@ -301,76 +245,111 @@ namespace psteg.Stegano.File.Format {
             21, 34, 37, 47, 50, 56, 59, 61,
             35, 36, 48, 49, 57, 58, 62, 63
         };
+
+        protected internal struct SOF0Component {
+            public byte ComponentID;
+            public byte SamplingFactor;
+            public byte QtNumber;
+            public SOF0Component(byte id, byte sf, byte qt) {
+                ComponentID = id;
+                SamplingFactor = sf;
+                QtNumber = qt;
+            }
+        }
     }
 
 
     public sealed class JpegDecode : Jpeg {
-        private List<HuffmanTableNew> HuffmanTableList { get; set; }
+        private List<HuffmanTable> HuffmanTableList { get; set; }
         private List<QuantizationTable> QuantizationTableList { get; set; }
+        private List<long> ScanPointers { get; set; }
+        private List<SOF0Component> Components { get; set; }
         private ushort RestartInterval { get; set; }
+
+        public int Width { get; private set; }
+        public int Height { get; private set; }
+
+        public long ScanCount { get => ScanPointers.LongCount(); }
 
         public Stream Stream { get; private set; }
 
-        private void DHT(byte[] DHTSect) {
-            byte[] flipbuf = new byte[2];
-            flipbuf[0] = DHTSect[1];
-            flipbuf[1] = DHTSect[0];
-
-            ushort size = BitConverter.ToUInt16(flipbuf, 0);
-
-
-            byte isac = DHTSect[3];
-            byte idx = (byte)(isac & 0x0F);
-            isac >>= 4;
-
-            HuffmanTableNew ht = new HuffmanTableNew(DHTSect);
-
-            HuffmanTableList.Add(ht);
-            size -= ht.Length;
-            
-        }
+        private void DHT(byte[] DHTSect) =>
+            HuffmanTableList.Add(new HuffmanTable(DHTSect));
 
         private void DQT(byte[] DQTsect) =>
             QuantizationTableList.Add(new QuantizationTable(DQTsect));
         
 
         private void SOF0(byte[] SOF0sect) {
-            byte[] flipbuf = new byte[2];
-            flipbuf[0] = SOF0sect[1];
-            flipbuf[1] = SOF0sect[0];
+            ushort size = GetBigEndianU16(SOF0sect, 0);
 
-            ushort size = BitConverter.ToUInt16(flipbuf, 0);
+            if (SOF0sect[2] != 0x8)
+                throw new Exception("JPEG unsupported (BPP!=8)");
+
+            Width = GetBigEndianU16(SOF0sect, 3);
+            Height = GetBigEndianU16(SOF0sect, 5);
+            if (SOF0sect[7] != 3) {
+                if (SOF0sect[7] == 1)
+                    throw new Exception("Greyscale JPEGs not supported");
+                else
+                    throw new Exception("Invalid component count");
+            }
+
+            for (int i = 8; i < size; i+=3) {
+                if (i > size)
+                    throw new Exception("Invalid SOF0 marker");
+                Components.Add(new SOF0Component(SOF0sect[i], SOF0sect[i+1], SOF0sect[i+2]));
+            }
         }
 
         private void DRI(byte[] DRIsect) {
-            byte[] flipbuf = new byte[2];
-            flipbuf[0] = DRIsect[1];
-            flipbuf[1] = DRIsect[0];
-
-            ushort size = BitConverter.ToUInt16(flipbuf, 0);
+            ushort size = GetBigEndianU16(DRIsect, 0);
             if (size != 4)
                 throw new Exception("Invalid DRI size");
 
-            flipbuf[0] = DRIsect[3];
-            flipbuf[2] = DRIsect[2];
-
-            RestartInterval = BitConverter.ToUInt16(flipbuf, 0);
+            RestartInterval = GetBigEndianU16(DRIsect, 2);
         }
+
+        private void SOS() { 
+            ScanPointers.Add(Stream.Position);
+            //whoever decided that SOS does not need a marker length field
+            //i hope both sides of your pillow are forever warm
+
+            byte[] buff = new byte[4096];
+            bool eom = false;
+            bool next_ff = false;
+
+
+            while (!eom) { 
+                int read = Stream.Read(buff, 0, buff.Length);
+
+                for (int i = 0; i < read; i++) {
+                    if (next_ff) {
+                        next_ff = false;
+                        if ((buff[i] >= 0xD0 && buff[i] <= 0xD7) || buff[i] == 0x00)
+                            continue;
+                        else {
+                            eom = true;
+                            Stream.Seek(i-read-1, SeekOrigin.Current);
+                            break;
+                        }
+                    }
+                    else if (buff[i] == 0xFF) 
+                        next_ff = true;
+                }
+            }
+        }
+
 
         private byte[] ReadMarkerAtHead() {
             byte[] window = new byte[2];
             Stream.Read(window, 0, 2);
 
-            byte i = window[0];
-            window[0] = window[1];
-            window[1] = i;
-
-            ushort len = BitConverter.ToUInt16(window, 0);
+            ushort len = GetBigEndianU16(window, 0);
             byte[] marker = new byte[len];
 
-            Stream.Read(marker, 2, len-2);
-            marker[0] = window[1];
-            marker[1] = window[0];
+            Stream.Seek(-2, SeekOrigin.Current);
+            Stream.Read(marker, 0, len);
 
             return marker;
         }
@@ -379,11 +358,7 @@ namespace psteg.Stegano.File.Format {
             byte[] window = new byte[2];
             Stream.Read(window, 0, 2);
 
-            byte i = window[0];
-            window[0] = window[1];
-            window[1] = i;
-
-            Stream.Seek(BitConverter.ToUInt16(window, 0)-2, SeekOrigin.Current);
+            Stream.Seek(GetBigEndianU16(window, 0)-2, SeekOrigin.Current);
         }
 
         private void Parse() {
@@ -409,13 +384,15 @@ namespace psteg.Stegano.File.Format {
                     case (ushort)Marker.DQT:
                         DQT(ReadMarkerAtHead());
                         break;
+                    case (ushort)Marker.SOS:
+                        SOS();
+                        break;
                     case (ushort)Marker.SOF0:
                         SOF0(ReadMarkerAtHead());
                         break;
                     case (ushort)Marker.DRI:
                         DRI(ReadMarkerAtHead());
                         break;
-                    case (ushort)Marker.SOS: //start of scan = end of headers
                     case (ushort)Marker.EOI:
                         EOI = true;
                         break;
@@ -437,13 +414,22 @@ namespace psteg.Stegano.File.Format {
                 throw new FormatException("Not a JPEG file");
         }
 
+        public byte[] DecodeScan(long index) {
+            byte[] scan = null;
+
+
+            return scan;
+        }
+
         public JpegDecode(Stream Stream) {
             this.Stream = Stream;
             if (!Stream.CanSeek)
                 throw new Exception("Stream must be seekable");
 
-            HuffmanTableList = new List<HuffmanTableNew>();
+            HuffmanTableList = new List<HuffmanTable>();
             QuantizationTableList = new List<QuantizationTable>();
+            ScanPointers = new List<long>();
+            Components = new List<SOF0Component>();
 
             Verify();
             Parse();
