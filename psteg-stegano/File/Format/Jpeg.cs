@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,7 +9,7 @@ using System.Threading.Tasks;
 namespace psteg.Stegano.File.Format {
     public abstract class Jpeg {
         public enum Marker : ushort {
-            //SOF MARKERS
+                            //SOF MARKERS
             SOF0 = 0xC0FF,  //baseline dct
             SOF1 = 0xC1FF,  //extended seq dct
             SOF2 = 0xC2FF,  //progressive dct
@@ -36,7 +35,7 @@ namespace psteg.Stegano.File.Format {
             RST5 = 0xD5FF,
             RST6 = 0xD6FF,
             RST7 = 0xD7FF,
-            //OTHER
+                            //STATE MARKERS
             SOI = 0xD8FF,   //start of image
             EOI = 0xD9FF,   //end of image
             SOS = 0xDAFF,   //start of scan
@@ -62,7 +61,7 @@ namespace psteg.Stegano.File.Format {
             APP13 = 0xEDFF, //photoshop IRB, 8BIM, IPTC
             APP14 = 0xEEFF, //reserved
             APP15 = 0xEFFF, //reserved
-                            //JPG MARKERS
+                            //JPG MARKERS (most decoders don't recognize these)
             JPG0 = 0xF0FF,  //reserved
             JPG1 = 0xF1FF,  //reserved
             JPG2 = 0xF2FF,  //reserved
@@ -88,7 +87,7 @@ namespace psteg.Stegano.File.Format {
             return BitConverter.ToUInt16(swabuff, 0);
         }
 
-        private readonly byte[] NaturalOrder = new byte[] {
+        protected internal static readonly byte[] Dezigzag = new byte[] {
              0,  1,  8, 16,  9,  2,  3, 10,
             17, 24, 32, 25, 18, 11,  4,  5,
             12, 19, 26, 33, 40, 48, 41, 34,
@@ -234,18 +233,6 @@ namespace psteg.Stegano.File.Format {
             }
         }
 
-        //taken from F5
-        protected internal static int[] DeZigZagTable { get; } = new int[] {
-            0,  1,  5,  6,  14, 15, 27, 28,
-            2,  4,  7,  13, 16, 26, 29, 42,
-            3,  8,  12, 17, 25, 30, 41, 43,
-            9,  11, 18, 24, 31, 40, 44, 53,
-            10, 19, 23, 32, 39, 45, 52, 54,
-            20, 22, 33, 38, 46, 51, 55, 60,
-            21, 34, 37, 47, 50, 56, 59, 61,
-            35, 36, 48, 49, 57, 58, 62, 63
-        };
-
         protected internal struct SOF0Component {
             public byte ComponentID;
             public byte SamplingFactor;
@@ -256,12 +243,42 @@ namespace psteg.Stegano.File.Format {
                 QtNumber = qt;
             }
         }
+
+        protected internal struct SOSHeader {
+            public struct SOSComponent {
+                public byte ComponentID;
+                public byte TableIndex;
+                public SOSComponent(byte id, byte ti) {
+                    ComponentID = id;
+                    TableIndex = ti;
+                }
+            }
+
+            public ushort Length;
+            public byte ComponentCount;
+            public SOSComponent[] ComponentInfo;
+            //there are 3 more bytes which are irellevant to SOF0
+
+            public SOSHeader(byte[] data) {
+                Length = GetBigEndianU16(data, 0);
+                ComponentCount = data[2];
+                ComponentInfo = new SOSComponent[ComponentCount];
+                for (int i = 3, j = 0; j < ComponentCount; i+=2, j++) {
+                    if (i >= data.Length)
+                        throw new Exception("Invalid SOS Header");
+                    ComponentInfo[j] = new SOSComponent(data[i], data[i+1]);
+                }
+            }
+        }
     }
 
 
     public sealed class JpegDecode : Jpeg {
+        private Dictionary<byte, Tuple<int, int>[]> HuffmanSimple;
         private List<HuffmanTable> HuffmanTableList { get; set; }
+        private Dictionary<int, HuffmanTable> HuffmanTables { get; set; }
         private List<QuantizationTable> QuantizationTableList { get; set; }
+        private List<SOSHeader> ScanHeaders { get; set; }
         private List<long> ScanPointers { get; set; }
         private List<SOF0Component> Components { get; set; }
         private ushort RestartInterval { get; set; }
@@ -272,6 +289,38 @@ namespace psteg.Stegano.File.Format {
         public long ScanCount { get => ScanPointers.LongCount(); }
 
         public Stream Stream { get; private set; }
+
+        private void DHTSimple(byte[] DHTSect) {
+            ushort size = GetBigEndianU16(DHTSect, 0);
+            byte index = DHTSect[2];
+            MemoryStream ms = new MemoryStream(DHTSect);
+            ms.Seek(3, SeekOrigin.Begin);
+            bool ins = false;
+            Tuple<int, int>[] l = new Tuple<int, int>[0x10000];
+            if (!HuffmanSimple.ContainsKey(index)) 
+                ins = true;
+
+            byte[] lens = new byte[16];
+            ms.Read(lens, 0, 16);
+
+            int c = 0;
+
+            for (int i = 1; i <= 16; i++) {
+                for (int j = 0; j < lens[i-1]; j++) {
+                    byte v = (byte)ms.ReadByte();
+                    int x = 16-i;
+                    int lo = c<<x;
+                    int hi = lo | ((1<<x)-1);
+                    for (int k = lo; k <= hi; k++)
+                        l[k]=new Tuple<int, int>(i, v);
+                    c++;
+                }
+                c <<= 1;
+            }
+            if (ins)
+                HuffmanSimple.Add(index, l);
+            else HuffmanSimple[index] = l;
+        }
 
         private void DHT(byte[] DHTSect) =>
             HuffmanTableList.Add(new HuffmanTable(DHTSect));
@@ -310,7 +359,8 @@ namespace psteg.Stegano.File.Format {
             RestartInterval = GetBigEndianU16(DRIsect, 2);
         }
 
-        private void SOS() { 
+        private void SOS(byte[] SOSsect) {
+            ScanHeaders.Add(new SOSHeader(SOSsect));
             ScanPointers.Add(Stream.Position);
             //whoever decided that SOS does not need a marker length field
             //i hope both sides of your pillow are forever warm
@@ -379,13 +429,13 @@ namespace psteg.Stegano.File.Format {
                     case (ushort)Marker.SOI:
                         break;
                     case (ushort)Marker.DHT:
-                        DHT(ReadMarkerAtHead());
+                        DHTSimple(ReadMarkerAtHead());
                         break;
                     case (ushort)Marker.DQT:
                         DQT(ReadMarkerAtHead());
                         break;
                     case (ushort)Marker.SOS:
-                        SOS();
+                        SOS(ReadMarkerAtHead());
                         break;
                     case (ushort)Marker.SOF0:
                         SOF0(ReadMarkerAtHead());
@@ -414,10 +464,85 @@ namespace psteg.Stegano.File.Format {
                 throw new FormatException("Not a JPEG file");
         }
 
+        private int DecodeInt(int huffi, int len) =>
+            huffi < (1 << (len - 1)) ? huffi - ((1 << len) - 1) : huffi;
+        
+
+        private int[] DecodeNextBlock(int table, BitQueue bq) {
+            Tuple<int, int> hval;
+            
+            int[] r = new int[64];
+            byte[] block = bq.Pop(2);
+            hval = HuffmanSimple[(byte)table][GetBigEndianU16(block, 0)];
+
+            for (int i = 0; i < hval.Item1; i++)
+                bq.PopSingle();
+            int huffi = 0;
+            for (int i = 0; i < hval.Item2; i++)
+                huffi = (huffi << 1)|(bq.PopSingle() ? 1 : 0);
+
+            r[0] = DecodeInt(huffi, hval.Item2);
+
+            for (int i = 1; i < 64; i++) {
+                block = bq.Pop(2);
+
+                hval = HuffmanSimple[(byte)(table+1)][GetBigEndianU16(block, 0)];
+                for (int j = 0; j < hval.Item1; j++)
+                    bq.PopSingle();
+
+                switch (hval.Item2) {
+                    case 0x00:
+                        i = 63;
+                        break;
+                    case 0xF0:
+                        i += 16;
+                        break;
+                    default:
+                        i += (hval.Item2&0xF0)>>4;
+                        huffi = 0;
+                        for (int k = 0; k < (hval.Item2 & 0x0f); k++)
+                            huffi = (huffi << 1)|(bq.PopSingle() ? 1 : 0);
+
+                        r[Dezigzag[i]] = DecodeInt(huffi, hval.Item2 & 0x0f);
+                        break;
+                }
+            }
+
+            return r;
+        }
+
         public byte[] DecodeScan(long index) {
+            Stream.Seek(ScanPointers[(int)index], SeekOrigin.Begin);
+            
             byte[] scan = null;
+            int[][] block = new int[6][];
+            int dY = 0, dCb = 0, dCr = 0;
+            int xMcu = (Width + 15) / 16;
+            int yMcu = (Height + 15) / 16;
+
+            BitQueue bq = new BitQueue();
+            byte[] bk = new byte[512];
 
 
+            for (int x = 0; x < xMcu; x++) for (int y = 0; y < yMcu; y++) {
+                    if (bq.Length < 512*8) {
+                        Stream.Read(bk, 0, 512);
+                        for (int i = 0; i < 512; i++)
+                            bk[i] = Stegano.Engine.Encode.LSBEncoderEngine.ReverseBits(bk[i]);
+                        bq.Push(bk);
+                    }
+
+                    for (int i = 0; i < 4; i++) {
+                        block[i] = DecodeNextBlock(ScanHeaders[(int)index].ComponentInfo[0].ComponentID-1, bq);
+                        dY = block[i][0] += dY;
+                    }
+
+                    block[4] = DecodeNextBlock(ScanHeaders[(int)index].ComponentInfo[1].ComponentID-1, bq);
+                    dCb = block[4][0] += dCb;
+
+                    block[5] = DecodeNextBlock(ScanHeaders[(int)index].ComponentInfo[2].ComponentID-1, bq);
+                    dCr = block[5][0] += dCr;
+                }
             return scan;
         }
 
@@ -426,13 +551,19 @@ namespace psteg.Stegano.File.Format {
             if (!Stream.CanSeek)
                 throw new Exception("Stream must be seekable");
 
+            HuffmanSimple = new Dictionary<byte, Tuple<int, int>[]>();
             HuffmanTableList = new List<HuffmanTable>();
+            HuffmanTables = new Dictionary<int, HuffmanTable>();
             QuantizationTableList = new List<QuantizationTable>();
             ScanPointers = new List<long>();
+            ScanHeaders = new List<SOSHeader>();
             Components = new List<SOF0Component>();
 
             Verify();
             Parse();
+
+            foreach (HuffmanTable t in HuffmanTableList) 
+                HuffmanTables.Add(t.Type << 4 | t.Index, t);
         }
     }
 }
