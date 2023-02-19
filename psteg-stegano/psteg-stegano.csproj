@@ -163,7 +163,6 @@
   <ItemGroup />
   <ItemGroup>
     <Content Include="icon-new.ico" />
-    <Content Include="icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\psteg-common\psteg-common.csproj">

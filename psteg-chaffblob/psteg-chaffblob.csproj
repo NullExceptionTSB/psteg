@@ -107,7 +107,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon-chaff.ico" />
-    <Content Include="icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\psteg-common\psteg-common.csproj">

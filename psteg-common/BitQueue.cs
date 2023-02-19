@@ -7,13 +7,16 @@ namespace psteg {
 
 		public int Length { get { return iqueue.Count; } }
         #region single bit operations
-        public void Push(bool bit) {
+        public void Push(bool bit) =>
 			iqueue.Enqueue(bit);
-        }
+        
 
-		public bool PopSingle() {
-			return iqueue.Dequeue();
-        }
+		public bool PopSingle() =>
+			iqueue.Dequeue();
+
+
+		public bool PeekSingle() => 
+			iqueue.Peek();
         #endregion
         #region single byte operations
         public void Push(byte by) {
@@ -28,6 +31,13 @@ namespace psteg {
                 b |= (byte)((iqueue.Dequeue() ? 1 : 0) << (byte)(i));
 			return b;
         }
+
+		public byte Peek() {
+			byte b = 0x00;
+			for (byte i = 0; i < 8; i++)
+				b |= (byte)((iqueue.Peek() ? 1 : 0) << (byte)(i));
+			return b;
+		}
 		#endregion
 		#region multi byte operations
 		public void Push(byte[] bytes) {
@@ -42,6 +52,7 @@ namespace psteg {
 				bytes[i] = Pop();
 			return bytes;
         }
+
 		#endregion
 		public BitQueue() {
 			iqueue = new Queue<bool>();

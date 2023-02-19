@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -468,25 +469,21 @@ namespace psteg.Stegano.File.Format {
             huffi < (1 << (len - 1)) ? huffi - ((1 << len) - 1) : huffi;
         
 
-        private int[] DecodeNextBlock(int table, BitQueue bq) {
+        private int[] DecodeNextBlock(int table, BitDecomposer bd) {
             Tuple<int, int> hval;
             
             int[] r = new int[64];
-            byte[] block = bq.Pop(2);
-            hval = HuffmanSimple[(byte)table][GetBigEndianU16(block, 0)];
+            hval = HuffmanSimple[(byte)table][bd.Peek(16)];
 
-            for (int i = 0; i < hval.Item1; i++)
-                bq.PopSingle();
+            bd.Seek(16);
             int huffi = 0;
-            for (int i = 0; i < hval.Item2; i++)
-                huffi = (huffi << 1)|(bq.PopSingle() ? 1 : 0);
 
-            r[0] = DecodeInt(huffi, hval.Item2);
+            r[0] = DecodeInt(bd.Read(hval.Item2), hval.Item2);
 
             for (int i = 1; i < 64; i++) {
                 block = bq.Pop(2);
 
-                hval = HuffmanSimple[(byte)(table+1)][GetBigEndianU16(block, 0)];
+                hval = HuffmanSimple[(byte)(table+1)][bd.Peek(16)];
                 for (int j = 0; j < hval.Item1; j++)
                     bq.PopSingle();
 
@@ -520,27 +517,19 @@ namespace psteg.Stegano.File.Format {
             int xMcu = (Width + 15) / 16;
             int yMcu = (Height + 15) / 16;
 
-            BitQueue bq = new BitQueue();
-            byte[] bk = new byte[512];
-
+            BitDecomposer bd = new BitDecomposer(Stream);
 
             for (int x = 0; x < xMcu; x++) for (int y = 0; y < yMcu; y++) {
-                    if (bq.Length < 512*8) {
-                        Stream.Read(bk, 0, 512);
-                        for (int i = 0; i < 512; i++)
-                            bk[i] = Stegano.Engine.Encode.LSBEncoderEngine.ReverseBits(bk[i]);
-                        bq.Push(bk);
-                    }
 
                     for (int i = 0; i < 4; i++) {
-                        block[i] = DecodeNextBlock(ScanHeaders[(int)index].ComponentInfo[0].ComponentID-1, bq);
+                        block[i] = DecodeNextBlock(ScanHeaders[(int)index].ComponentInfo[0].ComponentID-1, bd);
                         dY = block[i][0] += dY;
                     }
 
-                    block[4] = DecodeNextBlock(ScanHeaders[(int)index].ComponentInfo[1].ComponentID-1, bq);
+                    block[4] = DecodeNextBlock(ScanHeaders[(int)index].ComponentInfo[1].ComponentID-1, bd);
                     dCb = block[4][0] += dCb;
 
-                    block[5] = DecodeNextBlock(ScanHeaders[(int)index].ComponentInfo[2].ComponentID-1, bq);
+                    block[5] = DecodeNextBlock(ScanHeaders[(int)index].ComponentInfo[2].ComponentID-1, bd);
                     dCr = block[5][0] += dCr;
                 }
             return scan;

@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BitQueue.cs" />
+    <Compile Include="BitDecomposer.cs" />
     <Compile Include="Crypto\AES.cs" />
     <Compile Include="Crypto\Encryption.cs" />
     <Compile Include="Crypto\KeyDerivation\KeyDerivationAlgo.cs" />
