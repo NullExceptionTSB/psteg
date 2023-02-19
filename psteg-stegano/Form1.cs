@@ -35,8 +35,7 @@ namespace psteg.Stegano {
         }
 
         private void button3_Click(object sender, EventArgs e) {
-            BitQueueNg bqng = new BitQueueNg(1024*513);
-            bqng.Test();
+
         }
     }
 }
