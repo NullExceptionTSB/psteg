@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Engine\Decode\DecoderEngine.cs" />
+    <Compile Include="Engine\Encode\DCTEncoderEngine.cs" />
     <Compile Include="Engine\Decode\LSBDecoderEngine.cs" />
     <Compile Include="Engine\Decode\MetadataDecoderEngine.cs" />
     <Compile Include="Engine\Encode\EncoderEngine.cs" />
