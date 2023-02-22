@@ -1,7 +1,7 @@
 OutFile "psteg-setup.exe"
 SetCompressor /SOLID /FINAL lzma
 XPStyle on
-LicenseText "GPLv3 I hope"
+LicenseText "GNU GPLv3-or-later"
 
 UninstallIcon ..\icon-uninstall.ico
 Icon ..\icon-install.ico
@@ -12,7 +12,7 @@ Icon ..\icon-install.ico
 !define MUI_UNICON ..\icon-uninstall.ico
 
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE "eula.txt"
+!insertmacro MUI_PAGE_LICENSE "..\LICENSE"
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
@@ -23,7 +23,7 @@ Icon ..\icon-install.ico
 
 !insertmacro MUI_LANGUAGE "English"
 
-Name "psteg Beta 2"
+Name "psteg Beta 3"
 
 InstallDir "C:\Program Files\psteg"
 	
