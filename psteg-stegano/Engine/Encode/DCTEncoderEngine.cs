@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-
+using System.IO;
 using psteg.Stegano.File;
 using psteg.Stegano.File.Format;
 using static psteg.Stegano.Engine.Encode.LSBEncoderEngine;
@@ -15,6 +15,7 @@ namespace psteg.Stegano.Engine.Encode {
         private const int BQ_BLOCKSIZE = 1024;
         private BitQueue bq = new BitQueue();
         private JpegDecode je;
+        private int[,][][] scan;
 
         public Algorithm DistributionAlgo { get; set; }
         public string Seed { get; set; }
@@ -36,32 +37,41 @@ namespace psteg.Stegano.Engine.Encode {
             return true;
         }
 
-        public void JstegEncode() {
-            int[,][][] scan = je.DecodeScan(0);
-
+        public bool JstegEncode() {
             for (int x = 0; x < scan.GetLength(0); x++) { 
                 for (int y = 0; y < scan.GetLength(1);y++)
                     for (int i = 0; i < scan[x,y].Length; i++) 
                         for (int j = 0; j < 64; j++) {
-
+                            scan[x, y][i][j] &= ~1;
+                            scan[x, y][i][j] |= bq.PopSingle()?1:0;
                         }
+                PopulateBq();
+                if (bq.Length == 0) 
+                    return true;
             }
+            return false;
+        }
 
-
+        public void JpegCrosscode() {
+            JpegEncode jp = new JpegEncode((FileStream)OutputStream);
+            jp.RescaleQuantizationTables(75);
         }
 
         public override void Go() {
             je = new JpegDecode(CoverStream);
+            scan = je.DecodeScan(0);
 
+            bool succ = false;
             switch (DistributionAlgo) {
                 case Algorithm.Jsteg:
-                    JstegEncode();
+                    succ = JstegEncode();
                     break;
             }
 
+            if (!succ) 
+                 throw new Exception("Data too big or other encoder failure");
 
-
-            throw new NotImplementedException();
+            JpegCrosscode();
         }
     }
 }

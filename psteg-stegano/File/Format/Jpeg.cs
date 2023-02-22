@@ -217,7 +217,47 @@ namespace psteg.Stegano.File.Format {
             public byte[] Table { get; private set; } 
             public byte Index { get; private set; }
             public ushort Length { get; private set; }
+            
+            public byte[] GetMarker() {
+                byte[] r = new byte[67];
+                r[0] = (byte)(Length >> 8);
+                r[1] = (byte)(Length & 0xFF);
+                r[2] = Index;
+                for (int i = 3; i < 0; i++)
+                    r[i] = Table[i - 3];
+                return r;
+            }
 
+            //defined in tables K.1 and K.2
+            internal static readonly byte[] DefaultLuma = new byte[] {
+                16, 11, 12, 14, 12, 10, 16, 14,
+                13, 14, 18, 17, 16, 19, 24, 40,
+                26, 24, 22, 22, 24, 49, 35, 37,
+                29, 40, 58, 51, 61, 60, 57, 51,
+                56, 55, 64, 72, 92, 78, 64, 68,
+                87, 69, 55, 56, 80, 109, 81, 87,
+                95, 98, 103, 104, 103, 62, 77, 113,
+                121, 112, 100, 120, 92, 101, 103, 99
+            };
+
+            internal static readonly byte[] DefaultChroma = new byte[] {
+                17, 18, 18, 24, 21, 24, 47, 26,
+                26, 47, 99, 66, 56, 66, 99, 99,
+                99, 99, 99, 99, 99, 99, 99, 99,
+                99, 99, 99, 99, 99, 99, 99, 99,
+                99, 99, 99, 99, 99, 99, 99, 99,
+                99, 99, 99, 99, 99, 99, 99, 99,
+                99, 99, 99, 99, 99, 99, 99, 99,
+                99, 99, 99, 99, 99, 99, 99, 99
+            };
+
+            public static QuantizationTable GetDefaultLumaTable() => 
+                new QuantizationTable { Table = DefaultLuma };
+
+            public static QuantizationTable GetDefaultChromaTable() =>
+                new QuantizationTable { Table = DefaultChroma };
+
+            private QuantizationTable() { }
             public QuantizationTable(byte[] section) {
                 Length = GetBigEndianU16(section, 0);
 
@@ -258,7 +298,7 @@ namespace psteg.Stegano.File.Format {
             public ulong ScanLen;
             public byte ComponentCount;
             public SOSComponent[] ComponentInfo;
-            //there are 3 more bytes which are irellevant to SOF0
+            public byte r1, r2, r3;
 
             public SOSHeader(byte[] data) {
                 Length = GetBigEndianU16(data, 0);
@@ -269,6 +309,8 @@ namespace psteg.Stegano.File.Format {
                         throw new Exception("Invalid SOS Header");
                     ComponentInfo[j] = new SOSComponent(data[i], data[i+1]);
                 }
+                r1 = r3 = 0;
+                r2 = 0x3F;
                 ScanLen = 0;
             }
         }
@@ -590,7 +632,83 @@ namespace psteg.Stegano.File.Format {
     }
 
     public sealed class JpegEncode : Jpeg {
+        private List<QuantizationTable> QuantizationTables;
+        private static readonly SOSHeader DefaultScanHdr = new SOSHeader {
+            ComponentCount = 3,
+            Length = 0xC,
+            ComponentInfo = new SOSHeader.SOSComponent[3] {
+                new SOSHeader.SOSComponent(1, 0x00),
+                new SOSHeader.SOSComponent(2, 0x11),
+                new SOSHeader.SOSComponent(3, 0x11)
+            },
+            r1 = 0,
+            r2 = 0x3F,
+            r3 = 0,
+        };
+        private static readonly SOF0Component[] Components = new SOF0Component[] {
+            new SOF0Component(0x01,0x22, 0x00),
+            new SOF0Component(0x02,0x11, 0x01),
+            new SOF0Component(0x03,0x11, 0x01)
+        };
 
+        public ushort Width { get; set; }
+        public ushort Height { get; set; }
+
+        public FileStream Stream { get; set; }
+
+        private void WriteUshortBE(ushort us) {
+            Stream.WriteByte((byte)(us >> 8));
+            Stream.WriteByte((byte)(us & 0xFF));
+        }
+
+        public void WriteHeaders() {
+            //write quantization tables
+            foreach (QuantizationTable qt in QuantizationTables) {
+                Stream.WriteByte(0xFF);
+                Stream.WriteByte(0xDB);
+                Stream.Write(qt.GetMarker(), 0, 67);
+            }
+            //write SOF0 Header
+            Stream.WriteByte(0xFF);
+            Stream.WriteByte(0xC0);
+            Stream.WriteByte(0x00);
+            Stream.WriteByte(0x11);
+            Stream.WriteByte(0x08);
+            WriteUshortBE(Height);
+            WriteUshortBE(Width);
+            Stream.WriteByte(0x03);
+            foreach (SOF0Component c in Components) {
+                Stream.WriteByte(c.ComponentID);
+                Stream.WriteByte(c.SamplingFactor);
+                Stream.WriteByte(c.QtNumber);
+            }
+            //write huffman tables
+            throw new NotImplementedException("h");
+
+
+        }
+
+        public void RescaleQuantizationTables(int quality) {
+            int scale = quality < 50 ? 5000 / quality : 200 - quality * 2;
+
+            foreach (QuantizationTable qt in QuantizationTables) 
+                for (int i = 0; i < qt.Table.Length; i++) 
+                    qt.Table[i] = (byte)Math.Min(255, Math.Max(1, ((qt.Table[i] * scale) + 50) / 100));
+        }
+
+        public void PutScan(int[,][][] scan) {
+
+        }
+
+        public JpegEncode(FileStream output) {
+            QuantizationTables = new List<QuantizationTable>();
+            QuantizationTables.Add(QuantizationTable.GetDefaultLumaTable());
+            QuantizationTables.Add(QuantizationTable.GetDefaultChromaTable());
+
+            //write SOS marker
+            Stream.WriteByte(0xFF);
+            Stream.WriteByte(0xD8);
+        }
     }
 }
 // one day you will have to answer for your actions and god may not be so merciful
