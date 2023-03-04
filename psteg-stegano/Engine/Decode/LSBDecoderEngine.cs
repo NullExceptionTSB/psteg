@@ -2,8 +2,8 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 
-using static psteg.Stegano.Engine.Encode.LSBEncoderEngine;
 using psteg.Stegano.File;
+using psteg.Stegano.Engine.Util;
 
 namespace psteg.Stegano.Engine.Decode {
     public sealed class LSBDecoderEngine : DecoderEngine {
@@ -15,13 +15,12 @@ namespace psteg.Stegano.Engine.Decode {
         public bool AdaptiveDistribution { get; set; }
         public int? IV { get; set; }
 
-        public Mode EngineMode { get; set; }
+        public LSB.Mode EngineMode { get; set; }
 
-        public _ImageSpecificOptions ImageSpecificOptions { get; set; }
-        public _AudioSpecificOptions AudioSpecificOptions { get; set; }
+        public LSB.SpecificOptions.Img ImageSpecificOptions { get; set; }
+        public LSB.SpecificOptions.Audio AudioSpecificOptions { get; set; }
 
-        public static byte ReverseBits(byte b) =>
-            (byte)(((b * 0x80200802ul) & 0x0884422110ul) * 0x0101010101ul >> 32);
+
 
         private void Lint() {
             if (CoverStream == null)
@@ -30,16 +29,7 @@ namespace psteg.Stegano.Engine.Decode {
                 throw new Exception("Output stream null");
         }
 
-        private void LSBUnmixPush(byte data, int width) {
-            for (int i = 0; i < width; i++)
-                bq.Push((data&(1<<i))>0);
-        }
-
-        private void LSBUnmixPush(ushort data, int width) {
-            for (int i = 0; i < width; i++)
-                bq.Push((data&(1<<i))>0);
-        }
-
+        //works but is dog shit, recode this to use ImgSerialize
         public void RowFirstDecodeImage() {
             Bitmap bmp = new Bitmap(CoverStream);
             BitmapData bmpd = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
@@ -70,16 +60,16 @@ namespace psteg.Stegano.Engine.Decode {
                              a = p_pixel[3];
 
                         if (ImageSpecificOptions.Channels['B'])
-                            LSBUnmixPush(b, ImageSpecificOptions.BitWidth);
+                            LSB.UnmixPush(b, ImageSpecificOptions.BitWidth, bq);
                         if (ImageSpecificOptions.Channels['G'])
-                            LSBUnmixPush(g, ImageSpecificOptions.BitWidth);
+                            LSB.UnmixPush(g, ImageSpecificOptions.BitWidth, bq);
                         if (ImageSpecificOptions.Channels['R'])
-                            LSBUnmixPush(r, ImageSpecificOptions.BitWidth);
+                            LSB.UnmixPush(r, ImageSpecificOptions.BitWidth, bq);
                         if (ImageSpecificOptions.Channels['A'])
-                            LSBUnmixPush(a, ImageSpecificOptions.BitWidth);
+                            LSB.UnmixPush(a, ImageSpecificOptions.BitWidth, bq);
 
                         if (bq.Length >= 8) {
-                            OutputStream.WriteByte(!ReverseBitOrder ? ReverseBits(bq.Pop()) : bq.Pop());
+                            OutputStream.WriteByte(LSB.ReverseBits(bq.Pop(), !ReverseBitOrder));
                             if (OutputStream.Position == DataSize) { 
                                 data_eof = true;
                                 break;
@@ -101,22 +91,22 @@ namespace psteg.Stegano.Engine.Decode {
 
                 if (mono)
                     for (int i = 0; i < buffer.Length; i++)
-                        LSBUnmixPush(buffer[i], AudioSpecificOptions.BitWidth);
+                        LSB.UnmixPush(buffer[i], AudioSpecificOptions.BitWidth, bq);
                 else 
                     for (int i = 0; i < buffer.Length; i+=2) {
                         if (AudioSpecificOptions.Channels['L'])
-                            LSBUnmixPush(buffer[i], AudioSpecificOptions.BitWidth);
+                            LSB.UnmixPush(buffer[i], AudioSpecificOptions.BitWidth, bq);
                         if (AudioSpecificOptions.Channels['R'])
-                            LSBUnmixPush(buffer[i+1], AudioSpecificOptions.BitWidth);
+                            LSB.UnmixPush(buffer[i+1], AudioSpecificOptions.BitWidth, bq);
                     }
                 while (bq.Length / 8 > 0) {
-                    OutputStream.WriteByte(!ReverseBitOrder ? ReverseBits(bq.Pop()) : bq.Pop());
+                    OutputStream.WriteByte(LSB.ReverseBits(bq.Pop(),!ReverseBitOrder));
                     if (OutputStream.Position == DataSize)
                         goto eol;
                 }
             } while (smp_count != 0);
         eol:
-            if (true) { }
+            return;
         }
 
         public void DecodeAudio16() {
@@ -130,22 +120,22 @@ namespace psteg.Stegano.Engine.Decode {
 
                 if (mono)
                     for (int i = 0; i < buffer.Length; i++)
-                        LSBUnmixPush(buffer[i], AudioSpecificOptions.BitWidth);
+                        LSB.UnmixPush(buffer[i], AudioSpecificOptions.BitWidth, bq);
                 else
                     for (int i = 0; i < buffer.Length; i+=2) {
                         if (AudioSpecificOptions.Channels['L'])
-                            LSBUnmixPush(buffer[i], AudioSpecificOptions.BitWidth);
+                            LSB.UnmixPush(buffer[i], AudioSpecificOptions.BitWidth, bq);
                         if (AudioSpecificOptions.Channels['R'])
-                            LSBUnmixPush(buffer[i+1], AudioSpecificOptions.BitWidth);
+                            LSB.UnmixPush(buffer[i+1], AudioSpecificOptions.BitWidth, bq);
                     }
                 while (bq.Length / 8 > 0) {
-                    OutputStream.WriteByte(!ReverseBitOrder?ReverseBits(bq.Pop()):bq.Pop());
+                    OutputStream.WriteByte(LSB.ReverseBits(bq.Pop(), !ReverseBitOrder));
                     if (OutputStream.Position == DataSize) 
                         goto eol;
                 }
             } while (smp_count != 0);
         eol:
-            if (true) { }
+            return;
         }
 
         public void DecodeAudio() {
@@ -163,10 +153,12 @@ namespace psteg.Stegano.Engine.Decode {
             Owner.ReportProgress(1, new ProgressState(1, 2, "Initializing", true));
             Lint();
             bq = new BitQueue();
-            if (EngineMode == Mode.Audio)
+            if (EngineMode == LSB.Mode.Audio)
                 DecodeAudio();
             else if (ImageSpecificOptions.RowReadMode)
                 RowFirstDecodeImage();
+            else
+                throw new NotImplementedException();
 
             Finish();
         }

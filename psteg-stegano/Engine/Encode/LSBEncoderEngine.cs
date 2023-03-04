@@ -1,46 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 
 using psteg.Stegano.File;
+using psteg.Stegano.Engine.Util;
 
 namespace psteg.Stegano.Engine.Encode {
     public sealed class LSBEncoderEngine : EncoderEngine{
-        public enum Mode {
-            Audio, Image
-        }
-
         private const int BQ_BLOCKSIZE = 1024;
         private BitQueue bq = new BitQueue();
 
-        public Mode EngineMode { get; set; }
+        public LSB.Mode EngineMode { get; set; }
 
         public bool ReverseBitOrder { get; set; }
         public bool AdaptiveDistribution { get; set; }
         public int? IV { get; set; }
 
-        public struct _ImageSpecificOptions {
-            public Dictionary<char, bool> Channels;
-            public int BitWidth;
-            public bool RowReadMode;
-            public ImageFormat OutputFormat;
-        }
-
-        public struct _AudioSpecificOptions {
-            public AudioFileID ID;
-            public int BitWidth;
-            public Dictionary<char, bool> Channels;
-
-            public AudioDecode Decoder;
-            public AudioEncode Encoder;
-        }
-
-        public _ImageSpecificOptions ImageSpecificOptions { get; set; }
-        public _AudioSpecificOptions AudioSpecificOptions { get; set; }
-
-        public static byte ReverseBits(byte b) => 
-            (byte)(((b * 0x80200802ul) & 0x0884422110ul) * 0x0101010101ul >> 32);
+        public LSB.SpecificOptions.Img ImageSpecificOptions { get; set; }
+        public LSB.SpecificOptions.Audio AudioSpecificOptions { get; set; }
         
 
         private bool PopulateBq() {
@@ -48,130 +25,54 @@ namespace psteg.Stegano.Engine.Encode {
             if (d == -1)
                 return false;
 
-            bq.Push((byte)d);
-            
+            bq.Push(LSB.ReverseBits((byte)d, !ReverseBitOrder));
+
             while (bq.Length < BQ_BLOCKSIZE) {
                 d = DataStream.ReadByte();
                 if (d == -1)
                     break;
-                bq.Push(!ReverseBitOrder?ReverseBits((byte)d):(byte)d);
+                bq.Push(LSB.ReverseBits((byte)d, !ReverseBitOrder));
             }
             return true;
         }
 
-        private byte WidthPop(int depth) {
-            byte r = 0;
-            for (int i = 0; i < depth; i++)
-                r |= (byte)((bq.PopSingle() ? 1 : 0) << i);
-            return r;
-        }
-        private static byte LSBMix(byte cover, byte data, byte cover_mask) => (byte)((cover & cover_mask) | (data & ~cover_mask));
-        private static ushort LSBMix(ushort cover, ushort data, ushort cover_mask) => (ushort)((cover & cover_mask) | (data & ~cover_mask));
-
-        private void RowFirstEncodeImage() {
+        private void EncodeImage() {
             Bitmap bmp = new Bitmap(CoverStream);
             BitmapData bmpd = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            ImgSerialize state = new ImgSerialize(ImageSpecificOptions.RowReadMode, IV != null ? (int)IV : 0, ImageSpecificOptions.Channels, bmpd);
 
             byte cover_mask = (byte)~(((1 << ImageSpecificOptions.BitWidth) - 1));
+            //used for bq block filling
+            bool data_in_stream = DataStream.Position < DataStream.Length;
+            bool data_in_bq = bq.Length > 128; //128 has been chosen as a treshold arbitrarily, but it's big enough
+            //used only in progress reporting
+            int block = 0;
+            int total_blks = (int)(DataStream.Length/BQ_BLOCKSIZE);
 
-            int xiv = 0, yiv = 0;
-
-            if (IV != null) {
-                xiv = (int)IV % bmp.Width;
-                yiv = (int)IV / bmp.Height;
-            }
-
-            if (yiv > bmp.Height)
-                throw new Exception("IV too big");
-
-            bool data_eof = false;
-
-            int channel_count = 0;
-            foreach (bool en in ImageSpecificOptions.Channels.Values)
-                if (en)
-                    channel_count++;
-            
-            unsafe {
-                for (int y = yiv; y < bmp.Height; y++) {
-                    if (data_eof)
-                        break;
-                    Owner.ReportProgress(1, new ProgressState(y * bmp.Width, bmp.Width * bmp.Height, "Encoding"));
-                    for (int x = xiv; x < bmp.Width; x++) {
-                        byte* p_pixel = (byte*)(bmpd.Scan0 + (4 * x) + (bmpd.Stride * y)).ToPointer();
-
-                        byte b = p_pixel[0],
-                             g = p_pixel[1],
-                             r = p_pixel[2],
-                             a = p_pixel[3];
-
-                        if (ImageSpecificOptions.Channels['B'])
-                            b = LSBMix(b, WidthPop(ImageSpecificOptions.BitWidth), cover_mask);
-                        if (ImageSpecificOptions.Channels['G'])
-                            g = LSBMix(g, WidthPop(ImageSpecificOptions.BitWidth), cover_mask);
-                        if (ImageSpecificOptions.Channels['R'])
-                            r = LSBMix(r, WidthPop(ImageSpecificOptions.BitWidth), cover_mask);
-                        if (ImageSpecificOptions.Channels['A'])
-                            a = LSBMix(a, WidthPop(ImageSpecificOptions.BitWidth), cover_mask);
-
-                        p_pixel[0] = b;
-                        p_pixel[1] = g;
-                        p_pixel[2] = r;
-                        p_pixel[3] = a;
-
-                        //last block handling
-                        if (bq.Length < channel_count*ImageSpecificOptions.BitWidth) { 
-                            PopulateBq();
-                            //oof ouch my bones
-                            if (bq.Length < channel_count*ImageSpecificOptions.BitWidth) {
-                                x++;
-                                if (x == bmp.Width) {
-                                    x = 0;
-                                    y++;
-                                }
-                                if (y == bmp.Height)
-                                    throw new Exception("FUCK");
-
-                                data_eof = true;
-                                if (bq.Length == 0)
-                                    break;
-
-                                if (ImageSpecificOptions.Channels['B'])
-                                    b = LSBMix(b, WidthPop(Math.Min(ImageSpecificOptions.BitWidth, bq.Length)), cover_mask);
-
-                                if (bq.Length == 0)
-                                    break;
-
-                                if (ImageSpecificOptions.Channels['G'])
-                                    g = LSBMix(g, WidthPop(Math.Min(ImageSpecificOptions.BitWidth, bq.Length)), cover_mask);
-
-                                if (bq.Length == 0)
-                                    break;
-
-                                if (ImageSpecificOptions.Channels['R'])
-                                    r = LSBMix(r, WidthPop(Math.Min(ImageSpecificOptions.BitWidth, bq.Length)), cover_mask);
-
-                                if (bq.Length == 0)
-                                    break;
-
-                                if (ImageSpecificOptions.Channels['A'])
-                                    a = LSBMix(a, WidthPop(Math.Min(ImageSpecificOptions.BitWidth, bq.Length)), cover_mask);
-                                break;
-                            }
-                        }
-                    }
+            while (data_in_bq || data_in_stream) {
+                if (!data_in_bq) {
+                    Owner.ReportProgress(1, new ProgressState(++block, total_blks, "Encoding"));
+                    if (!PopulateBq())
+                        break; //out of data, finish
                 }
+
+                byte d = state.Get();
+                d = LSB.Mix(d, (byte)LSB.WidthPop(ImageSpecificOptions.BitWidth, bq), cover_mask);
+                state.Set(d);
+
+                state.Next();
+
+                data_in_stream = DataStream.Position < DataStream.Length;
+                data_in_bq = bq.Length > 0;
             }
-
-            if (!data_eof)
-                throw new Exception("Data does not fit");
-
-
 
             Owner.ReportProgress(1, new ProgressState(1, 1, "Outputting", true));
             bmp.UnlockBits(bmpd);
             bmp.Save(OutputStream, ImageSpecificOptions.OutputFormat);
             bmp.Dispose();
         }
+        //todo: refactor much of the audio encoder
+
         //copy pastin' shitty writtn' code
         private void EncodeAudio8() {
             AudioDecode decoder = AudioSpecificOptions.Decoder;
@@ -212,12 +113,12 @@ namespace psteg.Stegano.Engine.Encode {
                 }
 
                 if (mono) 
-                    smp_buffer[smp_buffer_pos] = LSBMix(smp_buffer[smp_buffer_pos++], WidthPop(AudioSpecificOptions.BitWidth), cover_mask);
+                    smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos++], (byte)LSB.WidthPop(AudioSpecificOptions.BitWidth, bq), cover_mask);
                 else {
                     if (AudioSpecificOptions.Channels['L'])
-                        smp_buffer[smp_buffer_pos] = LSBMix(smp_buffer[smp_buffer_pos], WidthPop(AudioSpecificOptions.BitWidth), cover_mask);
+                        smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos], (byte)LSB.WidthPop(AudioSpecificOptions.BitWidth, bq), cover_mask);
                     if (AudioSpecificOptions.Channels['R'])
-                        smp_buffer[smp_buffer_pos+1] = LSBMix(smp_buffer[smp_buffer_pos+1], WidthPop(AudioSpecificOptions.BitWidth), cover_mask);
+                        smp_buffer[smp_buffer_pos+1] = LSB.Mix(smp_buffer[smp_buffer_pos+1], (byte)LSB.WidthPop(AudioSpecificOptions.BitWidth, bq), cover_mask);
                     smp_buffer_pos += 2;
                 }
 
@@ -290,12 +191,12 @@ namespace psteg.Stegano.Engine.Encode {
                 }
 
                 if (mono)
-                    smp_buffer[smp_buffer_pos] = LSBMix(smp_buffer[smp_buffer_pos++], WidthPop(AudioSpecificOptions.BitWidth), cover_mask);
+                    smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos++], (ushort)LSB.WidthPop(AudioSpecificOptions.BitWidth, bq), cover_mask);
                 else {
                     if (AudioSpecificOptions.Channels['L'])
-                        smp_buffer[smp_buffer_pos] = LSBMix(smp_buffer[smp_buffer_pos], WidthPop(AudioSpecificOptions.BitWidth), cover_mask);
+                        smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos], (ushort)LSB.WidthPop(AudioSpecificOptions.BitWidth, bq), cover_mask);
                     if (AudioSpecificOptions.Channels['R'])
-                        smp_buffer[smp_buffer_pos+1] = LSBMix(smp_buffer[smp_buffer_pos+1], WidthPop(AudioSpecificOptions.BitWidth), cover_mask);
+                        smp_buffer[smp_buffer_pos+1] = LSB.Mix(smp_buffer[smp_buffer_pos+1], (ushort)LSB.WidthPop(AudioSpecificOptions.BitWidth, bq), cover_mask);
                     smp_buffer_pos += 2;
                 }
 
@@ -350,12 +251,12 @@ namespace psteg.Stegano.Engine.Encode {
             bq = new BitQueue();
             PopulateBq();
 
-            if (EngineMode == Mode.Audio)
+            if (EngineMode == LSB.Mode.Audio)
                 EncodeAudio();
-            else if (ImageSpecificOptions.RowReadMode)     
-                RowFirstEncodeImage();
-            
-
+            else if (EngineMode == LSB.Mode.Image)
+                EncodeImage();
+            else
+                throw new NotImplementedException();
 
             Finish();
         }
