@@ -78,7 +78,7 @@ namespace psteg.Stegano.Engine.Decode {
                         if (ImageSpecificOptions.Channels['A'])
                             LSBUnmixPush(a, ImageSpecificOptions.BitWidth);
 
-                        if (bq.Length / 8 > 0) {
+                        if (bq.Length >= 8) {
                             OutputStream.WriteByte(!ReverseBitOrder ? ReverseBits(bq.Pop()) : bq.Pop());
                             if (OutputStream.Position == DataSize) { 
                                 data_eof = true;
