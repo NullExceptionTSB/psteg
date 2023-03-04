@@ -4,7 +4,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using psteg.Stegano.File;
 using psteg.Stegano.File.Format;
-using static psteg.Stegano.Engine.Encode.LSBEncoderEngine;
+using psteg.Stegano.Engine.Util;
 
 namespace psteg.Stegano.Engine.Encode {
     public sealed class DCTDecoderEngine : EncoderEngine {
@@ -26,13 +26,13 @@ namespace psteg.Stegano.Engine.Encode {
             if (d == -1)
                 return false;
 
-            bq.Push((byte)d);
+            bq.Push(LSB.ReverseBits((byte)d, !ReverseBitOrder));
 
             while (bq.Length < BQ_BLOCKSIZE) {
                 d = DataStream.ReadByte();
                 if (d == -1)
                     break;
-                bq.Push(!ReverseBitOrder ? ReverseBits((byte)d) : (byte)d);
+                bq.Push(LSB.ReverseBits((byte)d, !ReverseBitOrder));
             }
             return true;
         }

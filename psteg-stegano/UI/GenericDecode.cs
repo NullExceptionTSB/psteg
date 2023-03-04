@@ -6,12 +6,14 @@ using System.Windows.Forms;
 
 using psteg.Crypto;
 using psteg.Stegano.Engine;
+using psteg.Stegano.Engine.Util;
 using psteg.Stegano.Engine.Decode;
 using psteg.Stegano.Engine.Encode;
 using psteg.Stegano.File;
 using psteg.Stegano.UI.LSBExtra;
 
 namespace psteg.Stegano.UI {
+    
     public partial class GenericDecode : Form {
         FileID CoverID = null;
         UserControl ExtraOptions = null;
@@ -145,11 +147,11 @@ namespace psteg.Stegano.UI {
                 ExtraImage ei = (ExtraImage)ExtraOptions;
 
 
-                engine.EngineMode = LSBEncoderEngine.Mode.Image;
+                engine.EngineMode = LSB.Mode.Image;
                 engine.IV = ei.IV;
                 engine.AdaptiveDistribution = ei.AdaptiveMode;
                 engine.ReverseBitOrder = ei.ReverseBitOrder;
-                engine.ImageSpecificOptions = new LSBEncoderEngine.Img() {
+                engine.ImageSpecificOptions = new LSB.SpecificOptions.Img() {
                     BitWidth = ei.BitDepth,
                     Channels = ei.ChannelAssignments,
                     RowReadMode = ei.RowReadMode
@@ -178,11 +180,11 @@ namespace psteg.Stegano.UI {
                     engine.Dispose();
                 }
 
-                engine.EngineMode = LSBEncoderEngine.Mode.Audio;
+                engine.EngineMode = LSB.Mode.Audio;
                 engine.IV = es.IV;
                 engine.AdaptiveDistribution = es.AdaptiveMode;
                 engine.ReverseBitOrder = es.ReverseBitOrder;
-                engine.AudioSpecificOptions = new LSBEncoderEngine.Audio() {
+                engine.AudioSpecificOptions = new LSB.SpecificOptions.Audio() {
                     BitWidth = es.BitDepth,
                     Channels = es.ChannelAssignments,
                     ID = id,
@@ -334,12 +336,14 @@ namespace psteg.Stegano.UI {
                 tb_coverPath.Text = ofd_cover.FileName;
         }
 
+        private IDisposable _ng;
+
         private void bw_process_DoWork(object sender, DoWorkEventArgs e) {
             DecoderEngine ng = (DecoderEngine)e.Argument;
+            _ng = ng;
             ng.Go();
             bw_process.ReportProgress(99, new ProgressState(1, 2, "Finalizing", true));
-            ng.Dispose();
-            bw_process.ReportProgress(100);
+
         }
 
         private void bw_process_ProgressChanged(object sender, ProgressChangedEventArgs e) {
@@ -347,7 +351,7 @@ namespace psteg.Stegano.UI {
                 pb_progress.Maximum = 1;
                 pb_progress.Value = 1;
                 pb_progress.Style = ProgressBarStyle.Blocks;
-                l_status.Text = "Done";
+                l_status.Text = (string)e.UserState;
                 return;
             }
 
@@ -412,6 +416,19 @@ namespace psteg.Stegano.UI {
                     tb_dataLength.Enabled = false;
                     break;
             }
+        }
+
+        private void bw_process_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
+            Exception err = e.Error;
+            _ng.Dispose();
+            Invoke(new Action(() => bw_process_ProgressChanged(null, new ProgressChangedEventArgs(100, err!=null ? "Error" : "Done"))));
+            pb_progress.Invoke(new Action(delegate {
+                pb_progress.Style = ProgressBarStyle.Continuous;
+                pb_progress.Maximum = 1;
+                pb_progress.Value = 1;
+            }));
+            if (err!=null)
+                MessageBox.Show("Encoder error: " + err.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

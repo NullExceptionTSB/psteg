@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using psteg.Crypto;
 using psteg.Stegano.Engine;
 using psteg.Stegano.Engine.Encode;
+using psteg.Stegano.Engine.Util;
 using psteg.Stegano.File;
 using psteg.Stegano.UI.LSBExtra;
 
@@ -142,11 +143,11 @@ namespace psteg.Stegano.UI {
                 }
 
 
-                engine.EngineMode = LSBEncoderEngine.Mode.Image;
+                engine.EngineMode = LSB.Mode.Image;
                 engine.IV = ei.IV;
                 engine.AdaptiveDistribution = ei.AdaptiveMode;
                 engine.ReverseBitOrder = ei.ReverseBitOrder;
-                engine.ImageSpecificOptions = new LSBEncoderEngine.Img() {
+                engine.ImageSpecificOptions = new LSB.SpecificOptions.Img() {
                     BitWidth = ei.BitDepth,
                     Channels = ei.ChannelAssignments,
                     OutputFormat = GetImageFormat(),
@@ -176,11 +177,11 @@ namespace psteg.Stegano.UI {
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     engine.Dispose();
                 }
-                engine.EngineMode = LSBEncoderEngine.Mode.Audio;
+                engine.EngineMode = LSB.Mode.Audio;
                 engine.IV = es.IV;
                 engine.AdaptiveDistribution = es.AdaptiveMode;
                 engine.ReverseBitOrder = es.ReverseBitOrder;
-                engine.AudioSpecificOptions = new LSBEncoderEngine.Audio() {
+                engine.AudioSpecificOptions = new LSB.SpecificOptions.Audio() {
                     BitWidth = es.BitDepth,
                     Channels = es.ChannelAssignments,
                     ID = id,
@@ -374,8 +375,10 @@ namespace psteg.Stegano.UI {
             tb_appOutputPath.Text = fnfo.FullName;
             MayRun();
         }
+        private IDisposable _ng;
         private void bw_process_DoWork(object sender, DoWorkEventArgs e) {
             EncoderEngine ng = (EncoderEngine)e.Argument;
+            _ng = ng;
             ng.Go();
             bw_process.ReportProgress(99,new ProgressState(1, 2, "Finalizing", true));
             ng.Dispose();
@@ -444,6 +447,19 @@ namespace psteg.Stegano.UI {
                     b_start.Click += b_start_Click_Metadata;
                     break;
             }
+        }
+
+        private void bw_process_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
+            Exception err = e.Error;
+            _ng.Dispose();
+            Invoke(new Action(() => bw_process_ProgressChanged(null, new ProgressChangedEventArgs(100, err!=null ? "Error" : "Done"))));
+            pb_progress.Invoke(new Action(delegate {
+                pb_progress.Style = ProgressBarStyle.Continuous;
+                pb_progress.Maximum = 1;
+                pb_progress.Value = 1;
+            }));
+            if (err!=null)
+                MessageBox.Show("Encoder error: " + err.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }
