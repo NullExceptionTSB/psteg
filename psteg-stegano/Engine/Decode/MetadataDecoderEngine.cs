@@ -14,9 +14,34 @@ namespace psteg.Stegano.Engine.Decode {
         public string MP4BoxName { get; set; }
         public Jpeg.Marker JpegMarker { get; set; }
 
+        private void JpegSkipSOS() {
+            long start = CoverStream.Position;
+            byte[] buff = new byte[4096];
+            bool eom = false;
+            bool next_ff = false;
+
+            while (!eom) {
+                int read = CoverStream.Read(buff, 0, buff.Length);
+
+                for (int i = 0; i < read; i++) {
+                    if (next_ff) {
+                        next_ff = false;
+                        if ((buff[i] >= 0xD0 && buff[i] <= 0xD7) || buff[i] == 0x00)
+                            continue;
+                        else {
+                            eom = true;
+                            CoverStream.Seek(i-read-1, SeekOrigin.Current);
+                            break;
+                        }
+                    }
+                    else if (buff[i] == 0xFF)
+                        next_ff = true;
+                }
+            }
+        }
+
         private void DecodeJpeg() {
             byte[] wnd = new byte[4];
-            byte n = 0;
 
             CoverStream.Seek(2, SeekOrigin.Begin);
             if (JpegMarker == Jpeg.Marker.EOI) {
@@ -25,11 +50,10 @@ namespace psteg.Stegano.Engine.Decode {
                     CoverStream.Seek(next, SeekOrigin.Current);
                     CoverStream.Read(wnd, 0, 4);
 
-                    n = wnd[2];
-                    wnd[2] = wnd[3];
-                    wnd[3] = n;
+                    next = Jpeg.GetBigEndianU16(wnd, 2);
+                    if (BitConverter.ToUInt16(wnd, 0) == ((ushort)Jpeg.Marker.SOS))
+                        JpegSkipSOS();
 
-                    next = BitConverter.ToUInt16(wnd, 2);
                 } while (BitConverter.ToUInt16(wnd, 0) != (ushort)JpegMarker);
 
                 CoverStream.CopyTo(OutputStream);
@@ -40,20 +64,24 @@ namespace psteg.Stegano.Engine.Decode {
             byte[] buff = new byte[ushort.MaxValue];
             do {
                 CoverStream.Read(wnd, 0, 4);
-                n = wnd[2];
-                wnd[2] = wnd[3];
-                wnd[3] = n;
 
                 ushort marker = BitConverter.ToUInt16(wnd, 0);
-                ushort len = BitConverter.ToUInt16(wnd, 2);
-                if (marker != (ushort)JpegMarker || marker == (ushort)Jpeg.Marker.EOI) {
+                ushort len = Jpeg.GetBigEndianU16(wnd, 2);
+
+                if (marker == (ushort)Jpeg.Marker.EOI)
+                    break;
+
+                if (marker != ((ushort)JpegMarker)) {
                     CoverStream.Seek(len-2, SeekOrigin.Current);
+                    if (marker == ((ushort)Jpeg.Marker.SOS))
+                        JpegSkipSOS();
+
                     continue;
                 }
 
-                CoverStream.Read(buff, 0, len);
-                OutputStream.Write(buff, 0, len);
-            } while (CoverStream.Length < CoverStream.Position);
+                CoverStream.Read(buff, 0, len-2);
+                OutputStream.Write(buff, 0, len-2);
+            } while (CoverStream.Length > CoverStream.Position);
         }
 
         private void DecodeMP4() {

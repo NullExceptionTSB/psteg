@@ -61,7 +61,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(203, 13);
             this.label1.TabIndex = 3;
-            this.label1.Text = "psteg Beta 2 - not intended for production";
+            this.label1.Text = "psteg Beta 3 - not intended for production";
             // 
             // b_lsbencode
             // 
@@ -69,7 +69,7 @@
             this.b_lsbencode.Name = "b_lsbencode";
             this.b_lsbencode.Size = new System.Drawing.Size(138, 23);
             this.b_lsbencode.TabIndex = 4;
-            this.b_lsbencode.Text = "LSB Encode";
+            this.b_lsbencode.Text = "Encode";
             this.b_lsbencode.UseVisualStyleBackColor = true;
             this.b_lsbencode.Click += new System.EventHandler(this.b_lsbencode_Click);
             // 
@@ -79,7 +79,7 @@
             this.b_lsbdecode.Name = "b_lsbdecode";
             this.b_lsbdecode.Size = new System.Drawing.Size(138, 23);
             this.b_lsbdecode.TabIndex = 5;
-            this.b_lsbdecode.Text = "LSB Decode";
+            this.b_lsbdecode.Text = "Decode";
             this.b_lsbdecode.UseVisualStyleBackColor = true;
             this.b_lsbdecode.Click += new System.EventHandler(this.b_lsbdecode_Click);
             // 

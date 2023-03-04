@@ -196,6 +196,7 @@ namespace psteg.Stegano.UI.LSBExtra
             this.tb_bitdepth.Size = new System.Drawing.Size(227, 45);
             this.tb_bitdepth.TabIndex = 14;
             this.tb_bitdepth.Value = 1;
+            this.tb_bitdepth.Scroll += new System.EventHandler(this.tb_bitdepth_Scroll);
             // 
             // label1
             // 
