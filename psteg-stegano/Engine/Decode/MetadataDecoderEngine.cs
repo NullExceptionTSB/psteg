@@ -46,16 +46,17 @@ namespace psteg.Stegano.Engine.Decode {
             CoverStream.Seek(2, SeekOrigin.Begin);
             if (JpegMarker == Jpeg.Marker.EOI) {
                 ushort next = 0;
+                CoverStream.Read(wnd, 0, 4);
                 do {
-                    CoverStream.Seek(next, SeekOrigin.Current);
-                    CoverStream.Read(wnd, 0, 4);
-
                     next = Jpeg.GetBigEndianU16(wnd, 2);
+                    CoverStream.Seek(next-2, SeekOrigin.Current);
                     if (BitConverter.ToUInt16(wnd, 0) == ((ushort)Jpeg.Marker.SOS))
                         JpegSkipSOS();
 
+                    CoverStream.Read(wnd, 0, 4);
                 } while (BitConverter.ToUInt16(wnd, 0) != (ushort)JpegMarker);
 
+                CoverStream.Seek(-2, SeekOrigin.Current);
                 CoverStream.CopyTo(OutputStream);
                 return;
             }
