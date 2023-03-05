@@ -127,6 +127,11 @@ namespace psteg.Stegano.UI {
         }
 
         private void b_start_Click_LSB(object sender, EventArgs e) {
+            if (!int.TryParse(tb_dataLength.Text, out _)) {
+                MessageBox.Show("Invalid data length", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             LSBDecoderEngine engine = (LSBDecoderEngine)
                 DecoderFactory.Create(Methods.LSB).
                 OpenCover(tb_appCoverPath.Text).
@@ -169,6 +174,7 @@ namespace psteg.Stegano.UI {
                 if (c == 0) {
                     MessageBox.Show("No channels assigned", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     engine.Dispose();
+                    return;
                 }
 
                 try {
