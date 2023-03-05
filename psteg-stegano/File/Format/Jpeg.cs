@@ -120,8 +120,8 @@ namespace psteg.Stegano.File.Format {
             public HuffmanTable(byte[] section) {
                 Length = GetBigEndianU16(section, 0);
 
-                Type = (byte)(section[3] >> 4);
-                Index = (byte)(section[3] & 0x0F);
+                Type = (byte)(section[2] >> 4);
+                Index = (byte)(section[2] & 0x0F);
 
                 if (Type > 1)
                     Console.WriteLine("W: invalid huffman table type");
@@ -313,6 +313,216 @@ namespace psteg.Stegano.File.Format {
                 r2 = 0x3F;
                 ScanLen = 0;
             }
+        }
+    }
+
+    public sealed class JpegNaiveDecode : Jpeg {
+        private Dictionary<int, HuffmanTable> HuffmanTables { get; set; }
+        private List<QuantizationTable> QuantizationTableList { get; set; }
+        private List<SOSHeader> ScanHeaders { get; set; }
+        private List<long> ScanPointers { get; set; }
+        private List<SOF0Component> Components { get; set; }
+        private ushort RestartInterval { get; set; } //i don't know what this does????
+
+        public int Width { get; private set; }
+        public int Height { get; private set; }
+
+        public int ScanCount { get => ScanPointers.Count; }
+
+        public Stream Stream { get; private set; }
+
+        private void DHT(byte[] DHTSect) {
+            HuffmanTable ht = new HuffmanTable(DHTSect);
+            HuffmanTables.Add(ht.Type << 4 | ht.Index, ht);
+        }
+
+        private void DQT(byte[] DQTsect) =>
+            QuantizationTableList.Add(new QuantizationTable(DQTsect));
+
+
+        private void SOF0(byte[] SOF0sect) {
+            ushort size = GetBigEndianU16(SOF0sect, 0);
+
+            if (SOF0sect[2] != 0x8)
+                throw new Exception("JPEG unsupported (BPP!=8)");
+
+            Width = GetBigEndianU16(SOF0sect, 5);
+            Height = GetBigEndianU16(SOF0sect, 3);
+            if (SOF0sect[7] != 3) {
+                if (SOF0sect[7] == 1)
+                    throw new Exception("Greyscale JPEGs not supported");
+                else
+                    throw new Exception("Invalid component count");
+            }
+
+            for (int i = 8; i < size; i+=3) {
+                if (i > size)
+                    throw new Exception("Invalid SOF0 marker");
+                Components.Add(new SOF0Component(SOF0sect[i], SOF0sect[i+1], SOF0sect[i+2]));
+            }
+        }
+
+        private void DRI(byte[] DRIsect) {
+            ushort size = GetBigEndianU16(DRIsect, 0);
+            if (size != 4)
+                throw new Exception("Invalid DRI size");
+
+            RestartInterval = GetBigEndianU16(DRIsect, 2);
+        }
+
+        private void SOS(byte[] SOSsect) {
+            SOSHeader h = new SOSHeader(SOSsect);
+
+            ScanPointers.Add(Stream.Position);
+            //whoever decided that SOS does not need a marker length field
+            //i hope both sides of your pillow are forever warm
+
+            long start = Stream.Position;
+            byte[] buff = new byte[4096];
+            bool eom = false;
+            bool next_ff = false;
+
+            while (!eom) {
+                int read = Stream.Read(buff, 0, buff.Length);
+
+                for (int i = 0; i < read; i++) {
+                    if (next_ff) {
+                        next_ff = false;
+                        if ((buff[i] >= 0xD0 && buff[i] <= 0xD7) || buff[i] == 0x00)
+                            continue;
+                        else {
+                            eom = true;
+                            Stream.Seek(i-read-1, SeekOrigin.Current);
+                            break;
+                        }
+                    }
+                    else if (buff[i] == 0xFF)
+                        next_ff = true;
+                }
+            }
+            h.ScanLen = (ulong)(Stream.Position - start);
+            ScanHeaders.Add(h);
+        }
+
+        private byte[] ReadMarkerAtHead() {
+            byte[] window = new byte[2];
+            Stream.Read(window, 0, 2);
+
+            ushort len = GetBigEndianU16(window, 0);
+            byte[] marker = new byte[len];
+
+            Stream.Seek(-2, SeekOrigin.Current);
+            Stream.Read(marker, 0, len);
+
+            return marker;
+        }
+
+        private void SkipMarkerAtHead() {
+            byte[] window = new byte[2];
+            Stream.Read(window, 0, 2);
+
+            Stream.Seek(GetBigEndianU16(window, 0)-2, SeekOrigin.Current);
+        }
+
+        public byte[] GetDehuffmanValues() {
+            return null;
+        }
+
+        private void Parse() {
+            bool EOI = false;
+            byte[] marker_window = new byte[2];
+            ushort marker = 0;
+
+            Stream.Seek(0, SeekOrigin.Begin);
+
+            while (Stream.Length != Stream.Position & !EOI) {
+                Stream.Read(marker_window, 0, 2);
+                if (marker_window[0] != 0xFF)
+                    throw new Exception("Corrupted file structure");
+
+                marker = BitConverter.ToUInt16(marker_window, 0);
+
+                switch (marker) {
+                    case (ushort)Marker.SOI:
+                        break;
+                    case (ushort)Marker.DHT:
+                        DHT(ReadMarkerAtHead());
+                        break;
+                    case (ushort)Marker.DQT:
+                        DQT(ReadMarkerAtHead());
+                        break;
+                    case (ushort)Marker.SOS:
+                        SOS(ReadMarkerAtHead());
+                        break;
+                    case (ushort)Marker.SOF0:
+                        SOF0(ReadMarkerAtHead());
+                        break;
+                    case (ushort)Marker.DRI:
+                        DRI(ReadMarkerAtHead());
+                        break;
+                    case (ushort)Marker.EOI:
+                        EOI = true;
+                        break;
+                    case (ushort)Marker.DAC:
+                        throw new Exception("JPEG file not supported (arithmetic coding)");
+                    default:
+                        Console.WriteLine("W: Skipping section: " + marker.ToString("X4") + "(" + ((Marker)marker).ToString() + ")");
+                        goto case (ushort)Marker.COM;
+                    case (ushort)Marker.COM:
+                        SkipMarkerAtHead();
+                        break;
+                }
+
+            }
+        }
+
+        private void Verify() {
+            if (FileID.IdentifyFile(Stream) != FileFormat.JPEG)
+                throw new FormatException("Not a JPEG file");
+        }
+
+        public void DequantizeBlock(int[] block, int index) {
+            for (int i = 0; i < 64; i++)
+                block[i] *= QuantizationTableList[index].Table[i];
+        }
+
+        public byte[] PreprocessScan(ulong length) {
+            byte[] b = new byte[length];
+
+            ulong truesz = 0;
+
+            for (; truesz < length; truesz++) {
+                byte d = (byte)Stream.ReadByte();
+
+                if (d == 0xFF) {
+                    if (Stream.ReadByte() == 0x00)
+                        b[truesz] = 0xFF;
+                    else
+                        break;
+                }
+                else
+                    b[truesz]=d;
+            }
+            truesz+=2;
+            Array.Resize(ref b, (int)truesz);
+            return b;
+        }
+
+        public JpegNaiveDecode(Stream Stream) {
+            this.Stream = Stream;
+            if (!Stream.CanSeek)
+                throw new Exception("Stream must be seekable");
+
+            HuffmanTables = new Dictionary<int, HuffmanTable>();
+            QuantizationTableList = new List<QuantizationTable>();
+            ScanPointers = new List<long>();
+            ScanHeaders = new List<SOSHeader>();
+            Components = new List<SOF0Component>();
+
+            Verify();
+            Parse();
+
+            if (true) { }
         }
     }
 

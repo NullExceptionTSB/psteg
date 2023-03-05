@@ -63,7 +63,15 @@ namespace psteg.Stegano.Engine.Encode {
                 d = LSB.Mix(d, (byte)LSB.WidthPop(BitWidth, bq), cover_mask);
                 state.Set(d);
 
-                state.Next();
+                try {
+                    state.Next();
+                }
+                catch (Exception e) {
+                    bmp.UnlockBits(bmpd);
+                    bmp.Dispose();
+                    Finish();
+                    throw e;
+                }
 
                 data_in_stream = DataStream.Position < DataStream.Length;
                 data_in_bq = bq.Length > 0;

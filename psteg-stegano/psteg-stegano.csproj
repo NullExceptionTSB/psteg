@@ -46,6 +46,7 @@
     </Reference>
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
@@ -57,10 +58,11 @@
       <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Engine\Decode\DecoderEngine.cs" />
-    <Compile Include="Engine\Encode\DCTEncoderEngine.cs" />
+    <Compile Include="Engine\Encode\JpegEncoderEngine.cs" />
     <Compile Include="Engine\Decode\LSBDecoderEngine.cs" />
     <Compile Include="Engine\Decode\MetadataDecoderEngine.cs" />
     <Compile Include="Engine\Encode\EncoderEngine.cs" />
@@ -93,6 +95,12 @@
     </Compile>
     <Compile Include="UI\GenericEncode.Designer.cs">
       <DependentUpon>GenericEncode.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\JpegExtra\ExtraJpeg.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\JpegExtra\ExtraJpeg.Designer.cs">
+      <DependentUpon>ExtraJpeg.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\LSBExtra\ExtraImage.cs">
       <SubType>UserControl</SubType>
@@ -136,6 +144,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\GenericEncode.resx">
       <DependentUpon>GenericEncode.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\JpegExtra\ExtraJpeg.resx">
+      <DependentUpon>ExtraJpeg.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\LSBExtra\ExtraImage.resx">
       <DependentUpon>ExtraImage.cs</DependentUpon>

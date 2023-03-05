@@ -44,7 +44,15 @@ namespace psteg.Stegano.Engine.Decode {
                     OutputStream.WriteByte(LSB.ReverseBits(bq.Pop(), !ReverseBitOrder));
                     written++;
                 }
-                state.Next();
+                //so that out of range cases get handled properly
+                try { 
+                    state.Next();
+                } catch (Exception e) {
+                    bmp.UnlockBits(bmpd);
+                    bmp.Dispose();
+                    Finish();
+                    throw e;
+                }
             }
 
             bmp.UnlockBits(bmpd);

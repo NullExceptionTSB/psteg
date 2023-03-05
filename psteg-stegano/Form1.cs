@@ -24,8 +24,7 @@ namespace psteg.Stegano {
         private void panel1_DragDrop(object sender, DragEventArgs e) {
             FileStream fs = new FileStream(((string[])e.Data.GetData(DataFormats.FileDrop, false))[0], FileMode.Open, FileAccess.Read, FileShare.Read);
 
-            JpegDecode jd = new JpegDecode(fs);
-            jd.DecodeScan(0);
+            JpegNaiveDecode jd = new JpegNaiveDecode(fs);
         }
 
         private void panel2_DragDrop(object sender, DragEventArgs e) {
@@ -35,6 +34,10 @@ namespace psteg.Stegano {
         }
 
         private void button3_Click(object sender, EventArgs e) {
+
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e) {
 
         }
     }

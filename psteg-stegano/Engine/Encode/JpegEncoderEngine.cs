@@ -7,7 +7,7 @@ using psteg.Stegano.File.Format;
 using psteg.Stegano.Engine.Util;
 
 namespace psteg.Stegano.Engine.Encode {
-    public sealed class DCTDecoderEngine : EncoderEngine {
+    public sealed class JpegDecoderEngine : EncoderEngine {
         public enum Algorithm {
             Jsteg
         }
