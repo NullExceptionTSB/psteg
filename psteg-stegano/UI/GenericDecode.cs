@@ -127,7 +127,8 @@ namespace psteg.Stegano.UI {
         }
 
         private void b_start_Click_LSB(object sender, EventArgs e) {
-            if (!int.TryParse(tb_dataLength.Text, out _)) {
+            int i;
+            if (!int.TryParse(tb_dataLength.Text, out i) || i < 0) {
                 MessageBox.Show("Invalid data length", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -137,7 +138,7 @@ namespace psteg.Stegano.UI {
                 OpenCover(tb_appCoverPath.Text).
                 OpenOutput(tb_appOutputPath.Text).
                 SetBackWork(bw_process).
-                SetDataLength(int.Parse(tb_dataLength.Text)).
+                SetDataLength(i).
                 SetCryptography((Encryption)Activator.CreateInstance(Encryption.AlgoList[cb_crypto.Items[cb_crypto.SelectedIndex].ToString()])).
                 SetCryptoKey(tb_cryptoKey.Text).
                 Finish();
