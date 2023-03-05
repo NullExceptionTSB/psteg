@@ -152,7 +152,7 @@ namespace psteg.Stegano.UI {
                 engine.AdaptiveDistribution = ei.AdaptiveMode;
                 engine.ReverseBitOrder = ei.ReverseBitOrder;
                 engine.ImageSpecificOptions = new LSB.SpecificOptions.Img() {
-                    Channels = ei.ChannelAssignments,
+                    ChannelString = ei.ChannelString,
                     RowReadMode = ei.RowReadMode
                 };
             }

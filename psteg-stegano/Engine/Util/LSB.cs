@@ -24,9 +24,13 @@ namespace psteg.Stegano.Engine.Util {
 
         public static class SpecificOptions {
             public struct Img {
+                [System.Obsolete]
                 public Dictionary<char, bool> Channels;
+
                 public bool RowReadMode;
                 public ImageFormat OutputFormat;
+
+                public string ChannelString;
 
                 public DistributionOptions DistOptions;
 

@@ -21,6 +21,8 @@ namespace psteg.Stegano.UI.LSBExtra {
         public int BitDepth { get => tb_bitdepth.Value; }
         public bool RowReadMode { get => cb_row_read_mode.Checked; }
         public bool ReverseBitOrder { get => cb_rbo.Checked; }
+        public string ChannelString { get => tb_co.Text; }
+
         public int? IV {
             get {
                 if (cb_iv.Checked) return int.Parse(tb_iv.Text);

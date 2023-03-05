@@ -32,7 +32,7 @@ namespace psteg.Stegano.Engine.Decode {
         public void DecodeImage() {
             Bitmap bmp = new Bitmap(CoverStream);
             BitmapData bmpd = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-            ImgSerialize state = new ImgSerialize(ImageSpecificOptions.RowReadMode, IV != null ? (int)IV : 0, ImageSpecificOptions.Channels, bmpd);
+            ImgSerialize state = new ImgSerialize(ImageSpecificOptions.RowReadMode, IV != null ? (int)IV : 0, ImageSpecificOptions.ChannelString, bmpd);
 
             long written = 0;
 
@@ -46,6 +46,9 @@ namespace psteg.Stegano.Engine.Decode {
                 }
                 state.Next();
             }
+
+            bmp.UnlockBits(bmpd);
+            bmp.Dispose();
         }
 
         public void DecodeAudio8() {
