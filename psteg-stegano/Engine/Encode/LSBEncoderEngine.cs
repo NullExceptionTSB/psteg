@@ -255,10 +255,11 @@ namespace psteg.Stegano.Engine.Encode {
         }
 
         public override void Go() {
+            Lint();
             Prepare();
 
             Owner.ReportProgress(1, new ProgressState(1, 2, "Initializing", true));
-            Lint();
+            
             bq = new BitQueue();
             PopulateBq();
 
