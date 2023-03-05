@@ -119,8 +119,11 @@ namespace psteg.Stegano.Engine.Encode {
                         encoder.PutSamples(smp_buffer);
 
                     smp_count = decoder.GetSamples8(smp_buffer);
-                    if (smp_count == 0)
+                    if (smp_count == 0) {
+                        encoder.Dispose();
+                        Finish();
                         throw new Exception("Data too large");
+                    }
                 }
 
                 if (mono) 
@@ -197,8 +200,11 @@ namespace psteg.Stegano.Engine.Encode {
                         encoder.PutSamples(smp_buffer);
 
                     smp_count = decoder.GetSamples16(smp_buffer);
-                    if (smp_count == 0)
+                    if (smp_count == 0) {
+                        encoder.Dispose();
+                        Finish();
                         throw new Exception("Data too large");
+                    }
                 }
 
                 if (mono)
