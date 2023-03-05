@@ -93,7 +93,7 @@ namespace psteg.Stegano.UI.LSBExtra
             this.tb_iv.Enabled = false;
             this.tb_iv.Location = new System.Drawing.Point(129, 284);
             this.tb_iv.Name = "tb_iv";
-            this.tb_iv.Size = new System.Drawing.Size(183, 20);
+            this.tb_iv.Size = new System.Drawing.Size(208, 20);
             this.tb_iv.TabIndex = 25;
             // 
             // cb_iv
@@ -191,7 +191,7 @@ namespace psteg.Stegano.UI.LSBExtra
             // l_bitdepth
             // 
             this.l_bitdepth.AutoSize = true;
-            this.l_bitdepth.Location = new System.Drawing.Point(299, 16);
+            this.l_bitdepth.Location = new System.Drawing.Point(324, 16);
             this.l_bitdepth.Name = "l_bitdepth";
             this.l_bitdepth.Size = new System.Drawing.Size(13, 13);
             this.l_bitdepth.TabIndex = 15;
@@ -204,7 +204,7 @@ namespace psteg.Stegano.UI.LSBExtra
             this.tb_bitdepth.Maximum = 8;
             this.tb_bitdepth.Minimum = 1;
             this.tb_bitdepth.Name = "tb_bitdepth";
-            this.tb_bitdepth.Size = new System.Drawing.Size(227, 45);
+            this.tb_bitdepth.Size = new System.Drawing.Size(252, 45);
             this.tb_bitdepth.TabIndex = 14;
             this.tb_bitdepth.Value = 1;
             this.tb_bitdepth.Scroll += new System.EventHandler(this.tb_bitdepth_Scroll);
@@ -234,7 +234,7 @@ namespace psteg.Stegano.UI.LSBExtra
             this.tb_co.Enabled = false;
             this.tb_co.Location = new System.Drawing.Point(129, 88);
             this.tb_co.Name = "tb_co";
-            this.tb_co.Size = new System.Drawing.Size(183, 20);
+            this.tb_co.Size = new System.Drawing.Size(208, 20);
             this.tb_co.TabIndex = 27;
             this.tb_co.Text = "BGR";
             this.tb_co.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tb_co_KeyPress);
@@ -247,7 +247,7 @@ namespace psteg.Stegano.UI.LSBExtra
             "Linear"});
             this.cb_dist_algo.Location = new System.Drawing.Point(129, 143);
             this.cb_dist_algo.Name = "cb_dist_algo";
-            this.cb_dist_algo.Size = new System.Drawing.Size(183, 21);
+            this.cb_dist_algo.Size = new System.Drawing.Size(208, 21);
             this.cb_dist_algo.TabIndex = 28;
             // 
             // label3
@@ -264,7 +264,7 @@ namespace psteg.Stegano.UI.LSBExtra
             this.textBox1.Enabled = false;
             this.textBox1.Location = new System.Drawing.Point(129, 170);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(183, 20);
+            this.textBox1.Size = new System.Drawing.Size(208, 20);
             this.textBox1.TabIndex = 30;
             // 
             // l_da_param
@@ -312,7 +312,7 @@ namespace psteg.Stegano.UI.LSBExtra
             this.cb_da_algo.FormattingEnabled = true;
             this.cb_da_algo.Location = new System.Drawing.Point(129, 195);
             this.cb_da_algo.Name = "cb_da_algo";
-            this.cb_da_algo.Size = new System.Drawing.Size(183, 21);
+            this.cb_da_algo.Size = new System.Drawing.Size(208, 21);
             this.cb_da_algo.TabIndex = 35;
             // 
             // ExtraImage

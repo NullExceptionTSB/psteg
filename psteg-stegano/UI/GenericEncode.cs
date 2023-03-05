@@ -149,8 +149,7 @@ namespace psteg.Stegano.UI {
                 engine.ReverseBitOrder = ei.ReverseBitOrder;
                 engine.BitWidth = ei.BitDepth;
                 engine.ImageSpecificOptions = new LSB.SpecificOptions.Img() {
-                    
-                    Channels = ei.ChannelAssignments,
+                    ChannelString = ei.ChannelString,
                     OutputFormat = GetImageFormat(),
                     RowReadMode = ei.RowReadMode
                 };

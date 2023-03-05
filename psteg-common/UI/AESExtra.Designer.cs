@@ -24,12 +24,12 @@
         /// </summary>
         private void InitializeComponent() {
             this.g_main = new System.Windows.Forms.GroupBox();
+            this.cb_padmode = new System.Windows.Forms.ComboBox();
+            this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.cb_blockmode = new System.Windows.Forms.ComboBox();
             this.cb_keysize = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.cb_padmode = new System.Windows.Forms.ComboBox();
             this.g_main.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -44,10 +44,28 @@
             this.g_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.g_main.Location = new System.Drawing.Point(0, 0);
             this.g_main.Name = "g_main";
-            this.g_main.Size = new System.Drawing.Size(346, 108);
+            this.g_main.Size = new System.Drawing.Size(343, 108);
             this.g_main.TabIndex = 0;
             this.g_main.TabStop = false;
             this.g_main.Text = "AES";
+            // 
+            // cb_padmode
+            // 
+            this.cb_padmode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cb_padmode.FormattingEnabled = true;
+            this.cb_padmode.Location = new System.Drawing.Point(129, 73);
+            this.cb_padmode.Name = "cb_padmode";
+            this.cb_padmode.Size = new System.Drawing.Size(208, 21);
+            this.cb_padmode.TabIndex = 5;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(6, 76);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(79, 13);
+            this.label3.TabIndex = 4;
+            this.label3.Text = "Padding Mode:";
             // 
             // label2
             // 
@@ -73,7 +91,7 @@
             this.cb_blockmode.FormattingEnabled = true;
             this.cb_blockmode.Location = new System.Drawing.Point(129, 46);
             this.cb_blockmode.Name = "cb_blockmode";
-            this.cb_blockmode.Size = new System.Drawing.Size(211, 21);
+            this.cb_blockmode.Size = new System.Drawing.Size(208, 21);
             this.cb_blockmode.TabIndex = 1;
             // 
             // cb_keysize
@@ -82,26 +100,8 @@
             this.cb_keysize.FormattingEnabled = true;
             this.cb_keysize.Location = new System.Drawing.Point(129, 19);
             this.cb_keysize.Name = "cb_keysize";
-            this.cb_keysize.Size = new System.Drawing.Size(211, 21);
+            this.cb_keysize.Size = new System.Drawing.Size(208, 21);
             this.cb_keysize.TabIndex = 0;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 76);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(79, 13);
-            this.label3.TabIndex = 4;
-            this.label3.Text = "Padding Mode:";
-            // 
-            // cb_padmode
-            // 
-            this.cb_padmode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cb_padmode.FormattingEnabled = true;
-            this.cb_padmode.Location = new System.Drawing.Point(129, 73);
-            this.cb_padmode.Name = "cb_padmode";
-            this.cb_padmode.Size = new System.Drawing.Size(211, 21);
-            this.cb_padmode.TabIndex = 5;
             // 
             // AESExtra
             // 
@@ -109,7 +109,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.g_main);
             this.Name = "AESExtra";
-            this.Size = new System.Drawing.Size(346, 108);
+            this.Size = new System.Drawing.Size(343, 108);
             this.g_main.ResumeLayout(false);
             this.g_main.PerformLayout();
             this.ResumeLayout(false);
