@@ -15,12 +15,12 @@ namespace psteg.Stegano.Engine.Decode {
         public bool AdaptiveDistribution { get; set; }
         public int? IV { get; set; }
 
+        public int BitWidth { get; set; }
+
         public LSB.Mode EngineMode { get; set; }
 
         public LSB.SpecificOptions.Img ImageSpecificOptions { get; set; }
         public LSB.SpecificOptions.Audio AudioSpecificOptions { get; set; }
-
-
 
         private void Lint() {
             if (CoverStream == null)
@@ -29,54 +29,22 @@ namespace psteg.Stegano.Engine.Decode {
                 throw new Exception("Output stream null");
         }
 
-        //works but is dog shit, recode this to use ImgSerialize
-        public void RowFirstDecodeImage() {
+        public void DecodeImage() {
             Bitmap bmp = new Bitmap(CoverStream);
             BitmapData bmpd = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            ImgSerialize state = new ImgSerialize(ImageSpecificOptions.RowReadMode, IV != null ? (int)IV : 0, ImageSpecificOptions.Channels, bmpd);
 
-            int xiv = 0, yiv = 0;
+            long written = 0;
 
-            if (IV != null) {
-                xiv = (int)IV % bmp.Width;
-                yiv = (int)IV / bmp.Height;
-            }
+            while (written < DataSize) {
+                byte s = state.Get();
+                LSB.UnmixPush(s, BitWidth, bq);
 
-
-            if (yiv > bmp.Height)
-                throw new Exception("IV too big");
-
-            bool data_eof = false;
-            unsafe {
-                for (int y = yiv; y < bmp.Height; y++) {
-                    Owner.ReportProgress(1, new ProgressState(y * bmp.Width, bmp.Width * bmp.Height, "Decoding"));
-                    if (data_eof)
-                        break;
-                    for (int x = xiv; x < bmp.Width; x++) {
-                        byte* p_pixel = (byte*)(bmpd.Scan0 + (4 * x) + (bmpd.Stride * y)).ToPointer();
-
-                        byte b = p_pixel[0],
-                             g = p_pixel[1],
-                             r = p_pixel[2],
-                             a = p_pixel[3];
-
-                        if (ImageSpecificOptions.Channels['B'])
-                            LSB.UnmixPush(b, ImageSpecificOptions.BitWidth, bq);
-                        if (ImageSpecificOptions.Channels['G'])
-                            LSB.UnmixPush(g, ImageSpecificOptions.BitWidth, bq);
-                        if (ImageSpecificOptions.Channels['R'])
-                            LSB.UnmixPush(r, ImageSpecificOptions.BitWidth, bq);
-                        if (ImageSpecificOptions.Channels['A'])
-                            LSB.UnmixPush(a, ImageSpecificOptions.BitWidth, bq);
-
-                        if (bq.Length >= 8) {
-                            OutputStream.WriteByte(LSB.ReverseBits(bq.Pop(), !ReverseBitOrder));
-                            if (OutputStream.Position == DataSize) { 
-                                data_eof = true;
-                                break;
-                            }
-                        }
-                    }
+                if (bq.Length >= 8) { 
+                    OutputStream.WriteByte(LSB.ReverseBits(bq.Pop(), !ReverseBitOrder));
+                    written++;
                 }
+                state.Next();
             }
         }
 
@@ -91,13 +59,13 @@ namespace psteg.Stegano.Engine.Decode {
 
                 if (mono)
                     for (int i = 0; i < buffer.Length; i++)
-                        LSB.UnmixPush(buffer[i], AudioSpecificOptions.BitWidth, bq);
+                        LSB.UnmixPush(buffer[i], BitWidth, bq);
                 else 
                     for (int i = 0; i < buffer.Length; i+=2) {
                         if (AudioSpecificOptions.Channels['L'])
-                            LSB.UnmixPush(buffer[i], AudioSpecificOptions.BitWidth, bq);
+                            LSB.UnmixPush(buffer[i], BitWidth, bq);
                         if (AudioSpecificOptions.Channels['R'])
-                            LSB.UnmixPush(buffer[i+1], AudioSpecificOptions.BitWidth, bq);
+                            LSB.UnmixPush(buffer[i+1], BitWidth, bq);
                     }
                 while (bq.Length / 8 > 0) {
                     OutputStream.WriteByte(LSB.ReverseBits(bq.Pop(),!ReverseBitOrder));
@@ -120,13 +88,13 @@ namespace psteg.Stegano.Engine.Decode {
 
                 if (mono)
                     for (int i = 0; i < buffer.Length; i++)
-                        LSB.UnmixPush(buffer[i], AudioSpecificOptions.BitWidth, bq);
+                        LSB.UnmixPush(buffer[i], BitWidth, bq);
                 else
                     for (int i = 0; i < buffer.Length; i+=2) {
                         if (AudioSpecificOptions.Channels['L'])
-                            LSB.UnmixPush(buffer[i], AudioSpecificOptions.BitWidth, bq);
+                            LSB.UnmixPush(buffer[i], BitWidth, bq);
                         if (AudioSpecificOptions.Channels['R'])
-                            LSB.UnmixPush(buffer[i+1], AudioSpecificOptions.BitWidth, bq);
+                            LSB.UnmixPush(buffer[i+1], BitWidth, bq);
                     }
                 while (bq.Length / 8 > 0) {
                     OutputStream.WriteByte(LSB.ReverseBits(bq.Pop(), !ReverseBitOrder));
@@ -156,7 +124,7 @@ namespace psteg.Stegano.Engine.Decode {
             if (EngineMode == LSB.Mode.Audio)
                 DecodeAudio();
             else if (ImageSpecificOptions.RowReadMode)
-                RowFirstDecodeImage();
+                DecodeImage();
             else
                 throw new NotImplementedException();
 

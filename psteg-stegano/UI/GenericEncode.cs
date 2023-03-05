@@ -147,8 +147,9 @@ namespace psteg.Stegano.UI {
                 engine.IV = ei.IV;
                 engine.AdaptiveDistribution = ei.AdaptiveMode;
                 engine.ReverseBitOrder = ei.ReverseBitOrder;
+                engine.BitWidth = ei.BitDepth;
                 engine.ImageSpecificOptions = new LSB.SpecificOptions.Img() {
-                    BitWidth = ei.BitDepth,
+                    
                     Channels = ei.ChannelAssignments,
                     OutputFormat = GetImageFormat(),
                     RowReadMode = ei.RowReadMode
@@ -181,8 +182,9 @@ namespace psteg.Stegano.UI {
                 engine.IV = es.IV;
                 engine.AdaptiveDistribution = es.AdaptiveMode;
                 engine.ReverseBitOrder = es.ReverseBitOrder;
+                engine.BitWidth = es.BitDepth;
+
                 engine.AudioSpecificOptions = new LSB.SpecificOptions.Audio() {
-                    BitWidth = es.BitDepth,
                     Channels = es.ChannelAssignments,
                     ID = id,
                     Encoder = encoder,

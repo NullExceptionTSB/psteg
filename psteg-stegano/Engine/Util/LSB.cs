@@ -25,14 +25,27 @@ namespace psteg.Stegano.Engine.Util {
         public static class SpecificOptions {
             public struct Img {
                 public Dictionary<char, bool> Channels;
-                public int BitWidth;
                 public bool RowReadMode;
                 public ImageFormat OutputFormat;
+
+                public DistributionOptions DistOptions;
+
+                public abstract class DistributionOptions {
+
+                    public enum Distribution {
+                        Linear
+                    }
+
+                    public abstract Distribution Dist { get; }
+                }
+
+                public sealed class LinearDistributionOptions : DistributionOptions {
+                    public override Distribution Dist => Distribution.Linear;
+                }
             }
 
             public struct Audio {
                 public AudioFileID ID;
-                public int BitWidth;
                 public Dictionary<char, bool> Channels;
 
                 public AudioDecode Decoder;

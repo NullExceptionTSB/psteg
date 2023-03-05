@@ -16,6 +16,8 @@ namespace psteg.Stegano.Engine.Encode {
         public bool AdaptiveDistribution { get; set; }
         public int? IV { get; set; }
 
+        public int BitWidth { get; set; }
+
         public LSB.SpecificOptions.Img ImageSpecificOptions { get; set; }
         public LSB.SpecificOptions.Audio AudioSpecificOptions { get; set; }
         
@@ -41,7 +43,7 @@ namespace psteg.Stegano.Engine.Encode {
             BitmapData bmpd = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
             ImgSerialize state = new ImgSerialize(ImageSpecificOptions.RowReadMode, IV != null ? (int)IV : 0, ImageSpecificOptions.Channels, bmpd);
 
-            byte cover_mask = (byte)~(((1 << ImageSpecificOptions.BitWidth) - 1));
+            byte cover_mask = (byte)~(((1 << BitWidth) - 1));
             //used for bq block filling
             bool data_in_stream = DataStream.Position < DataStream.Length;
             bool data_in_bq = bq.Length > 128; //128 has been chosen as a treshold arbitrarily, but it's big enough
@@ -51,13 +53,14 @@ namespace psteg.Stegano.Engine.Encode {
 
             while (data_in_bq || data_in_stream) {
                 if (!data_in_bq) {
-                    Owner.ReportProgress(1, new ProgressState(++block, total_blks, "Encoding"));
+                    block = (int)(DataStream.Position/BQ_BLOCKSIZE);
+                    Owner.ReportProgress(1, new ProgressState(block, total_blks, "Encoding"));
                     if (!PopulateBq())
                         break; //out of data, finish
                 }
 
                 byte d = state.Get();
-                d = LSB.Mix(d, (byte)LSB.WidthPop(ImageSpecificOptions.BitWidth, bq), cover_mask);
+                d = LSB.Mix(d, (byte)LSB.WidthPop(BitWidth, bq), cover_mask);
                 state.Set(d);
 
                 state.Next();
@@ -82,13 +85,13 @@ namespace psteg.Stegano.Engine.Encode {
             byte[] smp_buffer = new byte[BQ_BLOCKSIZE];
 
             int smp_count = 0;
-            byte cover_mask = (byte)~(((1 << AudioSpecificOptions.BitWidth) - 1));
+            byte cover_mask = (byte)~(((1 << BitWidth) - 1));
 
             bool final = false;
             bool mono = AudioSpecificOptions.ID.Channels == 1;
             while (DataStream.Length != DataStream.Position || bq.Length > 0) {
                 
-                if (bq.Length < AudioSpecificOptions.BitWidth*AudioSpecificOptions.ID.Channels && !final) { 
+                if (bq.Length < BitWidth*AudioSpecificOptions.ID.Channels && !final) { 
                     if (!PopulateBq()) {
                         final = true;
                         for (int i = 0; i < 16; i++)
@@ -113,12 +116,12 @@ namespace psteg.Stegano.Engine.Encode {
                 }
 
                 if (mono) 
-                    smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos++], (byte)LSB.WidthPop(AudioSpecificOptions.BitWidth, bq), cover_mask);
+                    smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos++], (byte)LSB.WidthPop(BitWidth, bq), cover_mask);
                 else {
                     if (AudioSpecificOptions.Channels['L'])
-                        smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos], (byte)LSB.WidthPop(AudioSpecificOptions.BitWidth, bq), cover_mask);
+                        smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos], (byte)LSB.WidthPop(BitWidth, bq), cover_mask);
                     if (AudioSpecificOptions.Channels['R'])
-                        smp_buffer[smp_buffer_pos+1] = LSB.Mix(smp_buffer[smp_buffer_pos+1], (byte)LSB.WidthPop(AudioSpecificOptions.BitWidth, bq), cover_mask);
+                        smp_buffer[smp_buffer_pos+1] = LSB.Mix(smp_buffer[smp_buffer_pos+1], (byte)LSB.WidthPop(BitWidth, bq), cover_mask);
                     smp_buffer_pos += 2;
                 }
 
@@ -157,7 +160,7 @@ namespace psteg.Stegano.Engine.Encode {
             ushort[] smp_buffer = new ushort[BQ_BLOCKSIZE];
 
             int smp_count = 0;
-            ushort cover_mask = (ushort)~(((1 << AudioSpecificOptions.BitWidth) - 1));
+            ushort cover_mask = (ushort)~(((1 << BitWidth) - 1));
 
             bool final = false;
             bool mono = AudioSpecificOptions.ID.Channels == 1;
@@ -166,7 +169,7 @@ namespace psteg.Stegano.Engine.Encode {
 
             while (DataStream.Length != DataStream.Position || bq.Length > 0) {
 
-                if (bq.Length < AudioSpecificOptions.BitWidth*AudioSpecificOptions.ID.Channels && !final) {
+                if (bq.Length < BitWidth*AudioSpecificOptions.ID.Channels && !final) {
                     if (!PopulateBq()) {
                         final = true;
                         for (int i = 0; i < 16; i++)
@@ -191,12 +194,12 @@ namespace psteg.Stegano.Engine.Encode {
                 }
 
                 if (mono)
-                    smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos++], (ushort)LSB.WidthPop(AudioSpecificOptions.BitWidth, bq), cover_mask);
+                    smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos++], (ushort)LSB.WidthPop(BitWidth, bq), cover_mask);
                 else {
                     if (AudioSpecificOptions.Channels['L'])
-                        smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos], (ushort)LSB.WidthPop(AudioSpecificOptions.BitWidth, bq), cover_mask);
+                        smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos], (ushort)LSB.WidthPop(BitWidth, bq), cover_mask);
                     if (AudioSpecificOptions.Channels['R'])
-                        smp_buffer[smp_buffer_pos+1] = LSB.Mix(smp_buffer[smp_buffer_pos+1], (ushort)LSB.WidthPop(AudioSpecificOptions.BitWidth, bq), cover_mask);
+                        smp_buffer[smp_buffer_pos+1] = LSB.Mix(smp_buffer[smp_buffer_pos+1], (ushort)LSB.WidthPop(BitWidth, bq), cover_mask);
                     smp_buffer_pos += 2;
                 }
 

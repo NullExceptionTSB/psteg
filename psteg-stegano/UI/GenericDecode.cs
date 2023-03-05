@@ -146,13 +146,12 @@ namespace psteg.Stegano.UI {
             if (CoverID.GetType().IsSubclassOf(typeof(ImageFileID))) {
                 ExtraImage ei = (ExtraImage)ExtraOptions;
 
-
+                engine.BitWidth = ei.BitDepth;
                 engine.EngineMode = LSB.Mode.Image;
                 engine.IV = ei.IV;
                 engine.AdaptiveDistribution = ei.AdaptiveMode;
                 engine.ReverseBitOrder = ei.ReverseBitOrder;
                 engine.ImageSpecificOptions = new LSB.SpecificOptions.Img() {
-                    BitWidth = ei.BitDepth,
                     Channels = ei.ChannelAssignments,
                     RowReadMode = ei.RowReadMode
                 };
@@ -184,8 +183,9 @@ namespace psteg.Stegano.UI {
                 engine.IV = es.IV;
                 engine.AdaptiveDistribution = es.AdaptiveMode;
                 engine.ReverseBitOrder = es.ReverseBitOrder;
+                engine.BitWidth = es.BitDepth;
+
                 engine.AudioSpecificOptions = new LSB.SpecificOptions.Audio() {
-                    BitWidth = es.BitDepth,
                     Channels = es.ChannelAssignments,
                     ID = id,
                     Encoder = encoder,
