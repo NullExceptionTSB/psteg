@@ -46,22 +46,30 @@ namespace psteg.Stegano.Engine.Encode {
             byte cover_mask = (byte)~(((1 << BitWidth) - 1));
             //used for bq block filling
             bool data_in_stream = DataStream.Position < DataStream.Length;
-            bool data_in_bq = bq.Length > 128; //128 has been chosen as a treshold arbitrarily, but it's big enough
+            bool data_in_bq = bq.Length > 0;
+            bool data_get = true;
+            int remainder = (int)((DataStream.Length * 8) % BitWidth);
             //used only in progress reporting
             int block = 0;
             int total_blks = (int)(DataStream.Length/BQ_BLOCKSIZE);
-
+            
             while (data_in_bq || data_in_stream) {
-                if (!data_in_bq) {
+                if (data_get) {
                     block = (int)(DataStream.Position/BQ_BLOCKSIZE);
                     Owner.ReportProgress(1, new ProgressState(block, total_blks, "Encoding"));
                     if (!PopulateBq())
                         break; //out of data, finish
                 }
-
-                byte d = state.Get();
-                d = LSB.Mix(d, (byte)LSB.WidthPop(BitWidth, bq), cover_mask);
-                state.Set(d);
+                //last block detection for coprimes
+                if (remainder == bq.Length && (!data_in_stream)) {
+                    byte d = state.Get();
+                    d = LSB.Mix(d, (byte)LSB.WidthPop(remainder, bq), cover_mask);
+                    state.Set(d);
+                } else { 
+                    byte d = state.Get();
+                    d = LSB.Mix(d, (byte)LSB.WidthPop(BitWidth, bq), cover_mask);
+                    state.Set(d);
+                }
 
                 try {
                     state.Next();
@@ -75,6 +83,7 @@ namespace psteg.Stegano.Engine.Encode {
 
                 data_in_stream = DataStream.Position < DataStream.Length;
                 data_in_bq = bq.Length > 0;
+                data_get = (bq.Length <= remainder) && data_in_stream;
             }
 
             Owner.ReportProgress(1, new ProgressState(1, 1, "Outputting", true));

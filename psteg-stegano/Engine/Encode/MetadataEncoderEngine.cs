@@ -178,16 +178,23 @@ namespace psteg.Stegano.Engine.Encode {
         }
 
         public override void Go() {
+            Prepare();
             FileFormat ff = FileID.IdentifyFile(CoverStream);
+            Exception e = null;
+            try { 
+                switch (ff) {
+                    case FileFormat.JPEG:
+                        EncodeJpeg();
+                        break;
+                    case FileFormat.MP4:
+                        EncodeMP4();
+                        break;
+                }
+            } catch (Exception ex) { e = ex; }
+            Finish();
 
-            switch (ff) {
-                case FileFormat.JPEG:
-                    EncodeJpeg();
-                    break;
-                case FileFormat.MP4:
-                    EncodeMP4();
-                    break;
-            }
+            if (e != null) 
+                throw e;
         }
     }
 }
