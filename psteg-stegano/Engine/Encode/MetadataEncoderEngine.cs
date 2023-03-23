@@ -7,18 +7,18 @@ using psteg.Stegano.File.Format;
 namespace psteg.Stegano.Engine.Encode {
     public sealed class MetadataEncoderEngine : EncoderEngine {
         public string MP4BoxName { get; set; }
-        public Jpeg.Marker JpegMarker { get; set; }
+        public JpegCommon.Marker JpegMarker { get; set; }
 
-        public static Jpeg.Marker[] SupportedJpegMarkers { get; } = {
-            Jpeg.Marker.COM,
-            Jpeg.Marker.EOI,
-            Jpeg.Marker.APP4,
-            Jpeg.Marker.APP5,
-            Jpeg.Marker.APP7,
-            Jpeg.Marker.APP8,
-            Jpeg.Marker.APP9,
-            Jpeg.Marker.APP14,
-            Jpeg.Marker.APP15
+        public static JpegCommon.Marker[] SupportedJpegMarkers { get; } = {
+            JpegCommon.Marker.COM,
+            JpegCommon.Marker.EOI,
+            JpegCommon.Marker.APP4,
+            JpegCommon.Marker.APP5,
+            JpegCommon.Marker.APP7,
+            JpegCommon.Marker.APP8,
+            JpegCommon.Marker.APP9,
+            JpegCommon.Marker.APP14,
+            JpegCommon.Marker.APP15
         };
 
         private void JpegSkipSOS() {
@@ -53,7 +53,7 @@ namespace psteg.Stegano.Engine.Encode {
             //it would be unreliable, because if the encoded data would end with an EOI marker, it would be ignored
             //and more data would be written to the end, causing the data to become mangled
             //this isn't even unlikely, as it could be achieved simply by encoding a JPEG file into another JPEG file
-            if (JpegMarker == Jpeg.Marker.EOI) {
+            if (JpegMarker == JpegCommon.Marker.EOI) {
                 //copy SOI
                 CoverStream.Seek(0, SeekOrigin.Begin);
                 OutputStream.Seek(0, SeekOrigin.Begin);
@@ -66,12 +66,12 @@ namespace psteg.Stegano.Engine.Encode {
                 do {
                     Owner.ReportProgress(1, new ProgressState((int)(CoverStream.Position), (int)(CoverStream.Length), "Parsing JPEG metadata"));
                     CoverStream.Read(wnd, 0, 2);
-                    ushort length = Jpeg.GetBigEndianU16(wnd, 0);
+                    ushort length = JpegCommon.GetBigEndianU16(wnd, 0);
                     OutputStream.Write(wnd, 0, 2);
 
                     CoverStream.Read(buff, 0, length-2);
                     OutputStream.Write(buff, 0, length-2);
-                    if (marker == ((ushort)Jpeg.Marker.SOS))
+                    if (marker == ((ushort)JpegCommon.Marker.SOS))
                         JpegSkipSOS();
 
                     CoverStream.Read(wnd, 0, 2);
@@ -84,7 +84,7 @@ namespace psteg.Stegano.Engine.Encode {
             }
 
             bool sup = false;
-            foreach (Jpeg.Marker m in SupportedJpegMarkers) 
+            foreach (JpegCommon.Marker m in SupportedJpegMarkers) 
                 if (m == JpegMarker) {
                     sup = true;
                     break;
@@ -98,7 +98,7 @@ namespace psteg.Stegano.Engine.Encode {
             //skip first marker
             CoverStream.Read(wnd, 0, 2);
             OutputStream.Write(wnd, 0, 2);
-            bool sos = (BitConverter.ToUInt16(wnd, 0) == ((ushort)Jpeg.Marker.SOS));
+            bool sos = (BitConverter.ToUInt16(wnd, 0) == ((ushort)JpegCommon.Marker.SOS));
             //load first marker length
             CoverStream.Read(wnd, 0, 2);
             //LE=>BE

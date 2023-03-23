@@ -12,7 +12,7 @@ namespace psteg.Stegano.Engine.Decode {
     public sealed class MetadataDecoderEngine : DecoderEngine {
 
         public string MP4BoxName { get; set; }
-        public Jpeg.Marker JpegMarker { get; set; }
+        public JpegCommon.Marker JpegMarker { get; set; }
 
         private void JpegSkipSOS() {
             long start = CoverStream.Position;
@@ -44,13 +44,13 @@ namespace psteg.Stegano.Engine.Decode {
             byte[] wnd = new byte[4];
 
             CoverStream.Seek(2, SeekOrigin.Begin);
-            if (JpegMarker == Jpeg.Marker.EOI) {
+            if (JpegMarker == JpegCommon.Marker.EOI) {
                 ushort next = 0;
                 CoverStream.Read(wnd, 0, 4);
                 do {
-                    next = Jpeg.GetBigEndianU16(wnd, 2);
+                    next = JpegCommon.GetBigEndianU16(wnd, 2);
                     CoverStream.Seek(next-2, SeekOrigin.Current);
-                    if (BitConverter.ToUInt16(wnd, 0) == ((ushort)Jpeg.Marker.SOS))
+                    if (BitConverter.ToUInt16(wnd, 0) == ((ushort)JpegCommon.Marker.SOS))
                         JpegSkipSOS();
 
                     CoverStream.Read(wnd, 0, 4);
@@ -67,14 +67,14 @@ namespace psteg.Stegano.Engine.Decode {
                 CoverStream.Read(wnd, 0, 4);
 
                 ushort marker = BitConverter.ToUInt16(wnd, 0);
-                ushort len = Jpeg.GetBigEndianU16(wnd, 2);
+                ushort len = JpegCommon.GetBigEndianU16(wnd, 2);
 
-                if (marker == (ushort)Jpeg.Marker.EOI)
+                if (marker == (ushort)JpegCommon.Marker.EOI)
                     break;
 
                 if (marker != ((ushort)JpegMarker)) {
                     CoverStream.Seek(len-2, SeekOrigin.Current);
-                    if (marker == ((ushort)Jpeg.Marker.SOS))
+                    if (marker == ((ushort)JpegCommon.Marker.SOS))
                         JpegSkipSOS();
 
                     continue;

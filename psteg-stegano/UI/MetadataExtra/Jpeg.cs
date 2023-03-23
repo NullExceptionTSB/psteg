@@ -11,7 +11,7 @@ using psteg.Stegano.Engine.Encode;
 
 namespace psteg.Stegano.UI.MetadataExtra {
     public partial class Jpeg : UserControl {
-        public File.Format.Jpeg.Marker Marker { get => (File.Format.Jpeg.Marker)Enum.Parse(typeof(File.Format.Jpeg.Marker), cb_marker.Items[cb_marker.SelectedIndex].ToString()); }
+        public File.Format.JpegCommon.Marker Marker { get => (File.Format.JpegCommon.Marker)Enum.Parse(typeof(File.Format.JpegCommon.Marker), cb_marker.Items[cb_marker.SelectedIndex].ToString()); }
 
         public Jpeg() {
             InitializeComponent();
