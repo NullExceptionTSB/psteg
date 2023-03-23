@@ -24,7 +24,6 @@ namespace psteg.Stegano {
         private void panel1_DragDrop(object sender, DragEventArgs e) {
             FileStream fs = new FileStream(((string[])e.Data.GetData(DataFormats.FileDrop, false))[0], FileMode.Open, FileAccess.Read, FileShare.Read);
 
-            JpegNaiveDecode jd = new JpegNaiveDecode(fs);
         }
 
         private void panel2_DragDrop(object sender, DragEventArgs e) {
@@ -33,12 +32,19 @@ namespace psteg.Stegano {
             WavDecode wd = new WavDecode(fs);
         }
 
-        private void button3_Click(object sender, EventArgs e) {
+        private void panel1_Paint(object sender, PaintEventArgs e) {
 
         }
 
-        private void panel1_Paint(object sender, PaintEventArgs e) {
+        private void button3_Click_1(object sender, EventArgs e) {
 
+            const string f = "C:\\Users\\NullException\\Desktop\\pes.jpg";
+            string outf = Path.GetTempFileName();
+            FileStream fs = new FileStream(f, FileMode.Open, FileAccess.Read, FileShare.Read);
+            FileStream ofs = new FileStream(outf, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+            JpegCodec jc = new JpegCodec(fs, ofs);
+            jc.SetScan(0);
+            for (; ;) jc.GetNextCode();
         }
     }
 }

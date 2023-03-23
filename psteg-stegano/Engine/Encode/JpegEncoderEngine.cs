@@ -14,7 +14,7 @@ namespace psteg.Stegano.Engine.Encode {
 
         private const int BQ_BLOCKSIZE = 1024;
         private BitQueue bq = new BitQueue();
-        private JpegDecode je;
+        //private JpegDecode je;
         private int[,][][] scan;
 
         public Algorithm DistributionAlgo { get; set; }
@@ -53,14 +53,15 @@ namespace psteg.Stegano.Engine.Encode {
         }
 
         public void JpegCrosscode() {
-            JpegEncode jp = new JpegEncode((FileStream)OutputStream);
-            jp.RescaleQuantizationTables(75);
+            //JpegEncode jp = new JpegEncode((FileStream)OutputStream);
+            //jp.RescaleQuantizationTables(75);
         }
 
         public override void Go() {
+            /*
             je = new JpegDecode(CoverStream);
             scan = je.DecodeScan(0);
-
+            */
             bool succ = false;
             switch (DistributionAlgo) {
                 case Algorithm.Jsteg:

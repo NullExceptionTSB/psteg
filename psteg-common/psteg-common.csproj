@@ -39,12 +39,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BitQueue.cs" />
-    <Compile Include="BitDecomposer.cs" />
+    <Compile Include="Huffman\BitComposer.cs" />
+    <Compile Include="Huffman\BitDecomposer.cs" />
     <Compile Include="Crypto\AES.cs" />
     <Compile Include="Crypto\Encryption.cs" />
     <Compile Include="Crypto\KeyDerivation\KeyDerivationAlgo.cs" />
     <Compile Include="Crypto\KeyDerivation\SHA512.cs" />
     <Compile Include="Crypto\NullEncrypt.cs" />
+    <Compile Include="Huffman\Code.cs" />
+    <Compile Include="Huffman\Tree.cs" />
     <Compile Include="ProgressState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\AESExtra.cs">

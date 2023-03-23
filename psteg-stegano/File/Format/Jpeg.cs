@@ -1,6 +1,7 @@
-﻿// Ship of Theseus
-// for the love of all that is libre do NOT use this as reference
-// COGNITOHAZARD WARNING
+﻿// this has been rewritten (i think) 4 times
+// so far this is the most readable and best working version
+// decoder internally known as jpegmicro as it does only the bare minimum
+// needed for steganography
 
 using System;
 using System.Collections.Generic;
@@ -8,10 +9,12 @@ using System.IO;
 
 using System.Diagnostics;
 
+using psteg.Huffman;
+
 namespace psteg.Stegano.File.Format {
     public abstract class JpegCommon {
         public enum Marker : ushort {
-                            //SOF MARKERS
+            //SOF MARKERS
             SOF0 = 0xC0FF,  //baseline dct
             SOF1 = 0xC1FF,  //extended seq dct
             SOF2 = 0xC2FF,  //progressive dct
@@ -37,7 +40,7 @@ namespace psteg.Stegano.File.Format {
             RST5 = 0xD5FF,
             RST6 = 0xD6FF,
             RST7 = 0xD7FF,
-                            //STATE MARKERS
+            //STATE MARKERS
             SOI = 0xD8FF,   //start of image
             EOI = 0xD9FF,   //end of image
             SOS = 0xDAFF,   //start of scan
@@ -88,38 +91,105 @@ namespace psteg.Stegano.File.Format {
             swabuff[1] = arr[idx];
             return BitConverter.ToUInt16(swabuff, 0);
         }
+        public static byte[] BigEndianU16ToByte(ushort n) {
+            byte[] b = new byte[2];
+            byte[] r = BitConverter.GetBytes(n);
+            b[0] = r[1];
+            b[1] = r[0];
+            return b;
+        }
 
         protected internal static readonly byte[] Dezigzag = new byte[] {
-             0,  1,  8, 16,  9,  2,  3, 10,
-            17, 24, 32, 25, 18, 11,  4,  5,
-            12, 19, 26, 33, 40, 48, 41, 34,
-            27, 20, 13,  6,  7, 14, 21, 28,
-            35, 42, 49, 56, 57, 50, 43, 36,
-            29, 22, 15, 23, 30, 37, 44, 51,
-            58, 59, 52, 45, 38, 31, 39, 46,
-            53, 60, 61, 54, 47, 55, 62, 63,
-        };
+                 0,  1,  8, 16,  9,  2,  3, 10,
+                17, 24, 32, 25, 18, 11,  4,  5,
+                12, 19, 26, 33, 40, 48, 41, 34,
+                27, 20, 13,  6,  7, 14, 21, 28,
+                35, 42, 49, 56, 57, 50, 43, 36,
+                29, 22, 15, 23, 30, 37, 44, 51,
+                58, 59, 52, 45, 38, 31, 39, 46,
+                53, 60, 61, 54, 47, 55, 62, 63,
+            };
 
-        //todo: refactor this warcrime (again)
         protected internal sealed class HuffmanTable {
             public ushort Length { get; set; }
             public byte Type { get; set; }
             public byte Index { get; set; }
-
-            public byte[] ValueOrder;
-
-            public int[] ValPtr = new int[17];
-            public int[] MinCode = new int[17];
-            public int[] MaxCode = new int[17];
+            public byte Selector { get => (byte)((Type<<4)|Index); }
 
             public byte[] Bits = new byte[17];
 
             public int[] Sizes = new int[257];
-            public int[] Codes = new int[257];
-            public int[] OrderedSizes = new int[257];
-            public int[] OrderedCodes = new int[257];
-            //sorry, my children. for i have failed to bring you salvation from this cold, dark world.
+            public int[][] Codes = new int[17][];
+            public Dictionary<Code, int> Values;
+
+            private Tree GenerateHuffmanTree() {
+                Tree Root = new Tree { Zero = new Tree(), One = new Tree() };
+                Tree TwoNode = (Tree)Root.Zero;
+                // 2-bit values
+                if (Codes[2].Length >= 1)
+                    TwoNode.Zero = Codes[2][0];
+                if (Codes[2].Length >= 2)
+                    TwoNode.One = Codes[2][1];
+                else
+                    TwoNode.One = new Tree();
+                // prepare next level root nodes
+                ((Tree)Root.One).Zero = new Tree();
+                ((Tree)Root.One).One = new Tree();
+
+                // larger values
+                Tree[] LevelRoots;
+                if (Codes[2].Length >= 2)
+                    LevelRoots = new Tree[] { (Tree)((Tree)Root.One).Zero, (Tree)((Tree)Root.One).One };
+                else
+                    LevelRoots = new Tree[] { (Tree)TwoNode.One, (Tree)((Tree)Root.One).Zero, (Tree)((Tree)Root.One).One };
+                List<Tree> NextLevelRoots = new List<Tree>();
+                for (int i = 3; i <= 16; i++) {
+                    int level_vals = Codes[i].Length;
+                    int level_nodes = LevelRoots.Length * 2;
+                    int current_root = 0;
+
+                    for (int j = 0; j < level_nodes; j++) {
+                        if ((j % 2 == 0) && j > 0)
+                            current_root++;
+
+                        Tree lRoot = LevelRoots[current_root];
+                        if (j < level_vals) {
+                            if (j%2 == 1)
+                                lRoot.One = Codes[i][j];
+                            else
+                                lRoot.Zero = Codes[i][j];
+                        }
+                        else {
+                            Tree t = new Tree();
+                            NextLevelRoots.Add(t);
+                            if (j%2 == 1)
+                                lRoot.One = t;
+                            else
+                                lRoot.Zero = t;
+                        }
+                    }
+                    LevelRoots = NextLevelRoots.ToArray();
+                    NextLevelRoots.Clear();
+                }
+                Root.Optimize();
+                return Root;
+            }
+            private void GenerateValuesDictionary(Tree Root, int upper = 0, int depth = 1) {
+                int n_upper = upper<<1;
+
+                if (Root.Zero?.GetType() == typeof(Tree))
+                    GenerateValuesDictionary((Tree)Root.Zero, n_upper, depth+1);
+                else if (Root.Zero != null)
+                    Values.Add(new Code(depth, n_upper & ~(1)), (int)Root.Zero);
+
+                if (Root.One?.GetType() == typeof(Tree))
+                    GenerateValuesDictionary((Tree)Root.One, n_upper | 1, depth+1);
+                else if (Root.One != null)
+                    Values.Add(new Code(depth, n_upper | 1), (int)Root.One);
+            }
+
             public HuffmanTable(byte[] section) {
+                Values = new Dictionary<Code, int>();
                 Length = GetBigEndianU16(section, 0);
 
                 Type = (byte)(section[2] >> 4);
@@ -130,143 +200,39 @@ namespace psteg.Stegano.File.Format {
                 if (Index > 3)
                     Console.WriteLine("W: invalid huffman table index");
 
-                int ValueCount = 0;
-                for (int i = 1; i <= 16; i++) { 
-                    Bits[i] = section[2+i];
-                    ValueCount+= Bits[i];
+                const int bits_offset = 3;
+                const int codes_offset = bits_offset+16;
+                //generate bits table
+                for (int i = 1; i <= 16; i++)
+                    Bits[i] = section[bits_offset+i-1];
+                //generate codes table
+                Codes[0] = new int[0];
+                int codes_registered = 0;
+                for (int i = 1; i <= 16; i++) {
+                    int vals = Bits[i];
+                    Codes[i] = new int[vals];
+                    for (int j = 0; j < vals; j++)
+                        Codes[i][j] = section[codes_registered+codes_offset+j];
+                    codes_registered += Codes[i].Length;
                 }
-                if (ValueCount > 19+section.Length)
-                    throw new Exception("Invalid DHT section");
-
-                ValueOrder = new byte[ValueCount];
-                for (int i = 0; i < ValueCount; i++)
-                    ValueOrder[i] = section[19 + i];
-
-                int lastk;
-                //my mango is to blow up
-                //Figure C.1 translated from flowchart to code like a troglodyte
-                { 
-                    int k = 0, i = 1, j = 1;
-
-                    do {
-                        while (!(j>Bits[i])) {
-                            Sizes[k] = i;
-                            k++;
-                            j++;
-                        }
-                        i++;
-                        j=1;
-                    } while (!(i > 16));
-                    Sizes[k] = 0;
-                    lastk = k;
-                }
-
-                //Figure C.2
-                {
-                    int k = 0, code = 0, si = Sizes[0];
-                    do {
-                        do {
-                            Codes[k] = code;
-                            code++;
-                            k++;
-                        } while (Sizes[k] == si);
-
-                        if (Sizes[k] == 0)
-                            break;
-
-                        do {
-                            code <<= 1; // described as SLL CODE 1 in the official JPEG docs : - ]
-                            si++;
-                        } while (Sizes[k] == si);
-
-                    } while (true);
-                }
-
-                //Figure C.3
-                //at this point i feel like i'm getting a colonoscopy
-                {
-                    int k = 0;
-                    do {
-                        int i = ValueOrder[k];
-                        OrderedSizes[i] = Sizes[k];
-                        OrderedCodes[i] = Codes[k];
-                        k++;
-                    } while (k < lastk);
-
-                }
-
-                //Figure F.15
-                {
-                    int i = 0, j = 0;
-                    do {
-                        i++;
-                        if (i > 16)
-                            break;
-                        if (Bits[i]==0)
-                            continue;
-                        ValPtr[i] = j;
-                        MinCode[i] = Codes[j];
-                        j += Bits[i]-1;
-                        MaxCode[i]= Codes[j];
-                        j++;
-                    } while (true);
-                }
-
+                //generate values table (decoder dictionary)
+                Tree Root = GenerateHuffmanTree();
+                GenerateValuesDictionary(Root);
             }
         }
 
         protected internal sealed class QuantizationTable {
-            public byte[] Table { get; private set; } 
+            public byte[] Table { get; private set; }
             public byte Index { get; private set; }
             public ushort Length { get; private set; }
-            
-            public byte[] GetMarker() {
-                byte[] r = new byte[67];
-                r[0] = (byte)(Length >> 8);
-                r[1] = (byte)(Length & 0xFF);
-                r[2] = Index;
-                for (int i = 3; i < 0; i++)
-                    r[i] = Table[i - 3];
-                return r;
-            }
 
-            //defined in tables K.1 and K.2
-            internal static readonly byte[] DefaultLuma = new byte[] {
-                16, 11, 12, 14, 12, 10, 16, 14,
-                13, 14, 18, 17, 16, 19, 24, 40,
-                26, 24, 22, 22, 24, 49, 35, 37,
-                29, 40, 58, 51, 61, 60, 57, 51,
-                56, 55, 64, 72, 92, 78, 64, 68,
-                87, 69, 55, 56, 80, 109, 81, 87,
-                95, 98, 103, 104, 103, 62, 77, 113,
-                121, 112, 100, 120, 92, 101, 103, 99
-            };
-
-            internal static readonly byte[] DefaultChroma = new byte[] {
-                17, 18, 18, 24, 21, 24, 47, 26,
-                26, 47, 99, 66, 56, 66, 99, 99,
-                99, 99, 99, 99, 99, 99, 99, 99,
-                99, 99, 99, 99, 99, 99, 99, 99,
-                99, 99, 99, 99, 99, 99, 99, 99,
-                99, 99, 99, 99, 99, 99, 99, 99,
-                99, 99, 99, 99, 99, 99, 99, 99,
-                99, 99, 99, 99, 99, 99, 99, 99
-            };
-
-            public static QuantizationTable GetDefaultLumaTable() => 
-                new QuantizationTable { Table = DefaultLuma };
-
-            public static QuantizationTable GetDefaultChromaTable() =>
-                new QuantizationTable { Table = DefaultChroma };
-
-            private QuantizationTable() { }
             public QuantizationTable(byte[] section) {
                 Length = GetBigEndianU16(section, 0);
 
                 if (Length != 67)
                     throw new Exception("DQT length != 67 !!");
 
-                Index = (byte)(section[3] & 0x0F);
+                Index = (byte)(section[2] & 0x0F);
 
                 Table = new byte[64];
 
@@ -318,28 +284,145 @@ namespace psteg.Stegano.File.Format {
         }
     }
 
-    public abstract class JpegContext : JpegCommon {
+    public sealed class JpegCodec : JpegCommon {
+        private sealed class DecoderState {
+            private int _imcuPos;
+
+            public int IntraMcuPosition {
+                get => _imcuPos;
+                set {
+                    _imcuPos = value%64;
+                    McuPosition += value/64;
+                }
+            }
+
+            public int HuffmanTable {
+                get => SmpHufftabs[McuPosition%SmpPerMcu] | (IsAC ? 0x10 : 0);
+            }
+
+            public int McuPosition { get; set; }
+
+            public int[] SmpChan { get; set; }
+            public int SmpPerMcu { get; set; }
+            public int[] SmpHufftabs { get; set; }
+
+            public bool IsAC { get => IntraMcuPosition != 0; }
+
+            public void Reset() {
+                McuPosition = 0;
+                IntraMcuPosition = 0;
+            }
+
+            public void SetChannelInformation(List<SOF0Component> c, SOSHeader sos) {
+                SmpChan = new int[c.Count];
+                SmpPerMcu = 0;
+                for (int i = 0; i < c.Count; i++) {
+                    SmpChan[i] = (c[i].SamplingFactor & 0x0F) * (c[i].SamplingFactor >> 4);
+                    SmpPerMcu += SmpChan[i];
+                }
+
+                SmpHufftabs = new int[SmpPerMcu];
+                int jc = 0;
+                for (int i = 0; i < c.Count; i++)
+                    for (int j = 0; j < SmpChan[i]; j++, jc++)
+                        SmpHufftabs[jc] = sos.ComponentInfo[i].TableIndex&0x0F;
+            }
+        }
+
+        private Dictionary<int, QuantizationTable> QuantizationTableList { get; set; }
         private Dictionary<int, HuffmanTable> HuffmanTables { get; set; }
-        private List<QuantizationTable> QuantizationTableList { get; set; }
         private List<SOSHeader> ScanHeaders { get; set; }
         private List<long> ScanPointers { get; set; }
         private List<SOF0Component> Components { get; set; }
+
+        private BitDecomposer BitDecomposer { get; set; }
+        private BitComposer BitComposer { get; set; }
+
+        public int CurrentScan { get; private set; } = -1;
 
         public int Width { get; private set; }
         public int Height { get; private set; }
 
         public int ScanCount { get => ScanPointers.Count; }
 
-        public Stream Stream { get; private set; }
+        public Stream InputStream { get; private set; }
+        public Stream OutputStream { get; private set; }
 
+        private DecoderState DecState;
+
+        #region Marker writing
+
+        private void WriteMarker(Marker m) => OutputStream.Write(BigEndianU16ToByte((ushort)m), 0, 2);
+        private void WriteBE16(ushort n) => OutputStream.Write(BigEndianU16ToByte(n), 0, 2);
+        //takes parsed markers and copies them into the output stream
+        private void WriteQuantTable(QuantizationTable qt) {
+            WriteMarker(Marker.DQT);
+            WriteBE16(qt.Length);
+            OutputStream.WriteByte(qt.Index);
+            OutputStream.Write(qt.Table, 0, qt.Table.Length);
+        }
+
+        private void WriteHuffTable(HuffmanTable ht) {
+            WriteMarker(Marker.DHT);
+            //todo: implement
+        }
+
+        private void WriteSOSHeader(SOSHeader sos) {
+            WriteMarker(Marker.SOS);
+            WriteBE16(sos.Length);
+            OutputStream.WriteByte(sos.ComponentCount);
+            foreach (SOSHeader.SOSComponent c in sos.ComponentInfo) {
+                OutputStream.WriteByte(c.ComponentID);
+                OutputStream.WriteByte(c.TableIndex);
+            }
+
+            OutputStream.WriteByte(sos.r1);
+            OutputStream.WriteByte(sos.r2);
+            OutputStream.WriteByte(sos.r3);
+        }
+
+        private void WriteSOF0Header() {
+            WriteMarker(Marker.SOF0);
+            WriteBE16((ushort)(8+3*Components.Count));
+            OutputStream.WriteByte(8);
+            WriteBE16((ushort)Height);
+            WriteBE16((ushort)Width);
+            OutputStream.WriteByte((byte)Components.Count);
+            foreach (SOF0Component c in Components) {
+                OutputStream.WriteByte(c.ComponentID);
+                OutputStream.WriteByte(c.SamplingFactor);
+                OutputStream.WriteByte(c.QtNumber);
+            }
+        }
+
+        public void CloneMarkers() {
+            WriteMarker(Marker.SOI);
+            //write quantization tables
+            foreach (QuantizationTable qt in QuantizationTableList.Values)
+                WriteQuantTable(qt);
+            //write huffman tables
+            foreach (HuffmanTable ht in HuffmanTables.Values)
+                WriteHuffTable(ht);
+            //write sof header
+            WriteSOF0Header();
+            //write scan headers
+            for (int i = 0; i < ScanCount; i++) {
+                OutputStream.Seek(ScanPointers[i], SeekOrigin.Begin);
+                OutputStream.Seek(-ScanHeaders[i].Length, SeekOrigin.Current);
+            }
+        }
+
+        #endregion  
         #region Marker parsing
         private void DHT(byte[] DHTSect) {
             HuffmanTable ht = new HuffmanTable(DHTSect);
-            HuffmanTables.Add(ht.Type << 4 | ht.Index, ht);
+            HuffmanTables.Add(ht.Selector, ht);
         }
 
-        private void DQT(byte[] DQTsect) =>
-            QuantizationTableList.Add(new QuantizationTable(DQTsect));
+        private void DQT(byte[] DQTsect) {
+            QuantizationTable qt = new QuantizationTable(DQTsect);
+            QuantizationTableList.Add(qt.Index, qt);
+        }
 
         private void SOF0(byte[] SOF0sect) {
             ushort size = GetBigEndianU16(SOF0sect, 0);
@@ -366,17 +449,17 @@ namespace psteg.Stegano.File.Format {
         private void SOS(byte[] SOSsect) {
             SOSHeader h = new SOSHeader(SOSsect);
 
-            ScanPointers.Add(Stream.Position);
+            ScanPointers.Add(InputStream.Position);
             //whoever decided that SOS does not need a marker length field
             //i hope both sides of your pillow are forever warm
 
-            long start = Stream.Position;
+            long start = InputStream.Position;
             byte[] buff = new byte[4096];
             bool eom = false;
             bool next_ff = false;
 
             while (!eom) {
-                int read = Stream.Read(buff, 0, buff.Length);
+                int read = InputStream.Read(buff, 0, buff.Length);
 
                 for (int i = 0; i < read; i++) {
                     if (next_ff) {
@@ -385,7 +468,7 @@ namespace psteg.Stegano.File.Format {
                             continue;
                         else {
                             eom = true;
-                            Stream.Seek(i-read-1, SeekOrigin.Current);
+                            InputStream.Seek(i-read-1, SeekOrigin.Current);
                             break;
                         }
                     }
@@ -393,28 +476,28 @@ namespace psteg.Stegano.File.Format {
                         next_ff = true;
                 }
             }
-            h.ScanLen = (ulong)(Stream.Position - start);
+            h.ScanLen = (ulong)(InputStream.Position - start);
             ScanHeaders.Add(h);
         }
         
         private byte[] ReadMarkerAtHead() {
             byte[] window = new byte[2];
-            Stream.Read(window, 0, 2);
+            InputStream.Read(window, 0, 2);
 
             ushort len = GetBigEndianU16(window, 0);
             byte[] marker = new byte[len];
 
-            Stream.Seek(-2, SeekOrigin.Current);
-            Stream.Read(marker, 0, len);
+            InputStream.Seek(-2, SeekOrigin.Current);
+            InputStream.Read(marker, 0, len);
 
             return marker;
         }
 
         private void SkipMarkerAtHead() {
             byte[] window = new byte[2];
-            Stream.Read(window, 0, 2);
+            InputStream.Read(window, 0, 2);
 
-            Stream.Seek(GetBigEndianU16(window, 0)-2, SeekOrigin.Current);
+            InputStream.Seek(GetBigEndianU16(window, 0)-2, SeekOrigin.Current);
         }
 
         private void Parse() {
@@ -422,10 +505,10 @@ namespace psteg.Stegano.File.Format {
             byte[] marker_window = new byte[2];
             ushort marker = 0;
 
-            Stream.Seek(0, SeekOrigin.Begin);
+            InputStream.Seek(0, SeekOrigin.Begin);
 
-            while (Stream.Length != Stream.Position & !EOI) {
-                Stream.Read(marker_window, 0, 2);
+            while (InputStream.Length != InputStream.Position & !EOI) {
+                InputStream.Read(marker_window, 0, 2);
                 if (marker_window[0] != 0xFF)
                     throw new Exception("Corrupted file structure");
 
@@ -464,7 +547,7 @@ namespace psteg.Stegano.File.Format {
         #endregion
         #region Linter
         private void Verify() {
-            if (FileID.IdentifyFile(Stream) != FileFormat.JPEG)
+            if (FileID.IdentifyFile(InputStream) != FileFormat.JPEG)
                 throw new FormatException("Not a JPEG file");
         }
         #endregion
@@ -475,10 +558,10 @@ namespace psteg.Stegano.File.Format {
             ulong truesz = 0;
 
             for (; truesz < length; truesz++) {
-                byte d = (byte)Stream.ReadByte();
+                byte d = (byte)InputStream.ReadByte();
 
                 if (d == 0xFF) {
-                    if (Stream.ReadByte() == 0x00)
+                    if (InputStream.ReadByte() == 0x00)
                         b[truesz] = 0xFF;
                     else
                         break;
@@ -491,15 +574,87 @@ namespace psteg.Stegano.File.Format {
             Array.Resize(ref b, (int)truesz);
             return b;
         }
+
+        public Code GetNextCode() {
+            HuffmanTable ht = HuffmanTables[DecState.HuffmanTable];
+            Debugger.Break();
+            ushort v = (ushort)BitDecomposer.Peek(16);
+            bool match = false;
+            for (int i = 14; i >= 0; i--) {
+                if (ht.Values.ContainsKey(new Code(16-i, v>>i))) {
+                    v=(ushort)ht.Values[new Code(16-i, v>>i)];
+                    BitDecomposer.Skip(16-i);
+                    match = true;
+                    break;
+                }
+            }
+            if (!match)
+                throw new Exception($"Invalid huffman value encountered @ pos {BitDecomposer.BytePosition}.{BitDecomposer.BitPosition}");
+
+            Code c = new Code(v, (int)BitDecomposer.Read(v));
+            if (DecState.IsAC)
+                switch (c.Value) {
+                    case 0x00:
+                        DecState.IntraMcuPosition = 0;
+                        DecState.McuPosition++;
+                        break;
+                    case 0xF0:
+                        DecState.IntraMcuPosition += 16;
+                        break;
+                    default:
+                        DecState.IntraMcuPosition++;
+                        break;
+                }
+            else
+                DecState.IntraMcuPosition++;
+            return c;
+        }
+
         #endregion  
 
-        public JpegContext(Stream Stream) {
-            this.Stream = Stream;
-            if (!Stream.CanSeek)
-                throw new Exception("Stream must be seekable");
+        public void SetScan(int scan_id) {
+            if (scan_id >= ScanCount)
+                throw new ArgumentException("Invalid scan");
+            CurrentScan = scan_id;
+            //reset decoder state
+            if (DecState == null)
+                DecState = new DecoderState();
+            
+            DecState.Reset();
+            DecState.SetChannelInformation(Components, ScanHeaders[scan_id]);
+            
+            //reset bitdecomposer
+            BitDecomposer?.Dispose();
+
+            InputStream.Seek(ScanPointers[scan_id], SeekOrigin.Begin);
+            byte[] sd = PreprocessScan(ScanHeaders[scan_id].ScanLen);
+
+            BitDecomposer = new BitDecomposer(new MemoryStream(sd));
+
+            //reset bitcomposer
+            //todo: finish implementation
+            OutputStream.Seek(ScanPointers[scan_id], SeekOrigin.Begin);
+            BitComposer = new BitComposer();
+        }
+
+        public bool IsCodeSpecial(Code c) {
+            switch (c.Value) {
+                case 0x00:
+                case 0xF0:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public JpegCodec(Stream Input, Stream Output) {
+            InputStream = Input;
+            if (!Input.CanSeek)
+                throw new Exception("Input stream must be seekable");
+            OutputStream = Output;
 
             HuffmanTables = new Dictionary<int, HuffmanTable>();
-            QuantizationTableList = new List<QuantizationTable>();
+            QuantizationTableList = new Dictionary<int, QuantizationTable>();
             ScanPointers = new List<long>();
             ScanHeaders = new List<SOSHeader>();
             Components = new List<SOF0Component>();
@@ -507,8 +662,9 @@ namespace psteg.Stegano.File.Format {
             Verify();
             Parse();
 
+            CloneMarkers();
+
             Debugger.Break();
         }
     }
 }
-// one day you will have to answer for your actions and god may not be so merciful
