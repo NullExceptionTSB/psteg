@@ -292,15 +292,16 @@ namespace psteg.Stegano.File.Format {
                 get => _imcuPos;
                 set {
                     _imcuPos = value%64;
-                    McuPosition += value/64;
+                    SamplePosition += value/64;
                 }
             }
 
             public int HuffmanTable {
-                get => SmpHufftabs[McuPosition%SmpPerMcu] | (IsAC ? 0x10 : 0);
+                get => SmpHufftabs[SamplePosition%SmpPerMcu] | (IsAC ? 0x10 : 0);
             }
 
-            public int McuPosition { get; set; }
+            public int SamplePosition { get; set; }
+            public int MCUPosition { get => SamplePosition / SmpPerMcu; }
 
             public int[] SmpChan { get; set; }
             public int SmpPerMcu { get; set; }
@@ -309,7 +310,7 @@ namespace psteg.Stegano.File.Format {
             public bool IsAC { get => IntraMcuPosition != 0; }
 
             public void Reset() {
-                McuPosition = 0;
+                SamplePosition = 0;
                 IntraMcuPosition = 0;
             }
 
@@ -577,7 +578,7 @@ namespace psteg.Stegano.File.Format {
 
         public Code GetNextCode() {
             HuffmanTable ht = HuffmanTables[DecState.HuffmanTable];
-            Debugger.Break();
+            //Debugger.Break();
             ushort v = (ushort)BitDecomposer.Peek(16);
             bool match = false;
             for (int i = 14; i >= 0; i--) {
@@ -590,13 +591,19 @@ namespace psteg.Stegano.File.Format {
             }
             if (!match)
                 throw new Exception($"Invalid huffman value encountered @ pos {BitDecomposer.BytePosition}.{BitDecomposer.BitPosition}");
-
-            Code c = new Code(v, (int)BitDecomposer.Read(v));
-            if (DecState.IsAC)
+            //BUG:
+            //AC coefficients are handled differently than DC
+            //AC coefficients consist of 2 niblbes
+            //0xAB =>   A = how many AC coefficients are to be skipped
+            //          B = actual data
+            Code c;
+            if (DecState.IsAC) { 
+                c = new Code(v, (int)BitDecomposer.Read(v));
+            
                 switch (c.Value) {
                     case 0x00:
                         DecState.IntraMcuPosition = 0;
-                        DecState.McuPosition++;
+                        DecState.SamplePosition++;
                         break;
                     case 0xF0:
                         DecState.IntraMcuPosition += 16;
@@ -605,8 +612,11 @@ namespace psteg.Stegano.File.Format {
                         DecState.IntraMcuPosition++;
                         break;
                 }
-            else
+            }
+            else { 
                 DecState.IntraMcuPosition++;
+                c = new Code(v, (int)BitDecomposer.Read(v));
+            }
             return c;
         }
 
