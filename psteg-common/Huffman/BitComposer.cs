@@ -22,6 +22,7 @@ namespace psteg.Huffman {
                 Destination.WriteByte(buff[i]);
 
             buff[0] = buff[BytePosition];
+            BytePosition = 0;
         }
 
         public void FullFlush() {
@@ -46,8 +47,8 @@ namespace psteg.Huffman {
         #region Write
         public void Write(Code code) {
             Flush();
-            for (int i = 0; i < code.Length; i++) 
-                WriteNoflush((code.Value & ((1 << (i-code.Length))-1)) != 0);
+            for (int i = code.Length; i > 0; i--) 
+                WriteNoflush((code.Value & ((1 << (i-1)))) != 0);
         }
 
         public void Write(bool bit) {
@@ -63,7 +64,7 @@ namespace psteg.Huffman {
             }
         }
 
-        public BitComposer(Stream s, bool dispose_stream) { 
+        public BitComposer(Stream s, bool dispose_stream = false) { 
             Destination = s;
             disp_s = dispose_stream;
         }

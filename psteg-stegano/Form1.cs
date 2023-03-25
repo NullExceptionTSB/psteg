@@ -20,23 +20,29 @@ namespace psteg.Stegano {
         private void button2_Click(object sender, EventArgs e) =>
             new UI.GenericDecode().Show();
       
-        private void button3_Click_1(object sender, EventArgs e) {
+        private void button3_Click(object sender, EventArgs e) {
             const string f = "C:\\Users\\NullException\\Desktop\\pes.jpg";
             //const string f = "H:\\stegcontainers\\pes.jpg";
             string outf = Path.GetTempFileName();
             FileStream fs = new FileStream(f, FileMode.Open, FileAccess.Read, FileShare.Read);
-            FileStream ofs = new FileStream(outf, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+            FileStream ofs = new FileStream(outf, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
             JpegCodec jc = new JpegCodec(fs, ofs);
             jc.SetScan(0);
-            for (; ;) jc.GetNextCode();
-
+            jc.CopyRestOfScan();
             fs.Close();
             fs.Dispose();
         }
 
         private void button4_Click(object sender, EventArgs e) {
-            Huffman.BitComposer bc = new Huffman.BitComposer();
-
+            byte[] s = new byte[128];
+            Huffman.BitComposer bc = new Huffman.BitComposer(new MemoryStream(s), true);
+            for (int i = 0; i < 4; i++) { 
+                bc.Write(true);
+                bc.Write(false);
+            }
+            bc.Write(new Huffman.Code(9, 0x1AF));
+            bc.Dispose();
+            System.Diagnostics.Debugger.Break();
         }
     }
 }

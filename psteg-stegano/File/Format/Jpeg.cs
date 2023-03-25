@@ -7,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-using System.Diagnostics;
-
 using psteg.Huffman;
 
 namespace psteg.Stegano.File.Format {
@@ -334,7 +332,6 @@ namespace psteg.Stegano.File.Format {
         private DecoderState DecState;
 
         #region Marker writing
-
         private void WriteMarker(Marker m) => OutputStream.Write(BitConverter.GetBytes((ushort)m), 0, 2);
         private void WriteBE16(ushort n) => OutputStream.Write(BigEndianU16ToByte(n), 0, 2);
         //takes parsed markers and copies them into the output stream
@@ -382,16 +379,26 @@ namespace psteg.Stegano.File.Format {
             }
         }
 
+        public void CopyRestOfScan() {
+            while (!BitDecomposer.EOF) {
+                Code c = (Code)GetNextCode();
+                //todo: write length
+                BitComposer.Write(c);
+            }
+            if (CurrentScan == ScanCount-1)
+                WriteMarker(Marker.EOI);
+        }
+
         public void CloneMarkers() {
             WriteMarker(Marker.SOI);
             //write quantization tables
             foreach (QuantizationTable qt in QuantizationTableList.Values)
                 WriteQuantTable(qt);
+            //write sof header
+            WriteSOF0Header();
             //write huffman tables
             foreach (HuffmanTable ht in HuffmanTables.Values)
                 WriteHuffTable(ht);
-            //write sof header
-            WriteSOF0Header();
             //write scan headers
             for (int i = 0; i < ScanCount; i++) {
                 OutputStream.Seek(ScanPointers[i], SeekOrigin.Begin);
@@ -534,6 +541,7 @@ namespace psteg.Stegano.File.Format {
         }
         #endregion
         #region Linter
+        //todo: more complete linting
         private void Verify() {
             if (FileID.IdentifyFile(InputStream) != FileFormat.JPEG)
                 throw new FormatException("Not a JPEG file");
@@ -557,7 +565,6 @@ namespace psteg.Stegano.File.Format {
                 else
                     b[truesz]=d;
             }
-            truesz+=2;
 
             Array.Resize(ref b, (int)truesz);
             return b;
@@ -566,8 +573,10 @@ namespace psteg.Stegano.File.Format {
         private string ReportDecoderPos() =>
             $"Scan {CurrentScan} pos {BitDecomposer.TotalBytePosition:X8}.{BitDecomposer.BitPosition} (absolute {BitDecomposer.TotalBytePosition + ScanPointers[CurrentScan]:X8}.{BitDecomposer.BitPosition})";
 
-        public Code GetNextCode() {
+        public Code? GetNextCode() {
             HuffmanTable ht = HuffmanTables[DecState.HuffmanTable];
+            if (BitDecomposer.EOF)
+                return null;
             ushort v = (ushort)BitDecomposer.Peek(16);
             bool match = false;
             for (int i = 14; i >= 0; i--) {
@@ -636,7 +645,9 @@ namespace psteg.Stegano.File.Format {
             //reset bitcomposer
             //todo: finish implementation
             OutputStream.Seek(ScanPointers[scan_id], SeekOrigin.Begin);
-            BitComposer = new BitComposer(null);
+            BitComposer?.Dispose();
+            BitComposer = new BitComposer(OutputStream);
+
         }
 
         public bool IsCodeSpecial(Code c) {

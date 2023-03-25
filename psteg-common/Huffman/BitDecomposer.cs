@@ -14,12 +14,17 @@ namespace psteg.Huffman {
         public int BitPosition { get; private set; } = 0;
         public int TotalBytePosition { get; private set; } = 0;
 
+        public int DataAmmount { get; private set; } = 0;
+
+        public bool EOF { get => (DataAmmount <= 0 && Source.Position == Source.Length); }
+        
+
         private void FillBuffer() {
             //push back data
             for (int i = BytePosition; i < buff.Length; i++)
                 buff[i-BytePosition] = buff[i];
             //get new data
-            Source.Read(buff, BUF_SIZE-BytePosition, BytePosition);
+            DataAmmount += Source.Read(buff, BUF_SIZE-BytePosition, BytePosition);
             BytePosition = 0;
         }
         public uint Peek(int ammount) {
@@ -58,6 +63,7 @@ namespace psteg.Huffman {
 
                 BytePosition += BitPosition / 8;
                 TotalBytePosition += BitPosition / 8;
+                DataAmmount -= BitPosition / 8;
                 BitPosition %= 8;
             }
 
@@ -73,6 +79,7 @@ namespace psteg.Huffman {
             BitPosition += ammount;
             BytePosition += BitPosition / 8;
             TotalBytePosition += BitPosition / 8;
+            DataAmmount -= BitPosition / 8;
             BitPosition %= 8;
         }
 
