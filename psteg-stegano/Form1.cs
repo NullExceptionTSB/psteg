@@ -13,25 +13,14 @@ namespace psteg.Stegano {
             InitializeComponent();
         }
 
-        private void panel1_DragEnter(object sender, DragEventArgs e) =>
-            e.Effect = DragDropEffects.Copy;
-
         private void button1_Click(object sender, EventArgs e) =>
             new UI.GenericEncode().Show();
         
 
         private void button2_Click(object sender, EventArgs e) =>
             new UI.GenericDecode().Show();
-        
-        private void panel1_DragDrop(object sender, DragEventArgs e) {
-            FileStream fs = new FileStream(((string[])e.Data.GetData(DataFormats.FileDrop, false))[0], FileMode.Open, FileAccess.Read, FileShare.Read);
-
-            fs.Close();
-            fs.Dispose();
-        }
-
+      
         private void button3_Click_1(object sender, EventArgs e) {
-
             const string f = "C:\\Users\\NullException\\Desktop\\pes.jpg";
             //const string f = "H:\\stegcontainers\\pes.jpg";
             string outf = Path.GetTempFileName();
@@ -43,6 +32,11 @@ namespace psteg.Stegano {
 
             fs.Close();
             fs.Dispose();
+        }
+
+        private void button4_Click(object sender, EventArgs e) {
+            Huffman.BitComposer bc = new Huffman.BitComposer();
+
         }
     }
 }

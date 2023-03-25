@@ -631,12 +631,12 @@ namespace psteg.Stegano.File.Format {
             InputStream.Seek(ScanPointers[scan_id], SeekOrigin.Begin);
             byte[] sd = PreprocessScan(ScanHeaders[scan_id].ScanLen);
 
-            BitDecomposer = new BitDecomposer(new MemoryStream(sd));
+            BitDecomposer = new BitDecomposer(new MemoryStream(sd), true);
 
             //reset bitcomposer
             //todo: finish implementation
             OutputStream.Seek(ScanPointers[scan_id], SeekOrigin.Begin);
-            BitComposer = new BitComposer();
+            BitComposer = new BitComposer(null);
         }
 
         public bool IsCodeSpecial(Code c) {

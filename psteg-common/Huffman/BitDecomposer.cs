@@ -5,9 +5,10 @@ namespace psteg.Huffman {
     public sealed class BitDecomposer : IDisposable {
         private const int BUF_SIZE = 128;
 
-        public Stream Source { get; private set; }
+        private readonly bool disp_s = false;
+        private readonly byte[] buff = new byte[BUF_SIZE];
 
-        private byte[] buff = new byte[BUF_SIZE];
+        public Stream Source { get; private set; }
 
         public int BytePosition { get; private set; } = BUF_SIZE;
         public int BitPosition { get; private set; } = 0;
@@ -75,11 +76,17 @@ namespace psteg.Huffman {
             BitPosition %= 8;
         }
 
-        public void Dispose() => Source.Dispose();
+        public void Dispose() {
+            if (disp_s) {
+                Source.Close();
+                Source.Dispose();
+            }
+        }
 
-        public BitDecomposer(Stream src) {
+        public BitDecomposer(Stream src, bool dispose_stream = false) {
             Source = src;
             FillBuffer();
+            disp_s = dispose_stream;
         }
     }
 }
