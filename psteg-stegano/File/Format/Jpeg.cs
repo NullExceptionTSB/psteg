@@ -118,32 +118,15 @@ namespace psteg.Stegano.File.Format {
 
             public byte[] Bits = new byte[17];
 
-            public int[] Sizes = new int[257];
-            public int[][] Codes = new int[17][];
+            public byte[][] Codes = new byte[17][];
             public Dictionary<Code, int> Values;
 
             private Tree GenerateHuffmanTree() {
                 Tree Root = new Tree { Zero = new Tree(), One = new Tree() };
-                Tree TwoNode = (Tree)Root.Zero;
-                // 2-bit values
-                if (Codes[2].Length >= 1)
-                    TwoNode.Zero = Codes[2][0];
-                if (Codes[2].Length >= 2)
-                    TwoNode.One = Codes[2][1];
-                else
-                    TwoNode.One = new Tree();
-                // prepare next level root nodes
-                ((Tree)Root.One).Zero = new Tree();
-                ((Tree)Root.One).One = new Tree();
+                Tree[] LevelRoots = new Tree[] { (Tree)Root.Zero, (Tree)Root.One };
 
-                // larger values
-                Tree[] LevelRoots;
-                if (Codes[2].Length >= 2)
-                    LevelRoots = new Tree[] { (Tree)((Tree)Root.One).Zero, (Tree)((Tree)Root.One).One };
-                else
-                    LevelRoots = new Tree[] { (Tree)TwoNode.One, (Tree)((Tree)Root.One).Zero, (Tree)((Tree)Root.One).One };
                 List<Tree> NextLevelRoots = new List<Tree>();
-                for (int i = 3; i <= 16; i++) {
+                for (int i = 2; i <= 16; i++) {
                     int level_vals = Codes[i].Length;
                     int level_nodes = LevelRoots.Length * 2;
                     int current_root = 0;
@@ -174,18 +157,19 @@ namespace psteg.Stegano.File.Format {
                 Root.Optimize();
                 return Root;
             }
+
             private void GenerateValuesDictionary(Tree Root, int upper = 0, int depth = 1) {
                 int n_upper = upper<<1;
 
                 if (Root.Zero?.GetType() == typeof(Tree))
                     GenerateValuesDictionary((Tree)Root.Zero, n_upper, depth+1);
                 else if (Root.Zero != null)
-                    Values.Add(new Code(depth, n_upper & ~(1)), (int)Root.Zero);
+                    Values.Add(new Code(depth, n_upper & ~(1)), (byte)Root.Zero);
 
                 if (Root.One?.GetType() == typeof(Tree))
                     GenerateValuesDictionary((Tree)Root.One, n_upper | 1, depth+1);
                 else if (Root.One != null)
-                    Values.Add(new Code(depth, n_upper | 1), (int)Root.One);
+                    Values.Add(new Code(depth, n_upper | 1), (byte)Root.One);
             }
 
             public HuffmanTable(byte[] section) {
@@ -206,11 +190,11 @@ namespace psteg.Stegano.File.Format {
                 for (int i = 1; i <= 16; i++)
                     Bits[i] = section[bits_offset+i-1];
                 //generate codes table
-                Codes[0] = new int[0];
+                Codes[0] = new byte[0];
                 int codes_registered = 0;
                 for (int i = 1; i <= 16; i++) {
                     int vals = Bits[i];
-                    Codes[i] = new int[vals];
+                    Codes[i] = new byte[vals];
                     for (int j = 0; j < vals; j++)
                         Codes[i][j] = section[codes_registered+codes_offset+j];
                     codes_registered += Codes[i].Length;
@@ -288,7 +272,7 @@ namespace psteg.Stegano.File.Format {
         private sealed class DecoderState {
             private int _imcuPos;
 
-            public int IntraMcuPosition {
+            public int IntraSmpPosition {
                 get => _imcuPos;
                 set {
                     _imcuPos = value%64;
@@ -296,9 +280,7 @@ namespace psteg.Stegano.File.Format {
                 }
             }
 
-            public int HuffmanTable {
-                get => SmpHufftabs[SamplePosition%SmpPerMcu] | (IsAC ? 0x10 : 0);
-            }
+            public int HuffmanTable { get => SmpHufftabs[SamplePosition%SmpPerMcu] | (IsAC ? 0x10 : 0); }
 
             public int SamplePosition { get; set; }
             public int MCUPosition { get => SamplePosition / SmpPerMcu; }
@@ -307,11 +289,11 @@ namespace psteg.Stegano.File.Format {
             public int SmpPerMcu { get; set; }
             public int[] SmpHufftabs { get; set; }
 
-            public bool IsAC { get => IntraMcuPosition != 0; }
+            public bool IsAC { get => IntraSmpPosition != 0; }
 
             public void Reset() {
                 SamplePosition = 0;
-                IntraMcuPosition = 0;
+                IntraSmpPosition = 0;
             }
 
             public void SetChannelInformation(List<SOF0Component> c, SOSHeader sos) {
@@ -353,7 +335,7 @@ namespace psteg.Stegano.File.Format {
 
         #region Marker writing
 
-        private void WriteMarker(Marker m) => OutputStream.Write(BigEndianU16ToByte((ushort)m), 0, 2);
+        private void WriteMarker(Marker m) => OutputStream.Write(BitConverter.GetBytes((ushort)m), 0, 2);
         private void WriteBE16(ushort n) => OutputStream.Write(BigEndianU16ToByte(n), 0, 2);
         //takes parsed markers and copies them into the output stream
         private void WriteQuantTable(QuantizationTable qt) {
@@ -362,10 +344,14 @@ namespace psteg.Stegano.File.Format {
             OutputStream.WriteByte(qt.Index);
             OutputStream.Write(qt.Table, 0, qt.Table.Length);
         }
-
         private void WriteHuffTable(HuffmanTable ht) {
             WriteMarker(Marker.DHT);
-            //todo: implement
+            OutputStream.WriteByte(ht.Selector);
+            for (int i = 1; i <= 16; i++)
+                OutputStream.WriteByte(ht.Bits[i]);
+            for (int i = 1; i < ht.Codes.Length; i++)
+                for (int j = 0; j < ht.Codes[i].Length; j++) 
+                    OutputStream.WriteByte(ht.Codes[i][j]);
         }
 
         private void WriteSOSHeader(SOSHeader sos) {
@@ -410,6 +396,7 @@ namespace psteg.Stegano.File.Format {
             for (int i = 0; i < ScanCount; i++) {
                 OutputStream.Seek(ScanPointers[i], SeekOrigin.Begin);
                 OutputStream.Seek(-ScanHeaders[i].Length, SeekOrigin.Current);
+                WriteSOSHeader(ScanHeaders[i]);
             }
         }
 
@@ -576,45 +563,50 @@ namespace psteg.Stegano.File.Format {
             return b;
         }
 
+        private string ReportDecoderPos() =>
+            $"Scan {CurrentScan} pos {BitDecomposer.TotalBytePosition:X8}.{BitDecomposer.BitPosition} (absolute {BitDecomposer.TotalBytePosition + ScanPointers[CurrentScan]:X8}.{BitDecomposer.BitPosition})";
+
         public Code GetNextCode() {
             HuffmanTable ht = HuffmanTables[DecState.HuffmanTable];
-            //Debugger.Break();
             ushort v = (ushort)BitDecomposer.Peek(16);
             bool match = false;
             for (int i = 14; i >= 0; i--) {
-                if (ht.Values.ContainsKey(new Code(16-i, v>>i))) {
-                    v=(ushort)ht.Values[new Code(16-i, v>>i)];
+                Code vc = new Code(16-i, v>>i);
+                if (ht.Values.ContainsKey(vc)) {
+                    v=(ushort)ht.Values[vc];
                     BitDecomposer.Skip(16-i);
                     match = true;
                     break;
                 }
             }
+            //in case of an invalid huffman code
             if (!match)
-                throw new Exception($"Invalid huffman value encountered @ pos {BitDecomposer.BytePosition}.{BitDecomposer.BitPosition}");
-            //BUG:
+                throw new Exception("Invalid huffman value encountered @ " + ReportDecoderPos());
+
             //AC coefficients are handled differently than DC
-            //AC coefficients consist of 2 niblbes
+            //AC coefficients consist of 2 nibbles
             //0xAB =>   A = how many AC coefficients are to be skipped
-            //          B = actual data
+            //          B = actual data length
             Code c;
             if (DecState.IsAC) { 
-                c = new Code(v, (int)BitDecomposer.Read(v));
-            
-                switch (c.Value) {
+                c = new Code(v, ((v&0xF) > 0) ? ((int)BitDecomposer.Read(v&0xF)) : 0);
+                
+                switch (v) {
                     case 0x00:
-                        DecState.IntraMcuPosition = 0;
+                        DecState.IntraSmpPosition = 0;
                         DecState.SamplePosition++;
                         break;
                     case 0xF0:
-                        DecState.IntraMcuPosition += 16;
+                        DecState.IntraSmpPosition += 16;
                         break;
                     default:
-                        DecState.IntraMcuPosition++;
+                        DecState.IntraSmpPosition += (v>>4) & 0xF;
+                        DecState.IntraSmpPosition++;
                         break;
                 }
             }
             else { 
-                DecState.IntraMcuPosition++;
+                DecState.IntraSmpPosition++;
                 c = new Code(v, (int)BitDecomposer.Read(v));
             }
             return c;
@@ -673,8 +665,6 @@ namespace psteg.Stegano.File.Format {
             Parse();
 
             CloneMarkers();
-
-            Debugger.Break();
         }
     }
 }

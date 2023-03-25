@@ -11,6 +11,7 @@ namespace psteg.Huffman {
 
         public int BytePosition { get; private set; } = BUF_SIZE;
         public int BitPosition { get; private set; } = 0;
+        public int TotalBytePosition { get; private set; } = 0;
 
         private void FillBuffer() {
             //push back data
@@ -39,7 +40,7 @@ namespace psteg.Huffman {
 
             BitPosition = bip;
             BytePosition = byp;
-
+            
             return d;
         }
 
@@ -55,9 +56,11 @@ namespace psteg.Huffman {
                 d |= (uint)((bit ? 1 : 0) << i);
 
                 BytePosition += BitPosition / 8;
+                TotalBytePosition += BitPosition / 8;
                 BitPosition %= 8;
             }
 
+            
             return d;
         }
 
@@ -68,6 +71,7 @@ namespace psteg.Huffman {
 
             BitPosition += ammount;
             BytePosition += BitPosition / 8;
+            TotalBytePosition += BitPosition / 8;
             BitPosition %= 8;
         }
 
