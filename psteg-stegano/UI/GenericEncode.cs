@@ -64,7 +64,7 @@ namespace psteg.Stegano.UI {
                 b_setOutput.Enabled = true;
                 b_browseOutput.Enabled = true;
 
-                sfd_destination.Filter = "Images|*.bmp;*.dib;*.gif;*.png";
+                sfd_destination.Filter = "PNG Image|*.png|BMP Image|*.bmp;*.dib|GIF Image|*.gif|TIFF File|*.tif;*.tiff";
             }
             else if (CoverID.GetType().IsSubclassOf(typeof(AudioFileID))) {
                 Controls.Remove(ExtraOptions);

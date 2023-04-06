@@ -117,7 +117,8 @@ namespace psteg.Stegano.File.Format {
             public byte[] Bits = new byte[17];
 
             public byte[][] Codes = new byte[17][];
-            public Dictionary<Code, int> Values;
+            public Dictionary<Code, int> ValuesDecode;
+            public Dictionary<int, Code> ValuesEncode;
 
             private Tree GenerateHuffmanTree() {
                 Tree Root = new Tree { Zero = new Tree(), One = new Tree() };
@@ -162,16 +163,17 @@ namespace psteg.Stegano.File.Format {
                 if (Root.Zero?.GetType() == typeof(Tree))
                     GenerateValuesDictionary((Tree)Root.Zero, n_upper, depth+1);
                 else if (Root.Zero != null)
-                    Values.Add(new Code(depth, n_upper & ~(1)), (byte)Root.Zero);
+                    ValuesDecode.Add(new Code(depth, n_upper & ~(1)), (byte)Root.Zero);
 
                 if (Root.One?.GetType() == typeof(Tree))
                     GenerateValuesDictionary((Tree)Root.One, n_upper | 1, depth+1);
                 else if (Root.One != null)
-                    Values.Add(new Code(depth, n_upper | 1), (byte)Root.One);
+                    ValuesDecode.Add(new Code(depth, n_upper | 1), (byte)Root.One);
             }
 
             public HuffmanTable(byte[] section) {
-                Values = new Dictionary<Code, int>();
+                ValuesDecode = new Dictionary<Code, int>();
+                ValuesEncode = new Dictionary<int, Code>();
                 Length = GetBigEndianU16(section, 0);
 
                 Type = (byte)(section[2] >> 4);
@@ -200,7 +202,9 @@ namespace psteg.Stegano.File.Format {
                 //generate values table (decoder dictionary)
                 Tree Root = GenerateHuffmanTree();
                 GenerateValuesDictionary(Root);
-            }
+                foreach (KeyValuePair<Code, int> kvp in ValuesDecode)
+                    ValuesEncode.Add(kvp.Value, kvp.Key);
+            }  
         }
 
         protected internal sealed class QuantizationTable {
@@ -267,7 +271,7 @@ namespace psteg.Stegano.File.Format {
     }
 
     public sealed class JpegCodec : JpegCommon {
-        private sealed class DecoderState {
+        private sealed class CoderState {
             private int _imcuPos;
 
             public int IntraSmpPosition {
@@ -329,7 +333,8 @@ namespace psteg.Stegano.File.Format {
         public Stream InputStream { get; private set; }
         public Stream OutputStream { get; private set; }
 
-        private DecoderState DecState;
+        private CoderState DecState;
+        private CoderState EncState;
 
         #region Marker writing
         private void WriteMarker(Marker m) => OutputStream.Write(BitConverter.GetBytes((ushort)m), 0, 2);
@@ -343,6 +348,7 @@ namespace psteg.Stegano.File.Format {
         }
         private void WriteHuffTable(HuffmanTable ht) {
             WriteMarker(Marker.DHT);
+            WriteBE16(ht.Length);
             OutputStream.WriteByte(ht.Selector);
             for (int i = 1; i <= 16; i++)
                 OutputStream.WriteByte(ht.Bits[i]);
@@ -377,16 +383,6 @@ namespace psteg.Stegano.File.Format {
                 OutputStream.WriteByte(c.SamplingFactor);
                 OutputStream.WriteByte(c.QtNumber);
             }
-        }
-
-        public void CopyRestOfScan() {
-            while (!BitDecomposer.EOF) {
-                Code c = (Code)GetNextCode();
-                //todo: write length
-                BitComposer.Write(c);
-            }
-            if (CurrentScan == ScanCount-1)
-                WriteMarker(Marker.EOI);
         }
 
         public void CloneMarkers() {
@@ -581,8 +577,8 @@ namespace psteg.Stegano.File.Format {
             bool match = false;
             for (int i = 14; i >= 0; i--) {
                 Code vc = new Code(16-i, v>>i);
-                if (ht.Values.ContainsKey(vc)) {
-                    v=(ushort)ht.Values[vc];
+                if (ht.ValuesDecode.ContainsKey(vc)) {
+                    v=(ushort)ht.ValuesDecode[vc];
                     BitDecomposer.Skip(16-i);
                     match = true;
                     break;
@@ -621,18 +617,62 @@ namespace psteg.Stegano.File.Format {
             return c;
         }
 
-        #endregion  
+        #endregion
+        #region Scan writer
+        public void WriteNextCode(Code c) {
+            Code sc = new Code(EncState.IsAC?(c.Length&0xF):c.Length, c.Value); //short code (code with ZRL masked out)
+            HuffmanTable ht = HuffmanTables[EncState.HuffmanTable];
 
+            if (EncState.IsAC) {
+                int v = c.Length;
+                switch (v) {
+                    case 0x00:
+                        EncState.IntraSmpPosition = 0;
+                        EncState.SamplePosition++;
+                        break;
+                    case 0xF0:
+                        EncState.IntraSmpPosition += 16;
+                        break;
+                    default:
+                        EncState.IntraSmpPosition += (v>>4) & 0xF;
+                        EncState.IntraSmpPosition++;
+                        break;
+                }
+            }
+            else
+                EncState.IntraSmpPosition++;
+
+            BitComposer.Write(ht.ValuesEncode[c.Length]);
+            if (sc.Length > 0)
+                BitComposer.Write(sc);
+
+        }
+        public void CopyRestOfScan() {
+            while (!BitDecomposer.EOF) {
+                Code c = (Code)GetNextCode();
+                WriteNextCode(c);
+            }
+            if (CurrentScan == ScanCount-1)
+                WriteMarker(Marker.EOI);
+        }
+        #endregion
+        #region Control
         public void SetScan(int scan_id) {
             if (scan_id >= ScanCount)
                 throw new ArgumentException("Invalid scan");
             CurrentScan = scan_id;
-            //reset decoder state
+            //reset coder states
             if (DecState == null)
-                DecState = new DecoderState();
+                DecState = new CoderState();
             
             DecState.Reset();
             DecState.SetChannelInformation(Components, ScanHeaders[scan_id]);
+
+            if (EncState == null)
+                EncState = new CoderState();
+
+            EncState.Reset();
+            EncState.SetChannelInformation(Components, ScanHeaders[scan_id]);
             
             //reset bitdecomposer
             BitDecomposer?.Dispose();
@@ -659,7 +699,7 @@ namespace psteg.Stegano.File.Format {
                     return false;
             }
         }
-
+        #endregion
         public JpegCodec(Stream Input, Stream Output) {
             InputStream = Input;
             if (!Input.CanSeek)

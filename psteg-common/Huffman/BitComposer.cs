@@ -18,8 +18,10 @@ namespace psteg.Huffman {
             if (BytePosition == 0)
                 return;
 
-            for (int i = 0; i < BytePosition; i++)
+            for (int i = 0; i < BytePosition; i++) { 
                 Destination.WriteByte(buff[i]);
+                buff[i] = 0;
+            }
 
             buff[0] = buff[BytePosition];
             BytePosition = 0;
