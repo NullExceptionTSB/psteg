@@ -6,9 +6,9 @@ namespace psteg_fstools {
     public static class Internals {
         
         [DllImport("ntdll.dll")]
-        public static extern int NtQueryInformationFile(IntPtr FileHandle, ref IO_STATUS_BLOCK IoStatusBlock, IntPtr FileInformation, uint Length, FileInformationClass FileInformationClass);
+        public static extern uint NtQueryInformationFile(IntPtr FileHandle, ref IO_STATUS_BLOCK IoStatusBlock, IntPtr FileInformation, uint Length, FileInformationClass FileInformationClass);
         [DllImport("ntdll.dll")]
-        public static extern int NtClose(IntPtr Handle);
+        public static extern uint NtClose(IntPtr Handle);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern IntPtr CreateFileW(string filename, int access, int share, IntPtr securityAttributes, int creationDisposition,int flagsAndAttributes, IntPtr templateFile);

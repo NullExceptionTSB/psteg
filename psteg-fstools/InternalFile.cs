@@ -60,12 +60,16 @@ namespace psteg_fstools {
             byte[] buff = new byte[64*1024]; //no way to get real size : - |
             GCHandle gchandle = GCHandle.Alloc(buff, GCHandleType.Pinned);
             Internals.IO_STATUS_BLOCK block = new Internals.IO_STATUS_BLOCK();
-            Internals.NtQueryInformationFile(Handle, ref block, gchandle.AddrOfPinnedObject(), (uint)buff.Length, Internals.FileInformationClass.FileStreamInformation);
+            uint ntstatus = 
+                Internals.NtQueryInformationFile(Handle, ref block, gchandle.AddrOfPinnedObject(), (uint)buff.Length, Internals.FileInformationClass.FileStreamInformation);
             gchandle.Free();
 
-            List<Tuple<string, long>> s = new List<Tuple<string,long>>();
+            if (ntstatus == 0xC000000DU)
+                throw new Exception("Selected file is not on an NTFS formatted filesystem"); //non-NTFS FS
+            else if (ntstatus != 0)
+                throw new Exception("Failed to read stream information with NTSTATUS 0x" + ntstatus.ToString("X8"));
 
-            
+            List<Tuple<string, long>> s = new List<Tuple<string,long>>();
             int totalOffset = 0;
             Internals.FILE_STREAM_INFORMATION fsInformation;
             do {

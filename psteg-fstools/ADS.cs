@@ -25,8 +25,16 @@ namespace psteg_fstools {
         }
 
         private void RefreshStreams() {
-            Tuple<string[], long[]> streamdata = f.ListStreams();
-            lv_streams.Items.Clear();
+            Tuple<string[], long[]> streamdata = null;
+            try {
+                streamdata = f.ListStreams();
+            } catch (Exception e) {
+                MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            } finally { 
+                lv_streams.Items.Clear();
+            }
+
             for (int i = 0; i < streamdata.Item1.Length; i++)
                 lv_streams.Items.Add(new ListViewItem(new ListViewItem.ListViewSubItem[] {
                     new ListViewItem.ListViewSubItem { Text = streamdata.Item1[i] },
@@ -38,7 +46,7 @@ namespace psteg_fstools {
             tb_appFile.Text = tb_file.Text;
             f?.Dispose();
             try { 
-            f = new InternalFile(tb_appFile.Text);
+                f = new InternalFile(tb_appFile.Text);
             } catch (Exception ex) {
                 MessageBox.Show("Failed to open file: " + ex.Message);
                 return;
