@@ -432,6 +432,9 @@ namespace psteg.Stegano.UI {
         }
 
         private void cb_sm_SelectedIndexChanged(object sender, EventArgs e) {
+            if (cb_sm.SelectedIndex == -1)
+                return;
+
             foreach (Control c in Controls) 
                 if (c != b_setOutput && c != b_browseOutput && c != b_start)
                     c.Enabled = true;
