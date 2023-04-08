@@ -50,6 +50,8 @@
     <Compile Include="Huffman\Tree.cs" />
     <Compile Include="ProgressState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RNG\RNG.cs" />
+    <Compile Include="RNG\Xorshift.cs" />
     <Compile Include="UI\AESExtra.cs">
       <SubType>UserControl</SubType>
     </Compile>

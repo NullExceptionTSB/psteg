@@ -1,6 +1,5 @@
-﻿namespace psteg_chaffblob.RNGs {
-    public sealed class Xorshift : RNG {
-
+﻿namespace psteg.RNG {
+    public sealed class Xorshift : PRNG {
         private ulong Cycle() {
             State64 ^= State64 >> 13;
             State64 ^= State64 << 7;
@@ -25,7 +24,7 @@
         public Xorshift() => Reseed();
     }
 
-    public sealed class XorshiftS : RNG {
+    public sealed class XorshiftS : PRNG {
         private const ulong Multiplier = 0x2545F4914F6CDD1DUL;
 
         private ulong Cycle() {

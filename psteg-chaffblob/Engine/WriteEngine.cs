@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-
-using psteg_chaffblob.RNGs;
-using psteg_chaffblob.Container.Writer;
 using System.Text;
+
+using psteg.RNG;
+using psteg_chaffblob.Container.Writer;
 
 namespace psteg_chaffblob.Engine {
     public sealed class InputFile {
@@ -25,7 +25,7 @@ namespace psteg_chaffblob.Engine {
             Tar
         }
 
-        private readonly RNG rng;
+        private readonly PRNG rng;
 
         public ContainerType Container { get; set; }
 
@@ -61,9 +61,9 @@ namespace psteg_chaffblob.Engine {
 
         public WriteEngine(Type RNGType, Type CryptoType, Type MACType) : base(CryptoType, MACType) {
             InputFiles = new List<InputFile>();
-            if (!(RNGType.BaseType == typeof(RNG)))
+            if (!(RNGType.BaseType == typeof(PRNG)))
                 throw new Exception("RNG type not an a RNG");
-            rng = (RNG)RNGType.GetConstructor(Type.EmptyTypes).Invoke(null);
+            rng = (PRNG)RNGType.GetConstructor(Type.EmptyTypes).Invoke(null);
         }
     }
 }

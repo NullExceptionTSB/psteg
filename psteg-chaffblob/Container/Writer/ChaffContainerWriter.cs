@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+
 using psteg.Crypto;
+using psteg.RNG;
 using psteg_chaffblob.MAC;
-using psteg_chaffblob.RNGs;
+
 
 //note: mac is of encrypted data
 namespace psteg_chaffblob.Container.Writer {
@@ -12,7 +14,7 @@ namespace psteg_chaffblob.Container.Writer {
         private Stream destination;
         protected List<BlobFile> FileList { get; set; }
 
-        public RNG PRNG { get; set; }
+        public PRNG PRNG { get; set; }
         protected uint BlockCount { get; set; }
 
         protected bool WriteInitialized { get; set; }

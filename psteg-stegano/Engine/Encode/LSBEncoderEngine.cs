@@ -41,7 +41,7 @@ namespace psteg.Stegano.Engine.Encode {
         private void EncodeImage() {
             Bitmap bmp = new Bitmap(CoverStream);
             BitmapData bmpd = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-            ImgSerialize state = new ImgSerialize(ImageSpecificOptions.RowReadMode, IV != null ? (int)IV : 0, ImageSpecificOptions.ChannelString, bmpd);
+            LinearImageSerializer state = new LinearImageSerializer(ImageSpecificOptions.RowReadMode, IV != null ? (int)IV : 0, ImageSpecificOptions.ChannelString, bmpd);
 
             byte cover_mask = (byte)~(((1 << BitWidth) - 1));
             //used for bq block filling

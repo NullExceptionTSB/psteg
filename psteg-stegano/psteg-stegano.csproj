@@ -55,7 +55,7 @@
     <Compile Include="Engine\Decode\MetadataDecoderEngine.cs" />
     <Compile Include="Engine\Encode\EncoderEngine.cs" />
     <Compile Include="Engine\Encode\LSBEncoderEngine.cs" />
-    <Compile Include="Engine\Util\ImgSerialize.cs" />
+    <Compile Include="Engine\Util\ImageSerializer.cs" />
     <Compile Include="Engine\Encode\MetadataEncoderEngine.cs" />
     <Compile Include="Engine\Factory.cs" />
     <Compile Include="Engine\Util\LSB.cs" />

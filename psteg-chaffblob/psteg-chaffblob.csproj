@@ -66,8 +66,6 @@
     <Compile Include="MAC\MACAlgorithm.cs" />
     <Compile Include="MAC\Net\DotnetMACAlgorithm.cs" />
     <Compile Include="IReports.cs" />
-    <Compile Include="RNG\RNG.cs" />
-    <Compile Include="RNG\Xorshift.cs" />
     <Compile Include="UI\Encode.cs">
       <SubType>Form</SubType>
     </Compile>

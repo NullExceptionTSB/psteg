@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows.Forms;
 
-using psteg_chaffblob.RNGs;
+using psteg.RNG;
 using psteg.Crypto;
 using psteg_chaffblob.MAC.Net;
 using psteg_chaffblob.Engine;

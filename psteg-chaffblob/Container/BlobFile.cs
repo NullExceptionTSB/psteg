@@ -1,15 +1,13 @@
-﻿using psteg_chaffblob.RNGs;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using psteg.RNG;
 
 namespace psteg_chaffblob.Container {
     public sealed class BlobFile {
         public Stream Stream { get; set; }
-        public RNG PRNG { get; set; }
+        public PRNG PRNG { get; set; }
         public bool Finished { get => Stream.Length == Stream.Position; }
 
         public string IDKey { get; set; }
