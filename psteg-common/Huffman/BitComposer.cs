@@ -24,6 +24,7 @@ namespace psteg.Huffman {
             }
 
             buff[0] = buff[BytePosition];
+            buff[BytePosition] = 0;
             BytePosition = 0;
         }
 

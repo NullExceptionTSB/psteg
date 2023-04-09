@@ -318,6 +318,7 @@ namespace psteg.Stegano.File.Format {
         private Dictionary<int, HuffmanTable> HuffmanTables { get; set; }
         private List<SOSHeader> ScanHeaders { get; set; }
         private List<long> ScanPointers { get; set; }
+        private List<long> OutputScanPointers { get; set; }
         private List<SOF0Component> Components { get; set; }
 
         private BitDecomposer BitDecomposer { get; set; }
@@ -385,6 +386,12 @@ namespace psteg.Stegano.File.Format {
             }
         }
 
+        private void WriteSOSHeader(long position, int index) {
+            if (position != -1)
+                OutputStream.Seek(position, SeekOrigin.Begin);
+            WriteSOSHeader(ScanHeaders[index]);
+        }
+
         public void CloneMarkers() {
             WriteMarker(Marker.SOI);
             //write quantization tables
@@ -395,12 +402,6 @@ namespace psteg.Stegano.File.Format {
             //write huffman tables
             foreach (HuffmanTable ht in HuffmanTables.Values)
                 WriteHuffTable(ht);
-            //write scan headers
-            for (int i = 0; i < ScanCount; i++) {
-                OutputStream.Seek(ScanPointers[i], SeekOrigin.Begin);
-                OutputStream.Seek(-ScanHeaders[i].Length, SeekOrigin.Current);
-                WriteSOSHeader(ScanHeaders[i]);
-            }
         }
 
         #endregion  
@@ -619,6 +620,7 @@ namespace psteg.Stegano.File.Format {
 
         #endregion
         #region Scan writer
+        private long _current_write_scan_begin = 0;
         public void WriteNextCode(Code c) {
             Code sc = new Code(EncState.IsAC?(c.Length&0xF):c.Length, c.Value); //short code (code with ZRL masked out)
             HuffmanTable ht = HuffmanTables[EncState.HuffmanTable];
@@ -657,7 +659,7 @@ namespace psteg.Stegano.File.Format {
         }
         #endregion
         #region Control
-        public void SetScan(int scan_id) {
+        public void SetScanRead(int scan_id) {
             if (scan_id >= ScanCount)
                 throw new ArgumentException("Invalid scan");
             CurrentScan = scan_id;
@@ -668,11 +670,6 @@ namespace psteg.Stegano.File.Format {
             DecState.Reset();
             DecState.SetChannelInformation(Components, ScanHeaders[scan_id]);
 
-            if (EncState == null)
-                EncState = new CoderState();
-
-            EncState.Reset();
-            EncState.SetChannelInformation(Components, ScanHeaders[scan_id]);
             
             //reset bitdecomposer
             BitDecomposer?.Dispose();
@@ -682,11 +679,48 @@ namespace psteg.Stegano.File.Format {
 
             BitDecomposer = new BitDecomposer(new MemoryStream(sd), true);
 
-            //reset bitcomposer
-            //todo: finish implementation
-            OutputStream.Seek(ScanPointers[scan_id], SeekOrigin.Begin);
+        }
+
+        public void InitScanWrite() {
+            if (CurrentScan == -1)
+                throw new Exception("Scan reader not open, can't set scan parameters");
+
+            if (EncState == null)
+                EncState = new CoderState();
+
+            EncState.Reset();
+            EncState.SetChannelInformation(Components, ScanHeaders[CurrentScan]);
+
+            _current_write_scan_begin = OutputStream.Position + ScanHeaders[CurrentScan].Length;
+            OutputScanPointers.Add(OutputStream.Position);
+
             BitComposer?.Dispose();
             BitComposer = new BitComposer(OutputStream);
+
+            WriteSOSHeader(ScanHeaders[CurrentScan]);
+        }
+
+        public void CloseScanWrite() {
+            long len = OutputStream.Position - _current_write_scan_begin;
+
+            if (len <= int.MaxValue) { //if file <= 2GB, do it in memory
+                byte[] scan = new byte[len];
+                OutputStream.Seek(_current_write_scan_begin, SeekOrigin.Begin);
+                OutputStream.Read(scan, 0, (int)len);
+                OutputStream.Seek(-len, SeekOrigin.Current);
+
+                for (int i = 0; i < scan.Length; i++) {
+                    OutputStream.WriteByte(scan[i]);
+                    if (scan[i] == 0xFF)
+                        OutputStream.WriteByte(0x00);
+                }
+
+                WriteMarker(Marker.EOI);
+            }
+            else {
+                string temp = Path.GetTempFileName();
+                throw new NotImplementedException("JPEG file too big, tempfile not implemented");
+            }
 
         }
 
@@ -700,6 +734,12 @@ namespace psteg.Stegano.File.Format {
             }
         }
         #endregion
+
+        private void InitializeWriter() {
+            OutputScanPointers = new List<long>();
+            CloneMarkers();
+        }
+
         public JpegCodec(Stream Input, Stream Output) {
             InputStream = Input;
             if (!Input.CanSeek)
@@ -715,7 +755,7 @@ namespace psteg.Stegano.File.Format {
             Verify();
             Parse();
 
-            CloneMarkers();
+            InitializeWriter();
         }
     }
 }

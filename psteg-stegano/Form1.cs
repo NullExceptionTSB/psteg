@@ -22,15 +22,21 @@ namespace psteg.Stegano {
       
         private void button3_Click(object sender, EventArgs e) {
             const string f = "C:\\Users\\NullException\\Desktop\\pes.jpg";
+            const string outf = "C:\\Users\\NullException\\Desktop\\pes_OUT.jpg";
             //const string f = "H:\\stegcontainers\\pes.jpg";
-            string outf = Path.GetTempFileName();
+            //string outf = Path.GetTempFileName();
             FileStream fs = new FileStream(f, FileMode.Open, FileAccess.Read, FileShare.Read);
             FileStream ofs = new FileStream(outf, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
             JpegCodec jc = new JpegCodec(fs, ofs);
-            jc.SetScan(0);
+            jc.SetScanRead(0);
+            jc.InitScanWrite();
             jc.CopyRestOfScan();
+            jc.CloseScanWrite();
+
             fs.Close();
             fs.Dispose();
+            ofs.Close();
+            ofs.Dispose();
         }
 
         private void button4_Click(object sender, EventArgs e) {
