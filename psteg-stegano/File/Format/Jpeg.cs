@@ -567,7 +567,7 @@ namespace psteg.Stegano.File.Format {
             return b;
         }
 
-        private string ReportDecoderPos() =>
+        public string ReportDecoderPos() =>
             $"Scan {CurrentScan} pos {BitDecomposer.TotalBytePosition:X8}.{BitDecomposer.BitPosition} (absolute {BitDecomposer.TotalBytePosition + ScanPointers[CurrentScan]:X8}.{BitDecomposer.BitPosition})";
 
         public Code? GetNextCode() {
@@ -596,7 +596,7 @@ namespace psteg.Stegano.File.Format {
             Code c;
             if (DecState.IsAC) { 
                 c = new Code(v, ((v&0xF) > 0) ? ((int)BitDecomposer.Read(v&0xF)) : 0);
-                
+                c.JpegIsAC = true;
                 switch (v) {
                     case 0x00:
                         DecState.IntraSmpPosition = 0;
@@ -614,7 +614,9 @@ namespace psteg.Stegano.File.Format {
             else { 
                 DecState.IntraSmpPosition++;
                 c = new Code(v, (int)BitDecomposer.Read(v));
+                c.JpegIsAC = false;
             }
+
             return c;
         }
 
@@ -733,11 +735,13 @@ namespace psteg.Stegano.File.Format {
                     return false;
             }
         }
+
+        public bool IsCodeAvailable(Code c) => HuffmanTables[EncState.HuffmanTable].ValuesEncode.ContainsKey(c.Length);
         #endregion
 
         private void InitializeWriter() {
             OutputScanPointers = new List<long>();
-            CloneMarkers();
+            CloneMarkers();   
         }
 
         public JpegCodec(Stream Input, Stream Output) {

@@ -14,11 +14,13 @@ namespace psteg.Stegano.Engine {
     public sealed class EncoderFactory {    
         private EncoderEngine Engine { get; set; }
 
-        public static EncoderFactory Create(Methods method) {
+        public static EncoderFactory Create(Methods method, object extra = null) {
             EncoderFactory ef = new EncoderFactory();
+            Type et = extra.GetType();
             switch (method) {
                 case Methods.DCT:
-                    throw new NotImplementedException();
+                    ef.Engine = (EncoderEngine)Activator.CreateInstance(et.GetType().MakeGenericType(typeof(JpegCoderOptions)), new object[] { extra });
+                    break;
                 case Methods.Metadata:
                     ef.Engine = new MetadataEncoderEngine();
                     break;
