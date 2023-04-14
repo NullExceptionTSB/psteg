@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 
 using psteg.Crypto;
-using psteg_chaffblob.MAC;
+using psteg.Chaffblob.MAC;
 
-namespace psteg_chaffblob.Container.Writer {
+namespace psteg.Chaffblob.Container.Writer {
     public sealed class TarWriter : ChaffContainerWriter {
         private ChaffBlobHeader blobHeader;
         public override void FinalizeWrite() {

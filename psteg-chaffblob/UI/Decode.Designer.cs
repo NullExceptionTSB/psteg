@@ -1,4 +1,4 @@
-﻿namespace psteg_chaffblob.UI {
+﻿namespace psteg.Chaffblob.UI {
     partial class Decode {
         /// <summary>
         /// Required designer variable.

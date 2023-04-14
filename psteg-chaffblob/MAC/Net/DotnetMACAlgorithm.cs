@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace psteg_chaffblob.MAC.Net {
+namespace psteg.Chaffblob.MAC.Net {
     public abstract class DotnetMACAlgorithm : MACAlgorithm {
         protected HMAC mac;
         public override int MACSize { get => mac.HashSize / 8; }

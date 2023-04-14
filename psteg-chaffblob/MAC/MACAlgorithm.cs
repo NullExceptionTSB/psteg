@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace psteg_chaffblob.MAC {
+namespace psteg.Chaffblob.MAC {
     public abstract class MACAlgorithm : IDisposable {
         public virtual byte[] Key { get; set; }
         public abstract int MACSize { get; }

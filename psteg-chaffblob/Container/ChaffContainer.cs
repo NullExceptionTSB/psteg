@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 
 using psteg.Crypto;
-using psteg_chaffblob.MAC;
-using psteg_chaffblob.MAC.Net;
+using psteg.Chaffblob.MAC;
+using psteg.Chaffblob.MAC.Net;
 
-namespace psteg_chaffblob.Container {
+namespace psteg.Chaffblob.Container {
     public abstract class ChaffContainer : IDisposable, IReports {
         public ushort BlockSize { get => 512; }
         protected static class KnownMagicNumbers {

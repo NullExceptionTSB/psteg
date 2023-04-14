@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 
 using psteg.Crypto;
 using psteg.RNG;
-using psteg_chaffblob.MAC;
+using psteg.Chaffblob.MAC;
 
 
 //note: mac is of encrypted data
-namespace psteg_chaffblob.Container.Writer {
+namespace psteg.Chaffblob.Container.Writer {
     public abstract class ChaffContainerWriter : ChaffContainer {
         private Stream destination;
         protected List<BlobFile> FileList { get; set; }

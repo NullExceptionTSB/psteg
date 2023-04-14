@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{227DC2B2-B267-4C62-BDD0-75A57DABD339}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>psteg_chaffblob</RootNamespace>
+    <RootNamespace>psteg.Chaffblob</RootNamespace>
     <AssemblyName>psteg.Chaffblob</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

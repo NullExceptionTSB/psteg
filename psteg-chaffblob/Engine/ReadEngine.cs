@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using psteg.Crypto;
-using psteg_chaffblob.MAC;
-
-namespace psteg_chaffblob.Engine {
+//NOTE: Move implementation from UI to ReadEngine
+namespace psteg.Chaffblob.Engine {
     public sealed class ReadEngine : Engine {
 
         public FileStream BlobFile { get; set; }

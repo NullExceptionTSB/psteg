@@ -6,11 +6,10 @@ using System.Windows.Forms;
 
 using psteg.RNG;
 using psteg.Crypto;
-using psteg_chaffblob.MAC.Net;
-using psteg_chaffblob.Engine;
+using psteg.Chaffblob.MAC.Net;
+using psteg.Chaffblob.Engine;
 
-
-namespace psteg_chaffblob {
+namespace psteg.Chaffblob {
     public partial class Encode : Form {
 
         Random random = new Random();

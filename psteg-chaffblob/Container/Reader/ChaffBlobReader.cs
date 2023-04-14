@@ -1,13 +1,11 @@
-﻿using psteg.Crypto;
-using psteg_chaffblob.MAC;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace psteg_chaffblob.Container.Reader {
+using psteg.Crypto;
+using psteg.Chaffblob.MAC;
+
+namespace psteg.Chaffblob.Container.Reader {
     public sealed class ChaffBlobReader : ChaffContainerReader {
         private ChaffBlobHeader cbh;
 

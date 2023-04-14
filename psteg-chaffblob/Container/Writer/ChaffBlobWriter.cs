@@ -2,9 +2,9 @@
 using System.IO;
 
 using psteg.Crypto;
-using psteg_chaffblob.MAC;
+using psteg.Chaffblob.MAC;
 
-namespace psteg_chaffblob.Container.Writer {
+namespace psteg.Chaffblob.Container.Writer {
     public sealed class ChaffBlobWriter : ChaffContainerWriter {
         private ChaffBlobHeader blobHeader;
         private bool writeInitialized = false;

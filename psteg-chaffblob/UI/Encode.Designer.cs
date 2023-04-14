@@ -1,4 +1,4 @@
-﻿namespace psteg_chaffblob {
+﻿namespace psteg.Chaffblob {
     partial class Encode {
         /// <summary>
         /// Required designer variable.

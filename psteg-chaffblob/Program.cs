@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
-using psteg_chaffblob.UI;
+using psteg.Chaffblob.UI;
 
-namespace psteg_chaffblob {
+namespace psteg.Chaffblob {
     static class Program {
         /// <summary>
         /// The main entry point for the application.

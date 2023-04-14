@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 
 using psteg.RNG;
 
-namespace psteg_chaffblob.Container {
+namespace psteg.Chaffblob.Container {
     public sealed class BlobFile {
         public Stream Stream { get; set; }
         public PRNG PRNG { get; set; }

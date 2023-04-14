@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-using psteg;
 using psteg.Crypto;
-using psteg_chaffblob.MAC;
+using psteg.Chaffblob.MAC;
 
-namespace psteg_chaffblob.Container.Reader {
+namespace psteg.Chaffblob.Container.Reader {
     public abstract class ChaffContainerReader : ChaffContainer{
 
         public virtual Stream InputFile { get; set; }

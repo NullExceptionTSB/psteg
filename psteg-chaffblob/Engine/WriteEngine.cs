@@ -4,9 +4,9 @@ using System.IO;
 using System.Text;
 
 using psteg.RNG;
-using psteg_chaffblob.Container.Writer;
+using psteg.Chaffblob.Container.Writer;
 
-namespace psteg_chaffblob.Engine {
+namespace psteg.Chaffblob.Engine {
     public sealed class InputFile {
         public string IDKey { get; set; }
         public string CryptKey { get; set; }

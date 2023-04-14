@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.IO;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using psteg;
-using psteg_chaffblob.Container.Reader;
+using psteg.Chaffblob.Container.Reader;
 
-namespace psteg_chaffblob.UI {
+namespace psteg.Chaffblob.UI {
     public partial class Decode : Form {
         public Decode() =>
             InitializeComponent();

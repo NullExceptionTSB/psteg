@@ -2,9 +2,9 @@
 using System.ComponentModel;
 
 using psteg.Crypto;
-using psteg_chaffblob.MAC;
+using psteg.Chaffblob.MAC;
 
-namespace psteg_chaffblob.Engine {
+namespace psteg.Chaffblob.Engine {
     public abstract class Engine : IDisposable {
         protected Encryption crypt;
         protected MACAlgorithm mac;
