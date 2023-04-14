@@ -63,11 +63,11 @@ namespace psteg.Stegano.Engine.Encode {
                 //last block detection for coprimes
                 if (remainder == bq.Length && (!data_in_stream)) {
                     byte d = state.Get();
-                    d = LSB.Mix(d, (byte)LSB.WidthPop(remainder, bq), cover_mask);
+                    d = LSB.Mix(d, (byte)LSB.WidthPopUnsafe(remainder, bq), cover_mask);
                     state.Set(d);
                 } else { 
                     byte d = state.Get();
-                    d = LSB.Mix(d, (byte)LSB.WidthPop(BitWidth, bq), cover_mask);
+                    d = LSB.Mix(d, (byte)LSB.WidthPopUnsafe(BitWidth, bq), cover_mask);
                     state.Set(d);
                 }
 
@@ -136,12 +136,12 @@ namespace psteg.Stegano.Engine.Encode {
                 }
 
                 if (mono) 
-                    smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos++], (byte)LSB.WidthPop(BitWidth, bq), cover_mask);
+                    smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos++], (byte)LSB.WidthPopUnsafe(BitWidth, bq), cover_mask);
                 else {
                     if (AudioSpecificOptions.Channels['L'])
-                        smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos], (byte)LSB.WidthPop(BitWidth, bq), cover_mask);
+                        smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos], (byte)LSB.WidthPopUnsafe(BitWidth, bq), cover_mask);
                     if (AudioSpecificOptions.Channels['R'])
-                        smp_buffer[smp_buffer_pos+1] = LSB.Mix(smp_buffer[smp_buffer_pos+1], (byte)LSB.WidthPop(BitWidth, bq), cover_mask);
+                        smp_buffer[smp_buffer_pos+1] = LSB.Mix(smp_buffer[smp_buffer_pos+1], (byte)LSB.WidthPopUnsafe(BitWidth, bq), cover_mask);
                     smp_buffer_pos += 2;
                 }
 
@@ -217,12 +217,12 @@ namespace psteg.Stegano.Engine.Encode {
                 }
 
                 if (mono)
-                    smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos++], (ushort)LSB.WidthPop(BitWidth, bq), cover_mask);
+                    smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos++], (ushort)LSB.WidthPopUnsafe(BitWidth, bq), cover_mask);
                 else {
                     if (AudioSpecificOptions.Channels['L'])
-                        smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos], (ushort)LSB.WidthPop(BitWidth, bq), cover_mask);
+                        smp_buffer[smp_buffer_pos] = LSB.Mix(smp_buffer[smp_buffer_pos], (ushort)LSB.WidthPopUnsafe(BitWidth, bq), cover_mask);
                     if (AudioSpecificOptions.Channels['R'])
-                        smp_buffer[smp_buffer_pos+1] = LSB.Mix(smp_buffer[smp_buffer_pos+1], (ushort)LSB.WidthPop(BitWidth, bq), cover_mask);
+                        smp_buffer[smp_buffer_pos+1] = LSB.Mix(smp_buffer[smp_buffer_pos+1], (ushort)LSB.WidthPopUnsafe(BitWidth, bq), cover_mask);
                     smp_buffer_pos += 2;
                 }
 

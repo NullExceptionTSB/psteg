@@ -15,10 +15,19 @@ namespace psteg.Stegano.Engine.Util {
                 bq.Push((data&(1<<i))>0);
         }
 
-        public static int WidthPop(int depth, BitQueue bq) {
+        public static int WidthPopUnsafe(int depth, BitQueue bq) {
             int r = 0;
             for (int i = 0; i < depth; i++)
                 r |= ((bq.PopSingle() ? 1 : 0) << i);
+            return r;
+        }
+
+        public static int WidthPop(int depth, BitQueue bq) {
+            int r = 0;
+            for (int i = 0; i < depth; i++) { 
+                if (bq.Length > 0)
+                    r |= ((bq.PopSingle() ? 1 : 0) << i);
+            }
             return r;
         }
 

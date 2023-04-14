@@ -10,6 +10,10 @@ using psteg.Stegano.Engine.Util;
 namespace psteg.Stegano.Engine.Encode {
     public abstract class JpegCoderOptions {
         private const int DEPTH_MAX = 10;
+        public const int DEFAULT_SUB_DEPTH = 4;
+        public const int DEFAULT_INS_DEPTH = 2;
+        public const bool ALLOW_INSERT = false;
+
         private int _maxSubstituteDepth = 4;
         private int _maxInsertDepth = 2;
 
@@ -35,7 +39,7 @@ namespace psteg.Stegano.Engine.Encode {
 
         public bool InsertInZRL { get; set; } = false;
     }
-    public sealed class JstegDecoderOptions : JpegCoderOptions { }
+    public sealed class JstegCoderOptions : JpegCoderOptions { }
 
     public sealed class JpegEncoderEngine<T> : EncoderEngine where T : JpegCoderOptions  {
         public enum Algorithm {
@@ -49,7 +53,7 @@ namespace psteg.Stegano.Engine.Encode {
         public string Seed { get; set; }
         public bool ReverseBitOrder { get; set; }
 
-        private JstegDecoderOptions JstegOpts;
+        private JstegCoderOptions JstegOpts;
 
         private JpegCodec Codec;
 
@@ -88,7 +92,8 @@ namespace psteg.Stegano.Engine.Encode {
             bool pop_bq_ret;
             int zrl_ammt = 0;
             while ((pop_bq_ret = PopulateBq()) || (bq.Length > 0)) {
-                if (zrl_ammt-- > 0) {
+                if (zrl_ammt > 0) {
+                    zrl_ammt--;
                     Codec.WriteNextCode(CodeGen(LSB.WidthPop(JstegOpts.MaxInsertDepth, bq), JstegOpts.MaxInsertDepth));
                     continue;
                 }
@@ -102,7 +107,7 @@ namespace psteg.Stegano.Engine.Encode {
 
                 if (code.JpegIsAC) {
                     byte zrl = (byte)((code.Length & 0xF0) >> 4),
-                         len = (byte) (code.Length & 0xF0);
+                         len = (byte) (code.Length & 0x0F);
 
                     if (JstegOpts.InsertInZRL && zrl > 0) { 
                         zrl_ammt = zrl;
@@ -123,10 +128,9 @@ namespace psteg.Stegano.Engine.Encode {
                         //lsb substitute
                         int sublen = Math.Min(JstegOpts.MaxSubstituteDepth, code.Length);
                         Codec.WriteNextCode(CodeMix(code, LSB.WidthPop(sublen, bq), sublen));
-                    }
+                    } else
+                        Codec.WriteNextCode(code);
                 }
-
-                Codec.WriteNextCode(code);
             }
 
             if (zrl_ammt > 0) 
@@ -134,16 +138,21 @@ namespace psteg.Stegano.Engine.Encode {
         }
 
         public override void Go() {
+
+            Codec = new JpegCodec(CoverStream, OutputStream);
+            Codec.SetScanRead(0);
+            Codec.InitScanWrite();
+
             Prepare();
             Exception e=null;
-            try { 
+           // try { 
                 switch (DistributionAlgo) {
                     case Algorithm.Jsteg:
                         JstegEncode();
                         break;
                 }
                 Codec.CopyRestOfScan();
-            } catch (Exception ex) { e=ex; }
+            //} catch (Exception ex) { e=ex; }
 
             Codec.CloseScanWrite();
             Finish();
@@ -153,14 +162,10 @@ namespace psteg.Stegano.Engine.Encode {
         }
 
         public JpegEncoderEngine(JpegCoderOptions opts = null) : base() {
-            if (typeof(T) == typeof(JstegDecoderOptions)) { 
+            if (typeof(T) == typeof(JstegCoderOptions)) { 
                 DistributionAlgo = Algorithm.Jsteg;
-                JstegOpts = (JstegDecoderOptions)opts;
+                JstegOpts = (JstegCoderOptions)opts;
             }
-
-            Codec = new JpegCodec(CoverStream, OutputStream);
-            Codec.SetScanRead(0);
-            Codec.InitScanWrite();
         }
     }
 }

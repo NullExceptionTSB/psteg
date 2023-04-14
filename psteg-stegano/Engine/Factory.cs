@@ -16,10 +16,9 @@ namespace psteg.Stegano.Engine {
 
         public static EncoderFactory Create(Methods method, object extra = null) {
             EncoderFactory ef = new EncoderFactory();
-            Type et = extra.GetType();
             switch (method) {
                 case Methods.DCT:
-                    ef.Engine = (EncoderEngine)Activator.CreateInstance(et.GetType().MakeGenericType(typeof(JpegCoderOptions)), new object[] { extra });
+                    ef.Engine = (EncoderEngine)Activator.CreateInstance(typeof(JpegEncoderEngine<>).MakeGenericType(extra.GetType()), new object[] { extra });
                     break;
                 case Methods.Metadata:
                     ef.Engine = new MetadataEncoderEngine();
