@@ -6,6 +6,8 @@ using psteg.Crypto;
 
 namespace psteg.Stegano.Engine.Encode {
     public abstract class EncoderEngine : IDisposable {
+        protected const int BQ_BLOCKSIZE = 1024;
+
         public Stream CoverStream { get; set; }
         public Stream OutputStream { get; set; }
         public Stream DataStream { get; set; }

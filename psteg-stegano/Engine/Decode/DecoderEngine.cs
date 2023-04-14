@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 
@@ -7,6 +6,8 @@ using psteg.Crypto;
 
 namespace psteg.Stegano.Engine.Decode {
     public abstract class DecoderEngine : IDisposable {
+        protected const int BQ_BLOCKSIZE = 1024;
+
         public Stream CoverStream { get; set; }
         public Stream OutputStream { get; set; }
         public BackgroundWorker Owner { get; set; }

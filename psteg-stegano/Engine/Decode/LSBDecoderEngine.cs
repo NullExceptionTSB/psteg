@@ -7,8 +7,6 @@ using psteg.Stegano.Engine.Util;
 
 namespace psteg.Stegano.Engine.Decode {
     public sealed class LSBDecoderEngine : DecoderEngine {
-
-        private const int BQ_BLOCKSIZE = 1024;
         private BitQueue bq = new BitQueue();
 
         public bool ReverseBitOrder { get; set; }

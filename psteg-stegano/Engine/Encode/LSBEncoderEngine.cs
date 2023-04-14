@@ -7,7 +7,6 @@ using psteg.Stegano.Engine.Util;
 
 namespace psteg.Stegano.Engine.Encode {
     public sealed class LSBEncoderEngine : EncoderEngine{
-        private const int BQ_BLOCKSIZE = 1024;
         private BitQueue bq = new BitQueue();
 
         public LSB.Mode EngineMode { get; set; }
