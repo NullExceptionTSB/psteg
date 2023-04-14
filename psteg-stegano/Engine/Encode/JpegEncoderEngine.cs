@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+
 using psteg.Huffman;
 using psteg.Stegano.File;
 using psteg.Stegano.File.Format;
