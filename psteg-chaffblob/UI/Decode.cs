@@ -9,7 +9,6 @@ namespace psteg.Chaffblob.UI {
     public partial class Decode : Form {
         public Decode() =>
             InitializeComponent();
-        
 
         private void cb_showIdKey_CheckedChanged(object sender, EventArgs e) =>
             tb_idKey.UseSystemPasswordChar = !cb_showIdKey.Checked;
@@ -45,25 +44,26 @@ namespace psteg.Chaffblob.UI {
                 MessageBox.Show("Failed to open output file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            ChaffContainerReader cr = null;
+
+            ChaffContainerReader ContainerReader = null;
             try { 
-                cr = ChaffContainerReader.FromFile(Input, Output);
-                cr.ReportsTo = bw_process;
+                ContainerReader = ChaffContainerReader.FromFile(Input, Output);
+                ContainerReader.ReportsTo = bw_process;
             } catch (Exception ex) {
                 MessageBox.Show("Failed to open reader: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-                string f = Output.Name;
-
+                ContainerReader?.Dispose();
+                if (Output.Name != null)
+                    File.Delete(Output.Name);
+                
+                return;
+            } finally {
                 Input?.Close();
                 Output?.Close();
                 Input?.Dispose();
                 Output?.Dispose();
-                cr?.Dispose();
-                if (f != null)
-                    File.Delete(f);
-                return;
             }
-            bw_process.RunWorkerAsync(cr);
+            bw_process.RunWorkerAsync(ContainerReader);
                 
         }
 
@@ -94,9 +94,9 @@ namespace psteg.Chaffblob.UI {
             pb_progress.Style = ProgressBarStyle.Continuous;
             try { 
                 pb_progress.Maximum = ps.Maximum;
-                pb_progress.Value = ps.Current;
-                
+                pb_progress.Value = ps.Current;   
             } catch { }
+
             l_state.Text = ps.State + ": " + ps.Current +"/"+ps.Maximum;
             l_state.Refresh();
         }
@@ -136,5 +136,11 @@ namespace psteg.Chaffblob.UI {
 
             Invoke(new Action(() => bw_process_ProgressChanged(null, new ProgressChangedEventArgs(100, e.Error))));
         }
+
+        private void tb_input_DragDrop(object sender, DragEventArgs e) =>
+            tb_input.Text = ((string[])e.Data.GetData(DataFormats.FileDrop, false))[0];
+
+        private void dDragEnter(object sender, DragEventArgs e)
+            => e.Effect = DragDropEffects.Copy;
     }
 }

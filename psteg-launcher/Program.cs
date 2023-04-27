@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace psteg_launcher {
+namespace psteg.Launcher {
     static class Program {
         /// <summary>
         /// Hlavní vstupní bod aplikace.
@@ -13,7 +10,7 @@ namespace psteg_launcher {
         static void Main() {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new f_Launcher());
+            Application.Run(new LauncherForm());
         }
     }
 }

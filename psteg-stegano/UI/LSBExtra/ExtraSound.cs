@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using psteg.Stegano.File;
 
 namespace psteg.Stegano.UI.LSBExtra {
     public partial class ExtraSound : UserControl {
-        private bool mono;
         public Dictionary<char, bool> ChannelAssignments {
             get => new Dictionary<char, bool>() {
                 { 'L', cb_l.Checked },
@@ -27,7 +21,6 @@ namespace psteg.Stegano.UI.LSBExtra {
                     cb_l.Checked = true;
                     cb_l.Enabled = false;
                 }
-                mono = value;
             }
         }
 
@@ -39,11 +32,11 @@ namespace psteg.Stegano.UI.LSBExtra {
             }
         }
 
-        public bool AdaptiveMode { get => cb_adaptive.Checked; }
+        private void tb_bitdepth_Scroll(object sender, EventArgs e) => l_bitdepth.Text = tb_bitdepth.Value.ToString();
+
+        public bool AdaptiveMode { get => cb_dist_algo.Items[cb_dist_algo.SelectedIndex].ToString() != "Linear"; }
         public int BitDepth { get => tb_bitdepth.Value; }
         public bool ReverseBitOrder { get => cb_rbo.Checked; }
-
-        private void tb_bitdepth_Scroll(object sender, EventArgs e) => l_bitdepth.Text = tb_bitdepth.Value.ToString();
 
         public ExtraSound(AudioFileID id) {
             InitializeComponent();
@@ -53,6 +46,8 @@ namespace psteg.Stegano.UI.LSBExtra {
             Mono = id.Channels == 1;
 
             tb_bitdepth.Maximum = id.SampleSize;
+
+            cb_dist_algo.SelectedIndex = 0;
         }
     }
 }
