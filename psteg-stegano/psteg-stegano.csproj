@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Engine\Decode\DecoderEngine.cs" />
+    <Compile Include="Engine\Decode\JpegDecoderEngine.cs" />
     <Compile Include="Engine\Encode\JpegEncoderEngine.cs" />
     <Compile Include="Engine\Decode\LSBDecoderEngine.cs" />
     <Compile Include="Engine\Decode\MetadataDecoderEngine.cs" />
@@ -56,6 +57,7 @@
     <Compile Include="Engine\Util\ImageSerializer.cs" />
     <Compile Include="Engine\Encode\MetadataEncoderEngine.cs" />
     <Compile Include="Engine\Factory.cs" />
+    <Compile Include="Engine\Util\JpegCoderOptions.cs" />
     <Compile Include="Engine\Util\LSB.cs" />
     <Compile Include="File\AudioDecode.cs" />
     <Compile Include="File\AudioEncode.cs" />
