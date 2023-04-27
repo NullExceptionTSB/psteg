@@ -2,15 +2,20 @@
 using System.IO;
 using System.Windows.Forms;
 
+using psteg.UI;
 using psteg.Stegano.File.Format;
 
 namespace psteg.Stegano {
     public partial class Form1 : Form {
+        private StateManager StateManager;
         public Form1() {
 #if !DEBUG
             Environment.Exit(0);
 #endif
             InitializeComponent();
+
+            StateManager = new StateManager(pb_sm_test, l_sm_test);
+            StateManager.StateChangeDenominator = 2;
         }
 
         private void button1_Click(object sender, EventArgs e) =>
@@ -48,7 +53,38 @@ namespace psteg.Stegano {
             }
             bc.Write(new Huffman.Code(9, 0x1AF));
             bc.Dispose();
-            System.Diagnostics.Debugger.Break();
+        }
+
+        private void b_smadd_Click(object sender, EventArgs e) {
+            StateManager.State = "Incrementing";
+            StateManager.IncrementProgress(1);
+        }
+
+        private void b_smrm_Click(object sender, EventArgs e) {
+            StateManager.State = "Decrementing";
+            StateManager.IncrementProgress(-1);
+        }
+
+        private void b_indef_Click(object sender, EventArgs e) {
+            StateManager.Indefinite = true;
+            StateManager.State = "Indefinite";
+            StateManager.UpdateDisplay();
+        }
+
+        private void b_smadd5_Click(object sender, EventArgs e) {
+            StateManager.State = "Incrementing";
+            StateManager.IncrementProgress(5);
+        }
+
+        private void b_smdef_Click(object sender, EventArgs e) {
+            StateManager.Indefinite = false;
+            StateManager.State = "Definite";
+            StateManager.UpdateDisplay();
+        }
+
+        private void b_smrm5_Click(object sender, EventArgs e) {
+            StateManager.State = "Decrementing";
+            StateManager.IncrementProgress(-5);
         }
     }
 }

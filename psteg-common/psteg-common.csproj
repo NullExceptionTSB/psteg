@@ -58,6 +58,7 @@
     <Compile Include="UI\AESExtra.Designer.cs">
       <DependentUpon>AESExtra.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\StateManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="UI\AESExtra.resx">

@@ -113,10 +113,13 @@
             // 
             // tb_filename
             // 
+            this.tb_filename.AllowDrop = true;
             this.tb_filename.Location = new System.Drawing.Point(67, 13);
             this.tb_filename.Name = "tb_filename";
             this.tb_filename.Size = new System.Drawing.Size(168, 20);
             this.tb_filename.TabIndex = 2;
+            this.tb_filename.DragDrop += new System.Windows.Forms.DragEventHandler(this.tb_filename_DragDrop);
+            this.tb_filename.DragEnter += new System.Windows.Forms.DragEventHandler(this.dDragEnter);
             // 
             // label2
             // 

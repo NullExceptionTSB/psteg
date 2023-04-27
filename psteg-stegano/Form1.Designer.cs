@@ -28,6 +28,14 @@
             this.label3 = new System.Windows.Forms.Label();
             this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
+            this.pb_sm_test = new System.Windows.Forms.ProgressBar();
+            this.l_sm_test = new System.Windows.Forms.Label();
+            this.b_smadd = new System.Windows.Forms.Button();
+            this.b_smrm = new System.Windows.Forms.Button();
+            this.b_indef = new System.Windows.Forms.Button();
+            this.b_smadd5 = new System.Windows.Forms.Button();
+            this.b_smrm5 = new System.Windows.Forms.Button();
+            this.b_smdef = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button1
@@ -81,11 +89,96 @@
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
+            // pb_sm_test
+            // 
+            this.pb_sm_test.Location = new System.Drawing.Point(384, 396);
+            this.pb_sm_test.Maximum = 10;
+            this.pb_sm_test.Name = "pb_sm_test";
+            this.pb_sm_test.Size = new System.Drawing.Size(221, 23);
+            this.pb_sm_test.TabIndex = 10;
+            // 
+            // l_sm_test
+            // 
+            this.l_sm_test.AutoSize = true;
+            this.l_sm_test.Location = new System.Drawing.Point(381, 380);
+            this.l_sm_test.Name = "l_sm_test";
+            this.l_sm_test.Size = new System.Drawing.Size(35, 13);
+            this.l_sm_test.TabIndex = 11;
+            this.l_sm_test.Text = "label1";
+            // 
+            // b_smadd
+            // 
+            this.b_smadd.Location = new System.Drawing.Point(384, 322);
+            this.b_smadd.Name = "b_smadd";
+            this.b_smadd.Size = new System.Drawing.Size(75, 23);
+            this.b_smadd.TabIndex = 12;
+            this.b_smadd.Text = "sm_add";
+            this.b_smadd.UseVisualStyleBackColor = true;
+            this.b_smadd.Click += new System.EventHandler(this.b_smadd_Click);
+            // 
+            // b_smrm
+            // 
+            this.b_smrm.Location = new System.Drawing.Point(465, 322);
+            this.b_smrm.Name = "b_smrm";
+            this.b_smrm.Size = new System.Drawing.Size(75, 23);
+            this.b_smrm.TabIndex = 13;
+            this.b_smrm.Text = "sm_rm";
+            this.b_smrm.UseVisualStyleBackColor = true;
+            this.b_smrm.Click += new System.EventHandler(this.b_smrm_Click);
+            // 
+            // b_indef
+            // 
+            this.b_indef.Location = new System.Drawing.Point(546, 322);
+            this.b_indef.Name = "b_indef";
+            this.b_indef.Size = new System.Drawing.Size(75, 23);
+            this.b_indef.TabIndex = 14;
+            this.b_indef.Text = "indef";
+            this.b_indef.UseVisualStyleBackColor = true;
+            this.b_indef.Click += new System.EventHandler(this.b_indef_Click);
+            // 
+            // b_smadd5
+            // 
+            this.b_smadd5.Location = new System.Drawing.Point(384, 351);
+            this.b_smadd5.Name = "b_smadd5";
+            this.b_smadd5.Size = new System.Drawing.Size(75, 23);
+            this.b_smadd5.TabIndex = 15;
+            this.b_smadd5.Text = "sm_add5";
+            this.b_smadd5.UseVisualStyleBackColor = true;
+            this.b_smadd5.Click += new System.EventHandler(this.b_smadd5_Click);
+            // 
+            // b_smrm5
+            // 
+            this.b_smrm5.Location = new System.Drawing.Point(465, 351);
+            this.b_smrm5.Name = "b_smrm5";
+            this.b_smrm5.Size = new System.Drawing.Size(75, 23);
+            this.b_smrm5.TabIndex = 16;
+            this.b_smrm5.Text = "sm_rm5";
+            this.b_smrm5.UseVisualStyleBackColor = true;
+            this.b_smrm5.Click += new System.EventHandler(this.b_smrm5_Click);
+            // 
+            // b_smdef
+            // 
+            this.b_smdef.Location = new System.Drawing.Point(546, 351);
+            this.b_smdef.Name = "b_smdef";
+            this.b_smdef.Size = new System.Drawing.Size(75, 23);
+            this.b_smdef.TabIndex = 17;
+            this.b_smdef.Text = "def";
+            this.b_smdef.UseVisualStyleBackColor = true;
+            this.b_smdef.Click += new System.EventHandler(this.b_smdef_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.b_smdef);
+            this.Controls.Add(this.b_smrm5);
+            this.Controls.Add(this.b_smadd5);
+            this.Controls.Add(this.b_indef);
+            this.Controls.Add(this.b_smrm);
+            this.Controls.Add(this.b_smadd);
+            this.Controls.Add(this.l_sm_test);
+            this.Controls.Add(this.pb_sm_test);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.label3);
@@ -105,6 +198,14 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.ProgressBar pb_sm_test;
+        private System.Windows.Forms.Label l_sm_test;
+        private System.Windows.Forms.Button b_smadd;
+        private System.Windows.Forms.Button b_smrm;
+        private System.Windows.Forms.Button b_indef;
+        private System.Windows.Forms.Button b_smadd5;
+        private System.Windows.Forms.Button b_smrm5;
+        private System.Windows.Forms.Button b_smdef;
     }
 }
 
