@@ -220,6 +220,11 @@ namespace psteg.Chaffblob {
         private void bw_go_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) =>
             Finish(_e, e.Error);
 
+        private void dDragEnter(object sender, DragEventArgs e)
+            => e.Effect = DragDropEffects.Copy;
+
+        private void tb_filename_DragDrop(object sender, DragEventArgs e) 
+            => tb_filename.Text = ((string[])e.Data.GetData(DataFormats.FileDrop, false))[0];
         
     }
 }

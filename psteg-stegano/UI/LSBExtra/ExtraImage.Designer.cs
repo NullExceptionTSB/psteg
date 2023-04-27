@@ -30,6 +30,16 @@ namespace psteg.Stegano.UI.LSBExtra
         private void InitializeComponent()
         {
             this.gb_main = new System.Windows.Forms.GroupBox();
+            this.cb_da_algo = new System.Windows.Forms.ComboBox();
+            this.l_da_algo = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.l_da_param = new System.Windows.Forms.Label();
+            this.tb_distalg_data = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.cb_dist_algo = new System.Windows.Forms.ComboBox();
+            this.tb_co = new System.Windows.Forms.TextBox();
+            this.cb_co = new System.Windows.Forms.CheckBox();
             this.tb_iv = new System.Windows.Forms.TextBox();
             this.cb_iv = new System.Windows.Forms.CheckBox();
             this.cb_rbo = new System.Windows.Forms.CheckBox();
@@ -42,16 +52,6 @@ namespace psteg.Stegano.UI.LSBExtra
             this.l_bitdepth = new System.Windows.Forms.Label();
             this.tb_bitdepth = new System.Windows.Forms.TrackBar();
             this.label1 = new System.Windows.Forms.Label();
-            this.cb_co = new System.Windows.Forms.CheckBox();
-            this.tb_co = new System.Windows.Forms.TextBox();
-            this.cb_dist_algo = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.l_da_param = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.l_da_algo = new System.Windows.Forms.Label();
-            this.cb_da_algo = new System.Windows.Forms.ComboBox();
             this.gb_main.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tb_bitdepth)).BeginInit();
             this.SuspendLayout();
@@ -63,7 +63,7 @@ namespace psteg.Stegano.UI.LSBExtra
             this.gb_main.Controls.Add(this.label5);
             this.gb_main.Controls.Add(this.label4);
             this.gb_main.Controls.Add(this.l_da_param);
-            this.gb_main.Controls.Add(this.textBox1);
+            this.gb_main.Controls.Add(this.tb_distalg_data);
             this.gb_main.Controls.Add(this.label3);
             this.gb_main.Controls.Add(this.cb_dist_algo);
             this.gb_main.Controls.Add(this.tb_co);
@@ -87,6 +87,103 @@ namespace psteg.Stegano.UI.LSBExtra
             this.gb_main.TabIndex = 0;
             this.gb_main.TabStop = false;
             this.gb_main.Text = "Image";
+            // 
+            // cb_da_algo
+            // 
+            this.cb_da_algo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cb_da_algo.Enabled = false;
+            this.cb_da_algo.FormattingEnabled = true;
+            this.cb_da_algo.Location = new System.Drawing.Point(129, 195);
+            this.cb_da_algo.Name = "cb_da_algo";
+            this.cb_da_algo.Size = new System.Drawing.Size(208, 21);
+            this.cb_da_algo.TabIndex = 35;
+            // 
+            // l_da_algo
+            // 
+            this.l_da_algo.AutoSize = true;
+            this.l_da_algo.Enabled = false;
+            this.l_da_algo.Location = new System.Drawing.Point(6, 198);
+            this.l_da_algo.Name = "l_da_algo";
+            this.l_da_algo.Size = new System.Drawing.Size(30, 13);
+            this.l_da_algo.TabIndex = 34;
+            this.l_da_algo.Text = "N/A:";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(3, 225);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(106, 13);
+            this.label5.TabIndex = 33;
+            this.label5.Text = "Hidden data storage:";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(3, 124);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(62, 13);
+            this.label4.TabIndex = 32;
+            this.label4.Text = "Distribution:";
+            // 
+            // l_da_param
+            // 
+            this.l_da_param.AutoSize = true;
+            this.l_da_param.Enabled = false;
+            this.l_da_param.Location = new System.Drawing.Point(6, 173);
+            this.l_da_param.Name = "l_da_param";
+            this.l_da_param.Size = new System.Drawing.Size(30, 13);
+            this.l_da_param.TabIndex = 31;
+            this.l_da_param.Text = "N/A:";
+            // 
+            // tb_distalg_data
+            // 
+            this.tb_distalg_data.Enabled = false;
+            this.tb_distalg_data.Location = new System.Drawing.Point(129, 170);
+            this.tb_distalg_data.Name = "tb_distalg_data";
+            this.tb_distalg_data.Size = new System.Drawing.Size(208, 20);
+            this.tb_distalg_data.TabIndex = 30;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(6, 146);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(108, 13);
+            this.label3.TabIndex = 29;
+            this.label3.Text = "Distribution Algorithm:";
+            // 
+            // cb_dist_algo
+            // 
+            this.cb_dist_algo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cb_dist_algo.FormattingEnabled = true;
+            this.cb_dist_algo.Items.AddRange(new object[] {
+            "Linear"});
+            this.cb_dist_algo.Location = new System.Drawing.Point(129, 143);
+            this.cb_dist_algo.Name = "cb_dist_algo";
+            this.cb_dist_algo.Size = new System.Drawing.Size(208, 21);
+            this.cb_dist_algo.TabIndex = 28;
+            // 
+            // tb_co
+            // 
+            this.tb_co.Enabled = false;
+            this.tb_co.Location = new System.Drawing.Point(129, 88);
+            this.tb_co.Name = "tb_co";
+            this.tb_co.Size = new System.Drawing.Size(208, 20);
+            this.tb_co.TabIndex = 27;
+            this.tb_co.Text = "BGR";
+            this.tb_co.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tb_co_KeyPress);
+            // 
+            // cb_co
+            // 
+            this.cb_co.AutoSize = true;
+            this.cb_co.Location = new System.Drawing.Point(9, 91);
+            this.cb_co.Name = "cb_co";
+            this.cb_co.Size = new System.Drawing.Size(90, 17);
+            this.cb_co.TabIndex = 26;
+            this.cb_co.Text = "Custom Order";
+            this.cb_co.UseVisualStyleBackColor = true;
+            this.cb_co.CheckedChanged += new System.EventHandler(this.cb_co_CheckedChanged);
             // 
             // tb_iv
             // 
@@ -218,103 +315,6 @@ namespace psteg.Stegano.UI.LSBExtra
             this.label1.TabIndex = 13;
             this.label1.Text = "Bit Depth:";
             // 
-            // cb_co
-            // 
-            this.cb_co.AutoSize = true;
-            this.cb_co.Location = new System.Drawing.Point(9, 91);
-            this.cb_co.Name = "cb_co";
-            this.cb_co.Size = new System.Drawing.Size(90, 17);
-            this.cb_co.TabIndex = 26;
-            this.cb_co.Text = "Custom Order";
-            this.cb_co.UseVisualStyleBackColor = true;
-            this.cb_co.CheckedChanged += new System.EventHandler(this.cb_co_CheckedChanged);
-            // 
-            // tb_co
-            // 
-            this.tb_co.Enabled = false;
-            this.tb_co.Location = new System.Drawing.Point(129, 88);
-            this.tb_co.Name = "tb_co";
-            this.tb_co.Size = new System.Drawing.Size(208, 20);
-            this.tb_co.TabIndex = 27;
-            this.tb_co.Text = "BGR";
-            this.tb_co.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tb_co_KeyPress);
-            // 
-            // cb_dist_algo
-            // 
-            this.cb_dist_algo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cb_dist_algo.FormattingEnabled = true;
-            this.cb_dist_algo.Items.AddRange(new object[] {
-            "Linear"});
-            this.cb_dist_algo.Location = new System.Drawing.Point(129, 143);
-            this.cb_dist_algo.Name = "cb_dist_algo";
-            this.cb_dist_algo.Size = new System.Drawing.Size(208, 21);
-            this.cb_dist_algo.TabIndex = 28;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 146);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(108, 13);
-            this.label3.TabIndex = 29;
-            this.label3.Text = "Distribution Algorithm:";
-            // 
-            // textBox1
-            // 
-            this.textBox1.Enabled = false;
-            this.textBox1.Location = new System.Drawing.Point(129, 170);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(208, 20);
-            this.textBox1.TabIndex = 30;
-            // 
-            // l_da_param
-            // 
-            this.l_da_param.AutoSize = true;
-            this.l_da_param.Enabled = false;
-            this.l_da_param.Location = new System.Drawing.Point(6, 173);
-            this.l_da_param.Name = "l_da_param";
-            this.l_da_param.Size = new System.Drawing.Size(30, 13);
-            this.l_da_param.TabIndex = 31;
-            this.l_da_param.Text = "N/A:";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(3, 124);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(62, 13);
-            this.label4.TabIndex = 32;
-            this.label4.Text = "Distribution:";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(3, 225);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(106, 13);
-            this.label5.TabIndex = 33;
-            this.label5.Text = "Hidden data storage:";
-            // 
-            // l_da_algo
-            // 
-            this.l_da_algo.AutoSize = true;
-            this.l_da_algo.Enabled = false;
-            this.l_da_algo.Location = new System.Drawing.Point(6, 198);
-            this.l_da_algo.Name = "l_da_algo";
-            this.l_da_algo.Size = new System.Drawing.Size(30, 13);
-            this.l_da_algo.TabIndex = 34;
-            this.l_da_algo.Text = "N/A:";
-            // 
-            // cb_da_algo
-            // 
-            this.cb_da_algo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cb_da_algo.Enabled = false;
-            this.cb_da_algo.FormattingEnabled = true;
-            this.cb_da_algo.Location = new System.Drawing.Point(129, 195);
-            this.cb_da_algo.Name = "cb_da_algo";
-            this.cb_da_algo.Size = new System.Drawing.Size(208, 21);
-            this.cb_da_algo.TabIndex = 35;
-            // 
             // ExtraImage
             // 
             this.Controls.Add(this.gb_main);
@@ -347,7 +347,7 @@ namespace psteg.Stegano.UI.LSBExtra
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ComboBox cb_dist_algo;
         private System.Windows.Forms.Label l_da_param;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox tb_distalg_data;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ComboBox cb_da_algo;

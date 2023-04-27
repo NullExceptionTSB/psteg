@@ -1,5 +1,5 @@
-﻿namespace psteg_launcher {
-    partial class f_Launcher {
+﻿namespace psteg.Launcher {
+    partial class LauncherForm {
         /// <summary>
         /// Vyžaduje se proměnná návrháře.
         /// </summary>
@@ -23,7 +23,7 @@
         /// obsah této metody v editoru kódu.
         /// </summary>
         private void InitializeComponent() {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(f_Launcher));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LauncherForm));
             this.b_chaffing = new System.Windows.Forms.Button();
             this.b_winnowing = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -57,11 +57,11 @@
             this.label1.AutoSize = true;
             this.label1.BackColor = System.Drawing.Color.Red;
             this.label1.ForeColor = System.Drawing.Color.Yellow;
-            this.label1.Location = new System.Drawing.Point(53, 98);
+            this.label1.Location = new System.Drawing.Point(48, 98);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(203, 13);
+            this.label1.Size = new System.Drawing.Size(212, 13);
             this.label1.TabIndex = 3;
-            this.label1.Text = "psteg Beta 3 - not intended for production";
+            this.label1.Text = "psteg Beta 3.3 - not intended for production";
             // 
             // b_lsbencode
             // 

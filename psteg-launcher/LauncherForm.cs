@@ -2,9 +2,9 @@
 using System.Diagnostics;
 using System.Windows.Forms;
 
-namespace psteg_launcher {
-    public partial class f_Launcher : Form {
-        public f_Launcher() => InitializeComponent();
+namespace psteg.Launcher {
+    public partial class LauncherForm : Form {
+        public LauncherForm() => InitializeComponent();
         public void Run(string process, string args) {
             Process p;
             try { 
@@ -16,6 +16,7 @@ namespace psteg_launcher {
 
             Hide();
             p.WaitForExit();
+
             Show();
             p?.Dispose();
         }
