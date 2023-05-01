@@ -42,33 +42,35 @@ namespace psteg.Stegano.UI.LSBExtra {
                     switch (c) {
                         case 'B':
                             b=cb_b.Checked;
-                            if (!cb_b.Checked) tb_co.Text.Replace("B", "");
+                            if (!cb_b.Checked)
+                                tb_co.Text = tb_co.Text.Replace("B", "");
                             break;
                         case 'G':
                             g=cb_g.Checked;
                             if (!cb_g.Checked)
-                                tb_co.Text.Replace("G", "");
+                                tb_co.Text = tb_co.Text.Replace("G", "");
                             break;
                         case 'R':
                             r=cb_r.Checked;
                             if (!cb_r.Checked)
-                                tb_co.Text.Replace("R", "");
+                                tb_co.Text = tb_co.Text.Replace("R", "");
                             break;
                         case 'A':
                             a=cb_a.Checked;
                             if (!cb_a.Checked)
-                                tb_co.Text.Replace("A", "");
+                                tb_co.Text = tb_co.Text.Replace("A", "");
                             break;
                     }
                 }
-                if (!b & cb_b.Checked)
+
+                if (!b && cb_b.Checked)
                     tb_co.Text += "B";
-                if (!g & cb_g.Checked)
-                    tb_co.Text += "B";
-                if (!r & cb_r.Checked)
-                    tb_co.Text += "B";
-                if (!a & cb_a.Checked)
-                    tb_co.Text += "B";
+                if (!g && cb_g.Checked)
+                    tb_co.Text += "G";
+                if (!r && cb_r.Checked)
+                    tb_co.Text += "R";
+                if (!a && cb_a.Checked)
+                    tb_co.Text += "A";
             } else {
                 tb_co.Text = "";
                 tb_co.Text += cb_b.Checked ? "B" : "";
@@ -84,6 +86,7 @@ namespace psteg.Stegano.UI.LSBExtra {
         }
 
         private void tb_co_KeyPress(object sender, KeyPressEventArgs e) {
+            e.Handled = true;
             switch (e.KeyChar) {
                 case 'r':
                 case 'R':
@@ -105,8 +108,10 @@ namespace psteg.Stegano.UI.LSBExtra {
                     if (cb_a.Checked && !tb_co.Text.Contains("A"))
                         tb_co.Text += "A";
                     break;
+                case '\b':
+                    e.Handled = false;
+                    break;
             }
-            e.Handled = true;
         }
     }
 }
