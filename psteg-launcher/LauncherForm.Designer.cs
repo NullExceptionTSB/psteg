@@ -61,7 +61,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(212, 13);
             this.label1.TabIndex = 3;
-            this.label1.Text = "psteg Beta 3.3 - not intended for production";
+            this.label1.Text = "psteg Beta 3.4 - not intended for production";
             // 
             // b_lsbencode
             // 
@@ -93,7 +93,7 @@
             this.b_ads.UseVisualStyleBackColor = true;
             this.b_ads.Click += new System.EventHandler(this.b_ads_Click);
             // 
-            // f_Launcher
+            // LauncherForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -107,7 +107,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
-            this.Name = "f_Launcher";
+            this.Name = "LauncherForm";
             this.Text = "psteg - Steganographic Suite";
             this.ResumeLayout(false);
             this.PerformLayout();
