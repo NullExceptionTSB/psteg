@@ -32,11 +32,11 @@ Section
 	
 	WriteUninstaller $INSTDIR\uninstall.exe
 
-	File ..\psteg-common\bin\Debug\psteg-common.dll 
-	File /oname=chaffblob.exe ..\psteg-chaffblob\bin\Debug\psteg.Chaffblob.exe
-	File /oname=stegano.exe ..\psteg-stegano\bin\Debug\psteg.Stegano.exe 
-	File /oname=psteg.exe ..\psteg-launcher\bin\Debug\psteg.Launcher.exe 
-	File /oname=fstools.exe ..\psteg-fstools\bin\Debug\psteg.FSTools.exe 
+	File ..\psteg-common\bin\Release\psteg-common.dll 
+	File /oname=chaffblob.exe ..\psteg-chaffblob\bin\Release\psteg.Chaffblob.exe
+	File /oname=stegano.exe ..\psteg-stegano\bin\Release\psteg.Stegano.exe 
+	File /oname=psteg.exe ..\psteg-launcher\bin\Release\psteg.Launcher.exe 
+	File /oname=fstools.exe ..\psteg-fstools\bin\Release\psteg.FSTools.exe 
 SectionEnd
 
 Section "uninstall"
