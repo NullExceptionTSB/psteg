@@ -538,5 +538,15 @@ namespace psteg.Stegano.UI {
             if (err!=null)
                 MessageBox.Show("Decoder error: " + err.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+
+        private void tb_coverPath_TextChanged(object sender, EventArgs e) {
+            try { ofd_cover.FileName = tb_coverPath.Text; }
+            catch { }
+        }
+
+        private void tb_outputPath_TextChanged(object sender, EventArgs e) {
+            try { sfd_destination.FileName = tb_outputPath.Text; }
+            catch { }
+        }
     }
 }

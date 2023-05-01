@@ -140,6 +140,14 @@ namespace psteg.Chaffblob.UI {
         private void tb_input_DragDrop(object sender, DragEventArgs e) =>
             tb_input.Text = ((string[])e.Data.GetData(DataFormats.FileDrop, false))[0];
 
+        private void tb_input_TextChanged(object sender, EventArgs e) {
+            try { ofd_input.FileName = tb_input.Text; } catch { }
+        }
+
+        private void tb_output_TextChanged(object sender, EventArgs e) {
+            try { sfd_output.FileName = tb_output.Text; } catch { }
+        }
+
         private void dDragEnter(object sender, DragEventArgs e)
             => e.Effect = DragDropEffects.Copy;
     }

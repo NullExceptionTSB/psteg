@@ -59,6 +59,7 @@
             this.tb_output.Name = "tb_output";
             this.tb_output.Size = new System.Drawing.Size(139, 20);
             this.tb_output.TabIndex = 2;
+            this.tb_output.TextChanged += new System.EventHandler(this.tb_output_TextChanged);
             // 
             // tb_encKey
             // 
@@ -131,6 +132,7 @@
             this.tb_input.Name = "tb_input";
             this.tb_input.Size = new System.Drawing.Size(139, 20);
             this.tb_input.TabIndex = 1;
+            this.tb_input.TextChanged += new System.EventHandler(this.tb_input_TextChanged);
             this.tb_input.DragDrop += new System.Windows.Forms.DragEventHandler(this.tb_input_DragDrop);
             this.tb_input.DragEnter += new System.Windows.Forms.DragEventHandler(this.dDragEnter);
             // 

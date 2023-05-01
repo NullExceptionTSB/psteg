@@ -25,6 +25,8 @@
         private void InitializeComponent() {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ADS));
             this.gb_creator = new System.Windows.Forms.GroupBox();
+            this.b_randsname = new System.Windows.Forms.Button();
+            this.cb_c_showkey = new System.Windows.Forms.CheckBox();
             this.label10 = new System.Windows.Forms.Label();
             this.cb_c_kda = new System.Windows.Forms.ComboBox();
             this.b_c_clear = new System.Windows.Forms.Button();
@@ -39,6 +41,8 @@
             this.tb_c_streamName = new System.Windows.Forms.TextBox();
             this.tb_c_dataSource = new System.Windows.Forms.TextBox();
             this.gb_reader = new System.Windows.Forms.GroupBox();
+            this.cb_r_showkey = new System.Windows.Forms.CheckBox();
+            this.b_r_delete = new System.Windows.Forms.Button();
             this.label9 = new System.Windows.Forms.Label();
             this.cb_r_kda = new System.Windows.Forms.ComboBox();
             this.b_extract = new System.Windows.Forms.Button();
@@ -60,10 +64,6 @@
             this.ofd_stream = new System.Windows.Forms.OpenFileDialog();
             this.ofd_data_source = new System.Windows.Forms.OpenFileDialog();
             this.sfd_extract = new System.Windows.Forms.SaveFileDialog();
-            this.b_r_delete = new System.Windows.Forms.Button();
-            this.cb_c_showkey = new System.Windows.Forms.CheckBox();
-            this.cb_r_showkey = new System.Windows.Forms.CheckBox();
-            this.b_randsname = new System.Windows.Forms.Button();
             this.gb_creator.SuspendLayout();
             this.gb_reader.SuspendLayout();
             this.gb_info.SuspendLayout();
@@ -93,6 +93,26 @@
             this.gb_creator.TabStop = false;
             this.gb_creator.Text = "Stream Creator";
             // 
+            // b_randsname
+            // 
+            this.b_randsname.Location = new System.Drawing.Point(327, 17);
+            this.b_randsname.Name = "b_randsname";
+            this.b_randsname.Size = new System.Drawing.Size(76, 23);
+            this.b_randsname.TabIndex = 20;
+            this.b_randsname.Text = "Random";
+            this.b_randsname.UseVisualStyleBackColor = true;
+            this.b_randsname.Click += new System.EventHandler(this.b_randsname_Click);
+            // 
+            // cb_c_showkey
+            // 
+            this.cb_c_showkey.AutoSize = true;
+            this.cb_c_showkey.Location = new System.Drawing.Point(385, 157);
+            this.cb_c_showkey.Name = "cb_c_showkey";
+            this.cb_c_showkey.Size = new System.Drawing.Size(15, 14);
+            this.cb_c_showkey.TabIndex = 19;
+            this.cb_c_showkey.UseVisualStyleBackColor = true;
+            this.cb_c_showkey.CheckedChanged += new System.EventHandler(this.cb_c_showkey_CheckedChanged);
+            // 
             // label10
             // 
             this.label10.AutoSize = true;
@@ -113,18 +133,18 @@
             // 
             // b_c_clear
             // 
-            this.b_c_clear.Location = new System.Drawing.Point(245, 180);
+            this.b_c_clear.Location = new System.Drawing.Point(244, 180);
             this.b_c_clear.Name = "b_c_clear";
-            this.b_c_clear.Size = new System.Drawing.Size(157, 23);
+            this.b_c_clear.Size = new System.Drawing.Size(159, 23);
             this.b_c_clear.TabIndex = 16;
             this.b_c_clear.Text = "Clear";
             this.b_c_clear.UseVisualStyleBackColor = true;
             // 
             // b_add
             // 
-            this.b_add.Location = new System.Drawing.Point(86, 180);
+            this.b_add.Location = new System.Drawing.Point(85, 180);
             this.b_add.Name = "b_add";
-            this.b_add.Size = new System.Drawing.Size(157, 23);
+            this.b_add.Size = new System.Drawing.Size(158, 23);
             this.b_add.TabIndex = 15;
             this.b_add.Text = "Add";
             this.b_add.UseVisualStyleBackColor = true;
@@ -185,9 +205,9 @@
             // 
             // b_c_browse
             // 
-            this.b_c_browse.Location = new System.Drawing.Point(86, 71);
+            this.b_c_browse.Location = new System.Drawing.Point(85, 71);
             this.b_c_browse.Name = "b_c_browse";
-            this.b_c_browse.Size = new System.Drawing.Size(316, 23);
+            this.b_c_browse.Size = new System.Drawing.Size(318, 23);
             this.b_c_browse.TabIndex = 9;
             this.b_c_browse.Text = "Browse";
             this.b_c_browse.UseVisualStyleBackColor = true;
@@ -206,6 +226,7 @@
             this.tb_c_dataSource.Name = "tb_c_dataSource";
             this.tb_c_dataSource.Size = new System.Drawing.Size(316, 20);
             this.tb_c_dataSource.TabIndex = 8;
+            this.tb_c_dataSource.TextChanged += new System.EventHandler(this.tb_c_dataSource_TextChanged);
             this.tb_c_dataSource.DragDrop += new System.Windows.Forms.DragEventHandler(this.tb_c_dataSource_DragDrop);
             this.tb_c_dataSource.DragEnter += new System.Windows.Forms.DragEventHandler(this.tb_DragEnter);
             // 
@@ -229,6 +250,27 @@
             this.gb_reader.TabStop = false;
             this.gb_reader.Text = "Stream Reader";
             // 
+            // cb_r_showkey
+            // 
+            this.cb_r_showkey.AutoSize = true;
+            this.cb_r_showkey.Location = new System.Drawing.Point(385, 102);
+            this.cb_r_showkey.Name = "cb_r_showkey";
+            this.cb_r_showkey.Size = new System.Drawing.Size(15, 14);
+            this.cb_r_showkey.TabIndex = 20;
+            this.cb_r_showkey.UseVisualStyleBackColor = true;
+            this.cb_r_showkey.CheckedChanged += new System.EventHandler(this.cb_r_showkey_CheckedChanged);
+            // 
+            // b_r_delete
+            // 
+            this.b_r_delete.Enabled = false;
+            this.b_r_delete.Location = new System.Drawing.Point(244, 125);
+            this.b_r_delete.Name = "b_r_delete";
+            this.b_r_delete.Size = new System.Drawing.Size(159, 23);
+            this.b_r_delete.TabIndex = 23;
+            this.b_r_delete.Text = "Delete";
+            this.b_r_delete.UseVisualStyleBackColor = true;
+            this.b_r_delete.Click += new System.EventHandler(this.b_r_delete_Click);
+            // 
             // label9
             // 
             this.label9.AutoSize = true;
@@ -250,9 +292,9 @@
             // b_extract
             // 
             this.b_extract.Enabled = false;
-            this.b_extract.Location = new System.Drawing.Point(86, 125);
+            this.b_extract.Location = new System.Drawing.Point(85, 125);
             this.b_extract.Name = "b_extract";
-            this.b_extract.Size = new System.Drawing.Size(157, 23);
+            this.b_extract.Size = new System.Drawing.Size(158, 23);
             this.b_extract.TabIndex = 17;
             this.b_extract.Text = "Extract";
             this.b_extract.UseVisualStyleBackColor = true;
@@ -333,10 +375,10 @@
             this.DataSize});
             this.lv_streams.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.lv_streams.HideSelection = false;
-            this.lv_streams.Location = new System.Drawing.Point(6, 113);
+            this.lv_streams.Location = new System.Drawing.Point(7, 113);
             this.lv_streams.MultiSelect = false;
             this.lv_streams.Name = "lv_streams";
-            this.lv_streams.Size = new System.Drawing.Size(350, 260);
+            this.lv_streams.Size = new System.Drawing.Size(348, 260);
             this.lv_streams.TabIndex = 14;
             this.lv_streams.UseCompatibleStateImageBehavior = false;
             this.lv_streams.View = System.Windows.Forms.View.Details;
@@ -352,7 +394,7 @@
             // DataSize
             // 
             this.DataSize.Text = "Data Size";
-            this.DataSize.Width = 132;
+            this.DataSize.Width = 131;
             // 
             // label1
             // 
@@ -366,10 +408,10 @@
             // tb_appFile
             // 
             this.tb_appFile.AllowDrop = true;
-            this.tb_appFile.Location = new System.Drawing.Point(6, 87);
+            this.tb_appFile.Location = new System.Drawing.Point(7, 87);
             this.tb_appFile.Name = "tb_appFile";
             this.tb_appFile.ReadOnly = true;
-            this.tb_appFile.Size = new System.Drawing.Size(350, 20);
+            this.tb_appFile.Size = new System.Drawing.Size(348, 20);
             this.tb_appFile.TabIndex = 12;
             this.tb_appFile.DragDrop += new System.Windows.Forms.DragEventHandler(this.tb_appFile_DragDrop);
             this.tb_appFile.DragEnter += new System.Windows.Forms.DragEventHandler(this.tb_DragEnter);
@@ -397,53 +439,13 @@
             // tb_file
             // 
             this.tb_file.AllowDrop = true;
-            this.tb_file.Location = new System.Drawing.Point(9, 19);
+            this.tb_file.Location = new System.Drawing.Point(7, 19);
             this.tb_file.Name = "tb_file";
-            this.tb_file.Size = new System.Drawing.Size(347, 20);
+            this.tb_file.Size = new System.Drawing.Size(348, 20);
             this.tb_file.TabIndex = 9;
+            this.tb_file.TextChanged += new System.EventHandler(this.tb_file_TextChanged);
             this.tb_file.DragDrop += new System.Windows.Forms.DragEventHandler(this.tb_file_DragDrop);
             this.tb_file.DragEnter += new System.Windows.Forms.DragEventHandler(this.tb_DragEnter);
-            // 
-            // b_r_delete
-            // 
-            this.b_r_delete.Enabled = false;
-            this.b_r_delete.Location = new System.Drawing.Point(245, 125);
-            this.b_r_delete.Name = "b_r_delete";
-            this.b_r_delete.Size = new System.Drawing.Size(157, 23);
-            this.b_r_delete.TabIndex = 23;
-            this.b_r_delete.Text = "Delete";
-            this.b_r_delete.UseVisualStyleBackColor = true;
-            this.b_r_delete.Click += new System.EventHandler(this.b_r_delete_Click);
-            // 
-            // cb_c_showkey
-            // 
-            this.cb_c_showkey.AutoSize = true;
-            this.cb_c_showkey.Location = new System.Drawing.Point(387, 157);
-            this.cb_c_showkey.Name = "cb_c_showkey";
-            this.cb_c_showkey.Size = new System.Drawing.Size(15, 14);
-            this.cb_c_showkey.TabIndex = 19;
-            this.cb_c_showkey.UseVisualStyleBackColor = true;
-            this.cb_c_showkey.CheckedChanged += new System.EventHandler(this.cb_c_showkey_CheckedChanged);
-            // 
-            // cb_r_showkey
-            // 
-            this.cb_r_showkey.AutoSize = true;
-            this.cb_r_showkey.Location = new System.Drawing.Point(387, 102);
-            this.cb_r_showkey.Name = "cb_r_showkey";
-            this.cb_r_showkey.Size = new System.Drawing.Size(15, 14);
-            this.cb_r_showkey.TabIndex = 20;
-            this.cb_r_showkey.UseVisualStyleBackColor = true;
-            this.cb_r_showkey.CheckedChanged += new System.EventHandler(this.cb_r_showkey_CheckedChanged);
-            // 
-            // b_randsname
-            // 
-            this.b_randsname.Location = new System.Drawing.Point(327, 17);
-            this.b_randsname.Name = "b_randsname";
-            this.b_randsname.Size = new System.Drawing.Size(75, 23);
-            this.b_randsname.TabIndex = 20;
-            this.b_randsname.Text = "Random";
-            this.b_randsname.UseVisualStyleBackColor = true;
-            this.b_randsname.Click += new System.EventHandler(this.b_randsname_Click);
             // 
             // ADS
             // 

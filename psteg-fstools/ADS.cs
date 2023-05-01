@@ -177,6 +177,13 @@ namespace psteg_fstools {
             tb_appFile.Text = ((string[])e.Data.GetData(DataFormats.FileDrop, false))[0];
             b_fileSet.PerformClick();
         }
-        
+
+        private void tb_c_dataSource_TextChanged(object sender, EventArgs e) {
+            try { ofd_data_source.FileName = tb_c_dataSource.Text; } catch { }
+        }
+
+        private void tb_file_TextChanged(object sender, EventArgs e) {
+            try { ofd_stream.FileName = tb_file.Text; } catch { }
+        }
     }
 }

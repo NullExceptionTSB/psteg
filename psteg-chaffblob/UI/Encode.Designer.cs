@@ -118,6 +118,7 @@
             this.tb_filename.Name = "tb_filename";
             this.tb_filename.Size = new System.Drawing.Size(168, 20);
             this.tb_filename.TabIndex = 2;
+            this.tb_filename.TextChanged += new System.EventHandler(this.tb_filename_TextChanged);
             this.tb_filename.DragDrop += new System.Windows.Forms.DragEventHandler(this.tb_filename_DragDrop);
             this.tb_filename.DragEnter += new System.Windows.Forms.DragEventHandler(this.dDragEnter);
             // 
@@ -379,6 +380,7 @@
             this.tb_outputFile.Name = "tb_outputFile";
             this.tb_outputFile.Size = new System.Drawing.Size(174, 20);
             this.tb_outputFile.TabIndex = 13;
+            this.tb_outputFile.TextChanged += new System.EventHandler(this.tb_outputFile_TextChanged);
             // 
             // label8
             // 

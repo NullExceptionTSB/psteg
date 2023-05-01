@@ -225,6 +225,13 @@ namespace psteg.Chaffblob {
 
         private void tb_filename_DragDrop(object sender, DragEventArgs e) 
             => tb_filename.Text = ((string[])e.Data.GetData(DataFormats.FileDrop, false))[0];
-        
+
+        private void tb_filename_TextChanged(object sender, EventArgs e) {
+            try { ofd_blobfile.FileName = tb_filename.Text; } catch { }
+        }
+
+        private void tb_outputFile_TextChanged(object sender, EventArgs e) {
+            try { sfd_output.FileName = tb_outputFile.Text; } catch { }
+        }
     }
 }

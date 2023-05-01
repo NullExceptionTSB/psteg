@@ -110,6 +110,7 @@
             this.tb_coverPath.Name = "tb_coverPath";
             this.tb_coverPath.Size = new System.Drawing.Size(387, 20);
             this.tb_coverPath.TabIndex = 0;
+            this.tb_coverPath.TextChanged += new System.EventHandler(this.tb_coverPath_TextChanged);
             this.tb_coverPath.DragDrop += new System.Windows.Forms.DragEventHandler(this.tb_coverPath_DragDrop);
             this.tb_coverPath.DragEnter += new System.Windows.Forms.DragEventHandler(this.tb_DragEnter);
             // 
@@ -216,6 +217,7 @@
             this.tb_outputPath.Name = "tb_outputPath";
             this.tb_outputPath.Size = new System.Drawing.Size(387, 20);
             this.tb_outputPath.TabIndex = 9;
+            this.tb_outputPath.TextChanged += new System.EventHandler(this.tb_outputPath_TextChanged);
             // 
             // cb_kda
             // 
