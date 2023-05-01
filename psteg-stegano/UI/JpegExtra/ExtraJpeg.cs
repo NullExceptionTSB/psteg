@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-using psteg.Stegano.Engine.Encode;
+using psteg.Stegano.Engine.Util;
 
 namespace psteg.Stegano.UI.JpegExtra {
     public partial class ExtraJpeg : UserControl {

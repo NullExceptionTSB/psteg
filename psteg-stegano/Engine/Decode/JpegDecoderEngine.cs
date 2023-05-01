@@ -17,7 +17,7 @@ namespace psteg.Stegano.Engine.Decode {
             while (OutputStream.Position < DataSize) {
                 Code? c = Codec.GetNextCode();
                 if (c == null)
-                    throw new Exception("Coder error: " + Codec.ReportDecoderPos());
+                    throw new Exception("Decoder reached EOF (Too much data requested?)");
 
                 Code code = (Code)c;
                 int code_len = code.JpegIsAC ? code.Length&0xF : code.Length;
@@ -25,11 +25,17 @@ namespace psteg.Stegano.Engine.Decode {
 
                 for (int i = 0; i <data; i++)
                     bq.Push((code.Value&~(1<<i))!=0);
+
+                while (bq.Length >= 8) {
+                    if (OutputStream.Position == DataSize)
+                        break;
+                    OutputStream.WriteByte(bq.Pop());
+                }
             }
         }
 
         public override void Go() {
-            Codec = new JpegCodec(CoverStream, OutputStream);
+            Codec = new JpegCodec(CoverStream, null);
             Codec.SetScanRead(0);
 
             Prepare();

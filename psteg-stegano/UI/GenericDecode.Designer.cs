@@ -356,7 +356,8 @@
             this.cb_sm.FormattingEnabled = true;
             this.cb_sm.Items.AddRange(new object[] {
             "LSB",
-            "Metadata"});
+            "Metadata",
+            "JPEG LSB-DCT"});
             this.cb_sm.Location = new System.Drawing.Point(147, 12);
             this.cb_sm.Name = "cb_sm";
             this.cb_sm.Size = new System.Drawing.Size(267, 21);

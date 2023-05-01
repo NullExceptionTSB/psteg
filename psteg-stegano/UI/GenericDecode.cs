@@ -48,6 +48,9 @@ namespace psteg.Stegano.UI {
                 case "Metadata":
                     MayRunMetadata();
                     return;
+                case "JPEG LSB-DCT":
+                    MayRunJpegLsbDct();
+                    break;
             }
         }
         #region LSB Specific
@@ -203,6 +206,7 @@ namespace psteg.Stegano.UI {
             bw_process.RunWorkerAsync(engine);
         }
         #endregion
+        #region Metadata
         public void MayRunMetadata() {
             b_start.Enabled = false;
 
@@ -313,6 +317,93 @@ namespace psteg.Stegano.UI {
 
             bw_process.RunWorkerAsync(engine);
         }
+        #endregion
+        #region JPEG LSB-DCT
+        public void MayRunJpegLsbDct() {
+            b_start.Enabled = false;
+
+            if (string.IsNullOrEmpty(tb_appOutputPath.Text))
+                return;
+
+            switch (CoverID.FileFormat) {
+                case FileFormat.JPEG:
+                    if (!CoverID.IsSupported())
+                        return;
+                    break;
+                default:
+                    return;
+            }
+
+            b_start.Enabled = !string.IsNullOrEmpty(tb_appCoverPath.Text) &&
+                    !string.IsNullOrEmpty(tb_outputPath.Text) &&
+                    !string.IsNullOrEmpty(tb_dataLength.Text);
+        }
+
+        private void b_setCover_Click_JpegLsbDct(object sender, EventArgs e) {
+            b_start.Enabled = false;
+            FileStream fs;
+            try { fs = new FileStream(tb_coverPath.Text, FileMode.Open, FileAccess.Read, FileShare.Read); }
+            catch { return; }
+
+            tb_appCoverPath.Text = tb_coverPath.Text;
+            int starty = ExtraCrypto != null ? ExtraCrypto.Bottom : 0;
+
+            CoverID = FileID.New(fs);
+            tb_coverID.Text = CoverID.ToString().Replace("\n", "\r\n");
+            fs.Close();
+            fs.Dispose();
+
+            switch (CoverID.FileFormat) {
+                case FileFormat.JPEG:
+                    if (ExtraOptions?.GetType() != typeof(JpegExtra.ExtraJpeg)) {
+                        Controls.Remove(ExtraOptions);
+                        ExtraOptions?.Dispose();
+                        ExtraOptions = new JpegExtra.ExtraJpeg() {
+                            Location = new Point(FormerClientSize.Width, Math.Max(gb_cover.Top, starty))
+                        };
+                    }
+
+                    ClientSize = new Size(FormerClientSize.Width + ExtraOptions.Size.Width + 12, FormerClientSize.Height);
+                    Controls.Add(ExtraOptions);
+                    ExtraOptions.Parent = this;
+                    break;
+                default:
+                    if (ExtraCrypto == null)
+                        ClientSize = FormerClientSize;
+                    else if (ExtraCrypto.Location.Y != gb_cover.Top)
+                        ExtraCrypto.Location = new Point(ExtraCrypto.Location.X, gb_cover.Top);
+
+                    Controls.Remove(ExtraOptions);
+                    ExtraOptions?.Dispose();
+                    ExtraOptions = null;
+                    break;
+            }
+
+
+            b_setOutput.Enabled = true;
+            b_browseOutput.Enabled = true;
+
+            MayRunJpegLsbDct();
+        }
+        private void b_start_Click_JpegLsbDct(object sender, EventArgs e) {
+            DecoderEngine engine = DecoderFactory.Create(Methods.DCT, ((JpegExtra.ExtraJpeg)ExtraOptions).GetOptions()).
+                OpenOutput(tb_appOutputPath.Text).
+                OpenCover(tb_appCoverPath.Text).
+                SetBackWork(bw_process).
+                SetCryptography((Encryption)Activator.CreateInstance(Encryption.AlgoList[cb_crypto.Items[cb_crypto.SelectedIndex].ToString()])).
+                SetCryptoKey(tb_cryptoKey.Text).
+                SetDataLength(int.Parse(tb_dataLength.Text)).
+                Finish();
+
+            switch (ExtraCrypto?.GetType().ToString()) {
+                case "psteg.UI.AESExtra":
+                    ((psteg.UI.AESExtra)ExtraCrypto).Apply((AES)engine.Encryption);
+                    break;
+            }
+
+            bw_process.RunWorkerAsync(engine);
+        }
+        #endregion
 
         private void cb_kda_SelectedIndexChanged(object sender, EventArgs e) =>
             Encryption.KeyDerivationAlgorithm = (Crypto.KeyDerivation.KeyDerivationAlgo)Encryption.KDFList[cb_kda.Items[cb_kda.SelectedIndex].ToString()].GetConstructor(Type.EmptyTypes).Invoke(null);
@@ -425,6 +516,13 @@ namespace psteg.Stegano.UI {
                     b_start.Click += b_start_Click_Metadata;
                     tb_dataLength.Enabled = false;
                     break;
+                case "JPEG LSB-DCT":
+                    ofd_cover.Filter = "JPEG Files|*.jpg;*.jpeg;*.jfif";
+                    b_setCover.Click -= b_setCover_Click_LSB;
+                    b_start.Click -= b_start_Click_LSB;
+                    b_setCover.Click += b_setCover_Click_JpegLsbDct;
+                    b_start.Click += b_start_Click_JpegLsbDct;
+                    break;
             }
         }
 
@@ -438,7 +536,7 @@ namespace psteg.Stegano.UI {
                 pb_progress.Value = 1;
             }));
             if (err!=null)
-                MessageBox.Show("Encoder error: " + err.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Decoder error: " + err.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

@@ -758,8 +758,8 @@ namespace psteg.Stegano.File.Format {
 
             Verify();
             Parse();
-
-            InitializeWriter();
+            if (Output != null)
+                InitializeWriter();
         }
     }
 }

@@ -73,14 +73,15 @@ namespace psteg.Stegano.Engine {
     public sealed class DecoderFactory {
         private DecoderEngine Engine { get; set; }
 
-        public static DecoderFactory Create(Methods method) {
+        public static DecoderFactory Create(Methods method, object extra = null) {
             DecoderFactory ef = new DecoderFactory();
             switch (method) {
                 case Methods.Metadata:
                     ef.Engine = new MetadataDecoderEngine();
                     break;
                 case Methods.DCT:
-                    throw new NotImplementedException();
+                    ef.Engine = (DecoderEngine)Activator.CreateInstance(typeof(JpegDecoderEngine<>).MakeGenericType(extra.GetType()), new object[] { extra });
+                    break;
                 case Methods.LSB:
                     ef.Engine = new LSBDecoderEngine();
                     break;
