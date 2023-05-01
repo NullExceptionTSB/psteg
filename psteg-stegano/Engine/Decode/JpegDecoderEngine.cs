@@ -24,12 +24,12 @@ namespace psteg.Stegano.Engine.Decode {
                 int data = Math.Min(JstegOpts.MaxSubstituteDepth, code_len);
 
                 for (int i = 0; i <data; i++)
-                    bq.Push((code.Value&~(1<<i))!=0);
+                    bq.Push((code.Value&(1<<i))!=0);
 
                 while (bq.Length >= 8) {
                     if (OutputStream.Position == DataSize)
                         break;
-                    OutputStream.WriteByte(bq.Pop());
+                    OutputStream.WriteByte(LSB.ReverseBits(bq.Pop()));
                 }
             }
         }

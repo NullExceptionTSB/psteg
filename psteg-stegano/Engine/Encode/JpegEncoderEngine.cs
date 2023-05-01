@@ -40,7 +40,7 @@ namespace psteg.Stegano.Engine.Encode {
 
             for (int i = 0; i < data_bits; i++) { 
                 dest.Value &= ~(1<<i);
-                dest.Value |= data&~(1<<i);
+                dest.Value |= data&(~(1<<i));
             }
             return dest;
         }
