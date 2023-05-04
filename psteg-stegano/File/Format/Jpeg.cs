@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 
 using psteg.Huffman;
+using psteg.Stegano.Debug;
 
 namespace psteg.Stegano.File.Format {
     public abstract class JpegCommon {
@@ -180,9 +181,9 @@ namespace psteg.Stegano.File.Format {
                 Index = (byte)(section[2] & 0x0F);
 
                 if (Type > 1)
-                    Console.WriteLine("W: invalid huffman table type");
+                    ConsoleLog.Warning("Invalid huffman table type.");
                 if (Index > 3)
-                    Console.WriteLine("W: invalid huffman table index");
+                    ConsoleLog.Warning("Invalid huffman table index.");
 
                 const int bits_offset = 3;
                 const int codes_offset = bits_offset+16;
@@ -525,9 +526,10 @@ namespace psteg.Stegano.File.Format {
                         EOI = true;
                         break;
                     case (ushort)Marker.DAC:
+                        ConsoleLog.Error("JPEG file not supported (arithmetic coding)");
                         throw new Exception("JPEG file not supported (arithmetic coding)");
                     default:
-                        Console.WriteLine("W: Skipping section: " + marker.ToString("X4") + "(" + ((Marker)marker).ToString() + ")");
+                        ConsoleLog.Warning("Skipping section: " + marker.ToString("X4") + "(" + ((Marker)marker).ToString() + ")");
                         goto case (ushort)Marker.COM;
                     case (ushort)Marker.COM:
                         SkipMarkerAtHead();

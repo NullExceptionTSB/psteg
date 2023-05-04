@@ -86,5 +86,10 @@ namespace psteg.Stegano {
             StateManager.State = "Decrementing";
             StateManager.IncrementProgress(-5);
         }
+
+        private void button5_Click(object sender, EventArgs e) {
+            Debug.LsbDctUnitTest dctut = new Debug.LsbDctUnitTest("unitdata");
+            dctut.Run();
+        }
     }
 }

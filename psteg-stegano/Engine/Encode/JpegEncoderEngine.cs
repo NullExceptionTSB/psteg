@@ -3,6 +3,7 @@
 using psteg.Huffman;
 using psteg.Stegano.File.Format;
 using psteg.Stegano.Engine.Util;
+using psteg.Stegano.Debug;
 
 namespace psteg.Stegano.Engine.Encode {
     public sealed class JpegEncoderEngine<T> : EncoderEngine where T : JpegCoderOptions  {
@@ -11,6 +12,7 @@ namespace psteg.Stegano.Engine.Encode {
         public JpegCoderOptions.Algorithm DistributionAlgo { get; private set; }
         public string Seed { get; set; }
         public bool ReverseBitOrder { get; set; }
+        public bool UnitTestMode { get; set; } = true;
 
         private JstegCoderOptions JstegOpts;
 
@@ -47,7 +49,7 @@ namespace psteg.Stegano.Engine.Encode {
 
         private Code CodeGen(int data, int data_bits) => new Code(data_bits, data);
 
-        public void JstegEncode() {
+        private void JstegEncode() {
             bool pop_bq_ret;
             int zrl_ammt = 0;
             while ((pop_bq_ret = PopulateBq()) || (bq.Length > 0)) {
@@ -63,6 +65,8 @@ namespace psteg.Stegano.Engine.Encode {
                     throw new Exception("Coder error: " + Codec.ReportDecoderPos());
 
                 Code code = (Code)nextCode;
+                if (UnitTestMode) 
+                    ConsoleLog.Verbose($"Input Code: \t{code.Value:X8}|{code.Length}");    
 
                 if (code.JpegIsAC) {
                     byte zrl = (byte)((code.Length & 0xF0) >> 4),
@@ -76,10 +80,18 @@ namespace psteg.Stegano.Engine.Encode {
                     if (len > 0) {
                         //lsb substitute
                         int sublen = Math.Min(JstegOpts.MaxSubstituteDepth, len);
-                        Codec.WriteNextCode(CodeMix(code, LSB.WidthPop(sublen, bq), sublen));
+                        int data = LSB.WidthPop(sublen, bq);
+                        if (UnitTestMode)
+                            ConsoleLog.Verbose($"Data: \t\t{data:X8}|{sublen}");
+                        Codec.WriteNextCode(CodeMix(code, data, sublen));
+                        if (UnitTestMode)
+                            ConsoleLog.Verbose($"Output Code: \t{code.Value:X8}|{code.Length}");
                     }
-                    else
+                    else {
                         Codec.WriteNextCode(code);
+                        if (UnitTestMode)
+                            ConsoleLog.Verbose($"Output Code: \t{code.Value:X8}|{code.Length}");
+                    }
 
                     if (zrl_ammt > 0) continue; 
                 } else {
