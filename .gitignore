@@ -7,4 +7,5 @@ packages
 *.dll
 *.pdb
 **/obj
-
+**/unitdata
+**/bin
