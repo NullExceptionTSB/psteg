@@ -5,10 +5,10 @@ using System.Windows.Forms;
 using psteg.UI;
 using psteg.Stegano.File.Format;
 
-namespace psteg.Stegano {
-    public partial class Form1 : Form {
+namespace psteg.Stegano.Debug {
+    public partial class DebugForm : Form {
         private StateManager StateManager;
-        public Form1() {
+        public DebugForm() {
 #if !DEBUG
             Environment.Exit(0);
 #endif

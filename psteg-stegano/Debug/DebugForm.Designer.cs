@@ -1,5 +1,5 @@
-﻿namespace psteg.Stegano {
-    partial class Form1 {
+﻿namespace psteg.Stegano.Debug {
+    partial class DebugForm {
         /// <summary>
         /// Required designer variable.
         /// </summary>

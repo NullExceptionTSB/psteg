@@ -13,12 +13,12 @@ namespace psteg.Stegano {
         static void Main(string[] args) {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
+#if DEBUG
             if (args.Length == 0) { 
-                Application.Run(new Form1());
+                Application.Run(new Debug.DebugForm());
                 return;
             }
-
+#endif
             switch (args[0]) {
                 case "--lsbencode":
                     Application.Run(new UI.GenericEncode());
